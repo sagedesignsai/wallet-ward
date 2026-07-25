@@ -9,7 +9,7 @@ import {
   ArrowLeftIcon,
 } from "@phosphor-icons/react"
 
-import { cn } from "@/lib/utils"
+import { SegmentedControl } from "@/components/ui/segmented-control"
 
 type ProjectNavProps = {
   projectId: string
@@ -17,16 +17,19 @@ type ProjectNavProps = {
 
 const tabs = [
   {
+    id: "overview",
     label: "Overview",
     href: "", // base route
     icon: HouseIcon,
   },
   {
+    id: "environments",
     label: "Environments",
     href: "/environments",
     icon: StackSimpleIcon,
   },
   {
+    id: "settings",
     label: "Settings",
     href: "/settings",
     icon: GearIcon,
@@ -37,8 +40,21 @@ export function ProjectNav({ projectId }: ProjectNavProps) {
   const pathname = usePathname()
   const base = `/dashboard/projects/${projectId}`
 
+  // Determine which tab is active based on the current route.
+  const activeId =
+    tabs.find((tab) => {
+      if (tab.href === "") return pathname === base
+      return pathname.startsWith(`${base}${tab.href}`)
+    })?.id ?? "overview"
+
+  // Resolve hrefs relative to the project base.
+  const resolvedTabs = tabs.map((tab) => ({
+    ...tab,
+    href: `${base}${tab.href}`,
+  }))
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {/* Back link */}
       <Link
         href="/dashboard/projects"
@@ -48,32 +64,11 @@ export function ProjectNav({ projectId }: ProjectNavProps) {
         All Projects
       </Link>
 
-      {/* Tab bar */}
-      <nav className="flex items-center gap-0.5 border-b border-border/40">
-        {tabs.map((tab) => {
-          const href = `${base}${tab.href}`
-          const isActive =
-            tab.href === ""
-              ? pathname === base
-              : pathname.startsWith(href)
-
-          return (
-            <Link
-              key={tab.label}
-              href={href}
-              className={cn(
-                "inline-flex h-9 items-center gap-1.5 rounded-t-md px-3 text-xs font-medium transition-all",
-                isActive
-                  ? "bg-primary/10 text-primary border-b-2 border-primary -mb-px"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-              )}
-            >
-              <tab.icon className="size-3.5" />
-              {tab.label}
-            </Link>
-          )
-        })}
-      </nav>
+      {/* Segmented tab bar */}
+      <SegmentedControl
+        tabs={resolvedTabs}
+        value={activeId}
+      />
     </div>
   )
 }
