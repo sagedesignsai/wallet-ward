@@ -105,7 +105,7 @@ export async function GET(request: Request) {
     // Redirect to the project page
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
     return NextResponse.redirect(
-      new URL(`/projects/${projectId}?integration=connected`, appUrl)
+      new URL(`/dashboard/projects/${projectId}?integration=connected`, appUrl)
     )
   } catch (error) {
     console.error("GitHub OAuth callback error:", error)

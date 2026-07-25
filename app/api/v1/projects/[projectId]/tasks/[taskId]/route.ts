@@ -15,7 +15,7 @@ export async function GET(_request: Request, ctx: Ctx) {
     const authCtx = await requireAuth()
     const orgCtx = await requireOrganization(authCtx)
     requirePermission(orgCtx.memberRole, "project:read")
-    const data = await getTask(taskId)
+    const data = await getTask(taskId, orgCtx.organizationId!)
     return json({ data })
   } catch (error) {
     return handleRouteError(error)

@@ -19,7 +19,7 @@ export async function GET(_request: Request, ctx: Ctx) {
     const authCtx = await requireAuth()
     const orgCtx = await requireOrganization(authCtx)
     requirePermission(orgCtx.memberRole, "project:read")
-    const data = await getDocument(documentId)
+    const data = await getDocument(documentId, orgCtx.organizationId!)
     return json({ data })
   } catch (error) {
     return handleRouteError(error)

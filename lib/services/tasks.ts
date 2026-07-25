@@ -4,6 +4,15 @@ import type { AuthContext } from "@/lib/api/auth"
 import { writeAuditLog } from "@/lib/services/audit"
 import type { TaskStatus } from "@/generated/prisma/client"
 
+/** Verify that a project belongs to the given organization. */
+async function assertProjectInOrg(projectId: string, organizationId: string) {
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, organizationId },
+  })
+  if (!project) throw notFound("Project not found")
+  return project
+}
+
 export function toTaskDto(task: {
   id: string
   projectId: string
@@ -32,7 +41,8 @@ export function toTaskDto(task: {
 
 export type TaskDto = ReturnType<typeof toTaskDto>
 
-export async function listTasks(projectId: string) {
+export async function listTasks(projectId: string, organizationId: string) {
+  await assertProjectInOrg(projectId, organizationId)
   const tasks = await prisma.task.findMany({
     where: { projectId },
     include: {
@@ -43,9 +53,9 @@ export async function listTasks(projectId: string) {
   return tasks.map(toTaskDto)
 }
 
-export async function getTask(id: string) {
-  const task = await prisma.task.findUnique({
-    where: { id },
+export async function getTask(id: string, organizationId: string) {
+  const task = await prisma.task.findFirst({
+    where: { id, project: { organizationId } },
     include: {
       assignee: { select: { id: true, name: true, email: true } },
     },
@@ -93,7 +103,7 @@ export async function updateTask(input: {
   status?: TaskStatus
   assigneeId?: string | null
 }) {
-  await getTask(input.id)
+  await getTask(input.id, input.ctx.organizationId!)
 
   const task = await prisma.task.update({
     where: { id: input.id },
@@ -124,7 +134,7 @@ export async function deleteTask(input: {
   ctx: AuthContext
   id: string
 }) {
-  await getTask(input.id)
+  await getTask(input.id, input.ctx.organizationId!)
   await prisma.task.delete({ where: { id: input.id } })
 
   await writeAuditLog({
