@@ -28,6 +28,8 @@ model User {
   invitations Invitation[] @relation("InvitationInviter")
   auditLogs   AuditLog[]
   twofactors  TwoFactor[]
+  createdDocuments Document[] @relation("DocumentAuthor")
+  assignedTasks    Task[]     @relation("TaskAssignee")
 
   @@map("user")
 }
@@ -214,6 +216,9 @@ model Project {
   organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   environments Environment[]
   secrets      Secret[]
+  documents    Document[]
+  tasks        Task[]
+  integrations Integration[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -290,6 +295,66 @@ model SecretVersion {
   @@map("secret_version")
 }
 
+enum TaskStatus {
+  todo
+  in_progress
+  done
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  projectId   String   @map("project_id")
+  title       String
+  content     String?
+  createdById String?  @map("created_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   User?    @relation("DocumentAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@map("document")
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  projectId   String     @map("project_id")
+  title       String
+  description String?
+  status      TaskStatus @default(todo)
+  assigneeId  String?    @map("assignee_id")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee    User?      @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([projectId, status])
+  @@map("task")
+}
+
+model Integration {
+  id                   String   @id @default(cuid())
+  projectId            String   @map("project_id")
+  provider             String
+  name                 String
+  accessTokenEncrypted String?  @map("access_token_encrypted")
+  refreshTokenEncrypted String? @map("refresh_token_encrypted")
+  metadata             Json?
+  enabled              Boolean  @default(true)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  project              Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([projectId, provider])
+  @@map("integration")
+}
+
 enum AuditAction {
   organization_create
   project_create
@@ -305,6 +370,14 @@ enum AuditAction {
   secret_export
   secret_import
   secret_version_create
+  document_create
+  document_update
+  document_delete
+  task_create
+  task_update
+  task_delete
+  integration_create
+  integration_delete
 }
 
 model AuditLog {
