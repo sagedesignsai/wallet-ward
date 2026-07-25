@@ -6,7 +6,7 @@ import { nextCookies } from "better-auth/next-js"
 import { prisma } from "@/lib/db"
 
 export const auth = betterAuth({
-  appName: "Wallet Ward",
+  appName: "Nimbus",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -19,7 +19,7 @@ export const auth = betterAuth({
     }),
     apiKey({
       enableMetadata: true,
-      defaultPrefix: "ww_",
+      defaultPrefix: "nw_",
       rateLimit: {
         enabled: true,
         timeWindow: 1000 * 60 * 60,
@@ -27,7 +27,7 @@ export const auth = betterAuth({
       },
     }),
     twoFactor({
-      issuer: "Wallet Ward",
+      issuer: "Nimbus",
     }),
     nextCookies(),
   ],

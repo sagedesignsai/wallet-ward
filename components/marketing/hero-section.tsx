@@ -127,7 +127,7 @@ export function HeroSection({ className }: HeroSectionProps) {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">1,200+</span> developers already using Wallet Ward
+                <span className="font-semibold text-foreground">1,200+</span> developers already using Nimbus
               </p>
             </div>
           </div>

@@ -123,7 +123,7 @@ export function TwoFactorManageCard({
               )}
             </div>
             <CardDescription className="text-xs">
-              Add an extra layer of security to your Wallet Ward account using TOTP authenticator apps.
+              Add an extra layer of security to your Nimbus account using TOTP authenticator apps.
             </CardDescription>
           </div>
         </CardHeader>

@@ -1,4 +1,4 @@
-// Wallet Ward — auth (Better Auth) + encrypted vault schema
+// Nimbus — auth (Better Auth) + encrypted vault schema
 // Runtime can use Prisma Accelerate (prisma://). Migrations use DIRECT_DATABASE_URL.
 
 generator client {

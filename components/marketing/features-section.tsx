@@ -172,7 +172,7 @@ export function FeaturesSection({ className }: FeaturesSectionProps) {
             Built for security-first teams
           </h2>
           <p className="text-muted-foreground text-base max-w-xl mx-auto leading-relaxed">
-            From solo developers to enterprise teams — Wallet Ward adapts to your workflow without compromising on security.
+            From solo developers to enterprise teams — Nimbus adapts to your workflow without compromising on security.
           </p>
         </div>
 

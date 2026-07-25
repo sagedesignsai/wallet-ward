@@ -38,9 +38,9 @@ export function MarketingFooter() {
           <div className="col-span-2 md:col-span-1 space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black text-lg">
-                W
+                N
               </div>
-              <span className="font-bold text-sm text-foreground">Wallet Ward</span>
+              <span className="font-bold text-sm text-foreground">Nimbus</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-[180px]">
               Zero-knowledge secrets management for security-first teams.
@@ -100,7 +100,7 @@ export function MarketingFooter() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8 border-t border-border/30">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Wallet Ward. All rights reserved.
+            © {new Date().getFullYear()} Nimbus. All rights reserved.
           </p>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

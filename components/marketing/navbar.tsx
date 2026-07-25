@@ -66,7 +66,7 @@ export function MarketingNavbar() {
         .join("")
         .toUpperCase()
         .slice(0, 2)
-    : "WW"
+    : "NW"
 
   return (
     <header
@@ -85,11 +85,11 @@ export function MarketingNavbar() {
           onClick={() => setMobileOpen(false)}
         >
           <div className="w-7 h-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-extrabold text-sm shadow-xs shadow-primary/30 group-hover:scale-105 transition-transform duration-200">
-            W
+            N
           </div>
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-foreground text-sm tracking-tight">
-              Wallet Ward
+              Nimbus
             </span>
             <Badge variant="outline" className="text-[10px] h-4 px-1.5 font-medium border-primary/20 text-primary bg-primary/5 hidden sm:inline-flex">
               v1.0

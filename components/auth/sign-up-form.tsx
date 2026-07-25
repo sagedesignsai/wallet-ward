@@ -118,7 +118,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
       <CardContent className="pt-6 space-y-6">
         <AuthCardHeader
           title="Create an Account"
-          description="Start managing your secrets securely with Wallet Ward"
+          description="Start managing your secrets securely with Nimbus"
           badgeText="Encrypted Storage"
           icon="shield"
         />

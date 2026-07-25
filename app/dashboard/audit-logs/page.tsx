@@ -247,7 +247,7 @@ export default function AuditLogsPage() {
               </EmptyTitle>
               <EmptyDescription>
                 {logs.length === 0
-                  ? "Activity will appear here as your team uses Wallet Ward."
+                  ? "Activity will appear here as your team uses Nimbus."
                   : "Try adjusting your filters or search to find what you're looking for."}
               </EmptyDescription>
             </EmptyHeader>

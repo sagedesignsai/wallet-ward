@@ -8,8 +8,8 @@ import { DashboardConfigProvider } from "@/hooks/use-dashboard-config"
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Wallet Ward",
-    default: "Dashboard | Wallet Ward",
+    template: "%s | Nimbus",
+    default: "Dashboard | Nimbus",
   },
   description: "Manage your encrypted secrets, projects, and team access.",
 }

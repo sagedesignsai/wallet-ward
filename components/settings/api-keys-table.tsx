@@ -151,7 +151,7 @@ export function ApiKeysTable() {
               </EmptyMedia>
               <EmptyTitle>No API keys</EmptyTitle>
               <EmptyDescription>
-                Create an API key to access Wallet Ward programmatically
+                Create an API key to access Nimbus programmatically
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>

@@ -7,7 +7,7 @@ import { PricingSection } from "@/components/marketing/pricing-section"
 import { CtaSection } from "@/components/marketing/cta-section"
 
 export const metadata: Metadata = {
-  title: "Wallet Ward — Zero-Knowledge Secrets Management",
+  title: "Nimbus — Zero-Knowledge Secrets Management",
   description:
     "Encrypt, organize, and share credentials across your team with military-grade AES-256 security and a zero-knowledge architecture. Start free.",
 }

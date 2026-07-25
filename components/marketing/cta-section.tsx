@@ -81,7 +81,7 @@ export function CtaSection({ className }: CtaSectionProps) {
                 </span>
               </h2>
               <p className="text-muted-foreground text-base max-w-md mx-auto">
-                Join thousands of developers who trust Wallet Ward with their most sensitive credentials.
+                Join thousands of developers who trust Nimbus with their most sensitive credentials.
                 Free forever. No credit card needed.
               </p>
             </div>

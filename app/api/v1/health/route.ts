@@ -4,7 +4,7 @@ export async function GET() {
   return json({
     data: {
       ok: true,
-      service: "wallet-ward",
+      service: "nimbus",
       version: "0.0.1",
       phase: 1,
     },
