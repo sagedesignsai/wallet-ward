@@ -23,6 +23,11 @@ export const createOrganizationSchema = z.object({
   slug: slugSchema.optional(),
 })
 
+export const updateOrganizationSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  logo: z.string().max(500).nullable().optional(),
+})
+
 export const createProjectSchema = z.object({
   name: z.string().min(1).max(100),
   slug: slugSchema.optional(),

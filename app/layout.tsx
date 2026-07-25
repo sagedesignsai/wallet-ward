@@ -1,17 +1,8 @@
-import { Geist, Geist_Mono, Figtree, Noto_Sans } from "next/font/google"
-
 import "./globals.css"
+import { sans, heading, mono } from "./fonts"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
-
-const notoSansHeading = Noto_Sans({subsets:['latin'],variable:'--font-heading'});
-
-const figtree = Figtree({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
+import NextTopLoader from "nextjs-toploader"
+import { cn } from "@/lib/utils"
 
 export default function RootLayout({
   children,
@@ -22,9 +13,16 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", figtree.variable, notoSansHeading.variable)}
+      className={cn(
+        sans.variable,
+        heading.variable,
+        mono.variable,
+        "antialiased",
+        "font-sans"
+      )}
     >
       <body>
+        <NextTopLoader showSpinner={false} />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
