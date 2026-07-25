@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { PanelToggleBar } from "@/components/workspace"
 
 function Breadcrumbs({
   items,
@@ -165,6 +166,10 @@ export function DashboardHeader() {
 
         <div className="flex items-center gap-2">
           {config.actions}
+
+          <PanelToggleBar />
+
+          <Separator orientation="vertical" className="h-4!" />
 
           <OrgSwitcher />
 

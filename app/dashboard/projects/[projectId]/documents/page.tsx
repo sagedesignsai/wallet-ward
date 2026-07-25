@@ -32,6 +32,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
+import { OpenInComputer } from "@/components/workspace"
+
 export default function DocumentsPage({
   params,
 }: {
@@ -191,7 +193,20 @@ function DocumentCard({ doc }: { doc: Document }) {
           <div className="flex size-6 shrink-0 items-center justify-center rounded bg-muted/50 text-muted-foreground">
             <FileTextIcon className="size-3" />
           </div>
-          <CardTitle className="truncate text-sm">{doc.title}</CardTitle>
+          <CardTitle className="flex-1 truncate text-sm">{doc.title}</CardTitle>
+          <OpenInComputer
+            tab={{
+              type: "document",
+              title: doc.title,
+              content: {
+                type: "document",
+                title: doc.title,
+                body: doc.content ?? "",
+                resourceId: doc.id,
+                editable: true,
+              },
+            }}
+          />
         </div>
       </CardHeader>
       <CardContent className="pt-2">

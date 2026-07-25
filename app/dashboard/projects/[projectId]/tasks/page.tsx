@@ -40,6 +40,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
+import { OpenInComputer } from "@/components/workspace"
+
 type StatusConfig = {
   label: string
   color: "secondary" | "outline" | "default"
@@ -265,7 +267,23 @@ function TaskCard({
   return (
     <Card className="gap-0 py-3">
       <CardHeader className="px-3 pb-1.5">
-        <CardTitle className="text-sm">{task.title}</CardTitle>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="text-sm">{task.title}</CardTitle>
+          <OpenInComputer
+            tab={{
+              type: "task",
+              title: task.title,
+              content: {
+                type: "task",
+                title: task.title,
+                description: task.description ?? undefined,
+                status: task.status,
+                resourceId: task.id,
+                projectId: task.projectId,
+              },
+            }}
+          />
+        </div>
       </CardHeader>
       <CardContent className="px-3">
         {task.description && (
