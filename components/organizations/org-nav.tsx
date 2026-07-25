@@ -1,12 +1,10 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   HouseIcon,
   UsersIcon,
   GearIcon,
-  ArrowLeftIcon,
 } from "@phosphor-icons/react"
 
 import { SegmentedControl } from "@/components/ui/segmented-control"
@@ -54,21 +52,9 @@ export function OrgNav({ orgId }: OrgNavProps) {
   }))
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Back link */}
-      <Link
-        href="/dashboard/organizations"
-        className="group inline-flex w-fit items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-3 transition-transform group-hover:-translate-x-0.5" />
-        All Organizations
-      </Link>
-
-      {/* Segmented tab bar */}
-      <SegmentedControl
-        tabs={resolvedTabs}
-        value={activeId}
-      />
-    </div>
+    <SegmentedControl
+      tabs={resolvedTabs}
+      value={activeId}
+    />
   )
 }
