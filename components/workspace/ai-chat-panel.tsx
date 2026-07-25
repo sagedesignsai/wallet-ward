@@ -1,33 +1,12 @@
 "use client";
 
 import { useWorkspacePanel, type ChatSession } from "@/context/workspace-panel";
+import { MessageRenderer } from "@/components/ai-elements/message-renderer";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
-import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from "@/components/ai-elements/reasoning";
-import {
-  ModelSelector,
-  ModelSelectorContent,
-  ModelSelectorEmpty,
-  ModelSelectorGroup,
-  ModelSelectorInput,
-  ModelSelectorItem,
-  ModelSelectorList,
-  ModelSelectorLogo,
-  ModelSelectorName,
-  ModelSelectorTrigger,
-} from "@/components/ai-elements/model-selector";
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import {
   PromptInput,
@@ -44,28 +23,18 @@ import {
   PromptInputTools,
   usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input";
-import {
-  Source,
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
-} from "@/components/ai-elements/sources";
 import { SpeechInput } from "@/components/ai-elements/speech-input";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { MODEL_PRESETS, DEFAULT_MODEL_ID } from "@/lib/ai/config";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import {
-  CheckIcon,
-  GlobeIcon,
   ShieldCheckIcon,
   PlusIcon,
   TrashIcon,
   ChatTeardropTextIcon,
   CaretDownIcon,
+  ArrowClockwiseIcon,
+  WarningCircleIcon,
 } from "@phosphor-icons/react";
 import {
   DropdownMenu,
@@ -76,16 +45,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-
-// Group presets by provider label
-const MODEL_GROUPS = MODEL_PRESETS.reduce<Record<string, typeof MODEL_PRESETS>>(
-  (acc, p) => {
-    if (!acc[p.providerLabel]) acc[p.providerLabel] = [];
-    acc[p.providerLabel].push(p);
-    return acc;
-  },
-  {}
-);
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
 
 const SUGGESTIONS = [
   "What's in this project?",
@@ -205,61 +166,49 @@ export function AIChatPanel({
   environmentId?: string;
 }) {
   const { activeSession, openTab } = useWorkspacePanel();
-
-  const [modelPresetId, setModelPresetId] = useState(DEFAULT_MODEL_ID);
-  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [text, setText] = useState("");
-  const [webSearch, setWebSearch] = useState(false);
 
-  const selectedPreset = useMemo(
-    () => MODEL_PRESETS.find((p) => p.id === modelPresetId)!,
-    [modelPresetId]
-  );
-
-  const { messages, sendMessage, status, error } = useChat({
+  // Use DefaultChatTransport for structured message parts
+  const { messages, sendMessage, status, error, regenerate } = useChat({
     id: activeSession?.id,
     transport: new DefaultChatTransport({
       api: "/api/ai/chat",
       body: {
-        modelPresetId,
-        systemPrompt: "secretsManager",
-        useTools: true,
-        webSearch,
         projectId,
         environmentId,
       },
     }),
-    onFinish({ message }) {
-      // Extract text from message parts
-      const text = message.parts
-        ?.filter((p) => p.type === "text")
-        .map((p) => (p.type === "text" ? p.text : ""))
-        .join("") ?? "";
-      // If response contains code blocks, push to computer panel
-      const codeMatch = text.match(/```(\w+)?\n([\s\S]*?)```/);
-      if (codeMatch) {
-        openTab({
-          type: "code",
-          title: `Generated · ${codeMatch[1] ?? "code"}`,
-          content: {
-            type: "code",
-            code: codeMatch[2],
-            language: codeMatch[1] ?? "text",
-          },
-        });
-      }
+    onFinish: ({ message }) => {
+      // Extract code from message parts
+      message.parts?.forEach((part: any) => {
+        if (part.type === "text") {
+          const codeMatch = part.text.match(/```(\w+)?\n([\s\S]*?)```/);
+          if (codeMatch) {
+            openTab({
+              type: "code",
+              title: `Generated · ${codeMatch[1] ?? "code"}`,
+              content: {
+                type: "code",
+                code: codeMatch[2],
+                language: codeMatch[1] ?? "text",
+              },
+            });
+          }
+        }
+      });
+    },
+    onError: (error) => {
+      console.error("[Chat error]", error);
     },
   });
 
-  const chatStatus = useMemo<"ready" | "submitted" | "streaming" | "error">(
+  const chatStatus = useMemo<"ready" | "streaming" | "error">(
     () =>
       error
         ? "error"
         : status === "streaming"
           ? "streaming"
-          : status === "submitted"
-            ? "submitted"
-            : "ready",
+          : "ready",
     [status, error]
   );
 
@@ -267,14 +216,21 @@ export function AIChatPanel({
     (message: PromptInputMessage) => {
       if (!message.text?.trim() && !message.files?.length) return;
       if (message.files?.length) toast.success(`${message.files.length} file(s) attached`);
-      sendMessage({ text: message.text || "(attachment)" });
+      
+      sendMessage({
+        text: message.text || "(attachment)",
+        files: message.files,
+      });
+      
       setText("");
     },
     [sendMessage]
   );
 
   const handleSuggestion = useCallback(
-    (s: string) => { sendMessage({ text: s }); },
+    (s: string) => { 
+      sendMessage({ text: s }); 
+    },
     [sendMessage]
   );
 
@@ -282,12 +238,7 @@ export function AIChatPanel({
     setText((prev) => (prev ? `${prev} ${t}` : t));
   }, []);
 
-  const handleModelSelect = useCallback((id: string) => {
-    setModelPresetId(id);
-    setModelSelectorOpen(false);
-  }, []);
-
-  const isSubmitDisabled = !text.trim() || chatStatus === "streaming";
+  const isSubmitDisabled = !text.trim() || status === "streaming";
 
   return (
     <div className={cn("flex h-full flex-col overflow-hidden", className)}>
@@ -299,15 +250,11 @@ export function AIChatPanel({
             className={cn(
               "size-1.5 rounded-full transition-colors",
               chatStatus === "streaming" ? "bg-green-500 animate-pulse" :
-              chatStatus === "submitted" ? "bg-amber-500 animate-pulse" :
-              chatStatus === "error" ? "bg-red-500" :
               "bg-muted"
             )}
           />
           <span className="text-[10px] text-muted-foreground capitalize">
-            {chatStatus === "streaming" ? "thinking…" :
-             chatStatus === "submitted" ? "sending…" :
-             chatStatus === "error" ? "error" : "ready"}
+            {chatStatus === "streaming" ? "thinking…" : "ready"}
           </span>
         </div>
       </div>
@@ -316,80 +263,40 @@ export function AIChatPanel({
       <Conversation className="flex-1 min-h-0">
         <ConversationContent>
           {messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-              <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <ShieldCheckIcon className="size-5" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">Nimbus AI</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Your intelligent workspace assistant
-                </p>
-              </div>
+            <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
+              <p className="text-xs text-muted-foreground">
+                Start a conversation with Nimbus AI
+              </p>
             </div>
           ) : (
-            messages.map((message) => (
-              <Message
-                key={message.id}
-                from={message.role === "user" ? "user" : "assistant"}
-              >
-                <div>
-                  {/* Sources */}
-                  {message.parts
-                    ?.filter((p) => p.type === "source-url" || p.type === "source-document")
-                    .map((p) =>
-                      p.type === "source-url" ? (
-                        <Sources key={p.sourceId}>
-                          <SourcesTrigger count={1} />
-                          <SourcesContent>
-                            <Source href={p.url} title={p.title ?? p.url} />
-                          </SourcesContent>
-                        </Sources>
-                      ) : p.type === "source-document" ? (
-                        <Sources key={p.sourceId}>
-                          <SourcesTrigger count={1} />
-                          <SourcesContent>
-                            <Source href="#" title={p.title} />
-                          </SourcesContent>
-                        </Sources>
-                      ) : null
-                    )}
-
-                  {/* Reasoning */}
-                  {message.parts
-                    ?.filter((p) => p.type === "reasoning")
-                    .map((p, i) =>
-                      p.type === "reasoning" ? (
-                        <Reasoning key={i} duration={0}>
-                          <ReasoningTrigger />
-                           <ReasoningContent>{p.text}</ReasoningContent>
-                        </Reasoning>
-                      ) : null
-                    )}
-
-                  <MessageContent>
-                    <MessageResponse>
-                      {(message.parts ?? [])
-                        .filter((p) => p.type === "text")
-                        .map((p) => (p.type === "text" ? p.text : ""))
-                        .join("")}
-                    </MessageResponse>
-                  </MessageContent>
-                </div>
-              </Message>
-            ))
+            <>
+              {messages.map((message, index) => (
+                <MessageRenderer
+                  key={message.id}
+                  message={message}
+                  isStreaming={status === "streaming" && index === messages.length - 1}
+                />
+              ))}
+            </>
           )}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
 
-      {/* Suggestions */}
-      {messages.length === 0 && (
-        <Suggestions className="px-3 pb-2">
-          {SUGGESTIONS.map((s) => (
-            <Suggestion key={s} suggestion={s} onClick={handleSuggestion} />
-          ))}
-        </Suggestions>
+      {/* Error inline */}
+      {chatStatus === "error" && (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground">
+          <WarningCircleIcon className="size-3.5 shrink-0 text-destructive" />
+          <span className="flex-1 truncate text-destructive/80">
+            {error?.message || "Something went wrong."}
+          </span>
+          <button
+            onClick={() => regenerate()}
+            className="shrink-0 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       )}
 
       {/* Input */}
@@ -421,48 +328,6 @@ export function AIChatPanel({
                 size="icon-sm"
                 variant="ghost"
               />
-
-              <PromptInputButton
-                onClick={() => setWebSearch((v) => !v)}
-                variant={webSearch ? "default" : "ghost"}
-                title="Web search"
-              >
-                <GlobeIcon size={15} />
-              </PromptInputButton>
-
-              <ModelSelector
-                open={modelSelectorOpen}
-                onOpenChange={setModelSelectorOpen}
-              >
-                <ModelSelectorTrigger asChild>
-                  <PromptInputButton title={selectedPreset.name}>
-                    <ModelSelectorLogo provider={selectedPreset.providerSlug} />
-                  </PromptInputButton>
-                </ModelSelectorTrigger>
-                <ModelSelectorContent>
-                  <ModelSelectorInput placeholder="Search…" />
-                  <ModelSelectorList>
-                    <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
-                    {Object.entries(MODEL_GROUPS).map(([group, presets]) => (
-                      <ModelSelectorGroup key={group} heading={group}>
-                        {presets.map((p) => (
-                          <ModelSelectorItem
-                            key={p.id}
-                            value={p.id}
-                            onSelect={() => handleModelSelect(p.id)}
-                          >
-                            <ModelSelectorLogo provider={p.providerSlug} />
-                            <ModelSelectorName>{p.name}</ModelSelectorName>
-                            {modelPresetId === p.id && (
-                              <CheckIcon className="ml-auto size-4" />
-                            )}
-                          </ModelSelectorItem>
-                        ))}
-                      </ModelSelectorGroup>
-                    ))}
-                  </ModelSelectorList>
-                </ModelSelectorContent>
-              </ModelSelector>
             </PromptInputTools>
             <PromptInputSubmit disabled={isSubmitDisabled} status={chatStatus} />
           </PromptInputFooter>

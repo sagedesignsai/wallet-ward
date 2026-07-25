@@ -131,8 +131,6 @@ export function DashboardSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarSeparator />
-
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>

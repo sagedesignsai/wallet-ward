@@ -25,10 +25,10 @@ export default function DashboardLayout({
     <DashboardAuthGate>
       <TooltipProvider>
         <WorkspacePanelProvider>
-          <SidebarProvider defaultOpen={false}>
+          <SidebarProvider defaultOpen={false} className="h-full overflow-hidden">
             <DashboardSidebar />
             <SidebarRail />
-            <SidebarInset>
+            <SidebarInset className="min-h-0">
               <DashboardConfigProvider>
                 <DashboardHeader />
                 <div className="flex-1 min-h-0 overflow-hidden">

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import { useWorkspacePanel } from "@/context/workspace-panel";
 import { AIChatPanel } from "./ai-chat-panel";
 import { ComputerPanel } from "./computer-panel";
@@ -16,7 +15,6 @@ import {
   DesktopIcon,
   ChatTeardropTextIcon,
 } from "@phosphor-icons/react";
-import type { PanelImperativeHandle } from "react-resizable-panels";
 
 // ─── Floating panel toggle toolbar ────────────────────────────────────────────
 
@@ -72,18 +70,6 @@ export function WorkspaceLayout({
   const { state, toggleComputer } = useWorkspacePanel();
   const { chatOpen, computerOpen } = state;
 
-  const chatPanelRef = useRef<PanelImperativeHandle>(null);
-
-  useEffect(() => {
-    const panel = chatPanelRef.current;
-    if (!panel) return;
-    if (chatOpen) {
-      panel.expand();
-    } else {
-      panel.collapse();
-    }
-  }, [chatOpen]);
-
   return (
     <div className="flex h-full overflow-hidden">
       {/* 2-column resizable split: Chat | Content */}
@@ -98,11 +84,10 @@ export function WorkspaceLayout({
               id="chat"
               collapsible
               collapsedSize="0%"
-              defaultSize="28%"
+              defaultSize="32%"
               minSize="18%"
-              maxSize="35%"
-              panelRef={chatPanelRef}
-              className="border-r border-border/60"
+              maxSize="37%"
+
             >
               <AIChatPanel
                 className="h-full"

@@ -19,10 +19,11 @@ export default function RootLayout({
         heading.variable,
         mono.variable,
         "antialiased",
-        "font-sans"
+        "font-sans",
+        "h-full"
       )}
     >
-      <body>
+      <body className="h-full">
         <NextTopLoader showSpinner={false} />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
