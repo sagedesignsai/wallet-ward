@@ -1,11 +1,12 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
-import { organization } from "better-auth/plugins"
+import { organization, twoFactor } from "better-auth/plugins"
 import { apiKey } from "@better-auth/api-key"
 import { nextCookies } from "better-auth/next-js"
 import { prisma } from "@/lib/db"
 
 export const auth = betterAuth({
+  appName: "Wallet Ward",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -24,6 +25,9 @@ export const auth = betterAuth({
         timeWindow: 1000 * 60 * 60,
         maxRequests: 1000,
       },
+    }),
+    twoFactor({
+      issuer: "Wallet Ward",
     }),
     nextCookies(),
   ],

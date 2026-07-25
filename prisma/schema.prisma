@@ -18,6 +18,7 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false) @map("email_verified")
   image         String?
+  twoFactorEnabled Boolean? @default(false) @map("two_factor_enabled")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -26,8 +27,26 @@ model User {
   members     Member[]
   invitations Invitation[] @relation("InvitationInviter")
   auditLogs   AuditLog[]
+  twofactors  TwoFactor[]
 
   @@map("user")
+}
+
+model TwoFactor {
+  id                      String    @id @default(cuid())
+  secret                  String
+  backupCodes             String
+  userId                  String    @map("user_id")
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0) @map("failed_verification_count")
+  lockedUntil             DateTime? @map("locked_until")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("two_factor")
 }
 
 model Session {
