@@ -70,6 +70,7 @@ export function useSecrets(projectId: string, environmentId: string) {
       value: string
       description?: string
       type?: string
+      metadata?: Record<string, unknown>
     }): Promise<Secret | null> => {
       try {
         const res = await fetch(

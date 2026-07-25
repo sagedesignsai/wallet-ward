@@ -13,6 +13,7 @@ import {
   NoteIcon,
   EyeIcon,
   EyeSlashIcon,
+  UploadSimpleIcon,
 } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
@@ -22,8 +23,24 @@ import { TimeAgo } from "@/components/dashboard/time-ago"
 import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
 import { DataTableToolbar } from "@/components/dashboard/data-table-toolbar"
 import { SensitiveValue } from "@/components/dashboard/sensitive-value"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { SecretRowActions } from "@/components/projects/secret-row-actions"
-import { CreateSecretDialog } from "@/components/projects/create-secret-dialog"
+import { SecretFormDialog } from "@/components/secrets/forms"
+import type { SecretType } from "@/components/secrets/forms"
+import { EnvVarBulkImport } from "@/components/projects/env-var-bulk-import"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -117,9 +134,24 @@ function SecretsInner({
 
   const [search, setSearch] = useState("")
   const [createOpen, setCreateOpen] = useState(false)
+  const [bulkImportOpen, setBulkImportOpen] = useState(false)
+  const [selectedType, setSelectedType] = useState<SecretType>("env_var")
   const [revealedSecrets, setRevealedSecrets] = useState<
     Record<string, SecretWithValue>
   >({})
+
+  const handleSelectType = useCallback((type: SecretType) => {
+    setSelectedType(type)
+    setCreateOpen(true)
+  }, [])
+
+  const handleCloseDialog = useCallback((open: boolean) => {
+    setCreateOpen(open)
+    // Reset type when closing
+    if (!open) {
+      setSelectedType("env_var")
+    }
+  }, [])
 
   const environment = project?.environments?.find(
     (e) => e.id === environmentId
@@ -130,14 +162,133 @@ function SecretsInner({
       setConfig({
         description: `Secrets in ${environment.name}`,
         actions: (
-          <Button
-            size="default"
-            onClick={() => setCreateOpen(true)}
-            className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
-          >
-            <PlusIcon />
-            Add Secret
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="default"
+                className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
+              >
+                <PlusIcon />
+                Add Secret
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="px-2 py-1.5">
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Select Secret Type
+                </p>
+              </div>
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem
+                onSelect={() => handleSelectType("env_var")}
+              >
+                <KeyIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Environment Variable</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    App configuration
+                  </span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onSelect={() => handleSelectType("password")}
+              >
+                <LockKeyIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Password</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    With strength indicator
+                  </span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onSelect={() => handleSelectType("api_token")}
+              >
+                <ShieldCheckIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">API Token</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    Keys & access tokens
+                  </span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onSelect={() => handleSelectType("ssh_keypair")}
+              >
+                <KeyIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">SSH Key</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    Public/private keypair
+                  </span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onSelect={() => handleSelectType("certificate")}
+              >
+                <CertificateIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Certificate</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    SSL/TLS certificates
+                  </span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onSelect={() => handleSelectType("json")}
+              >
+                <FileJsIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">JSON</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    Config files & structured data
+                  </span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onSelect={() => handleSelectType("file")}
+              >
+                <FileIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">File</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    Binary files & documents
+                  </span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onSelect={() => handleSelectType("note")}
+              >
+                <NoteIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Note</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    Secure text documentation
+                  </span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onSelect={() => setBulkImportOpen(true)}>
+                <UploadSimpleIcon className="size-3.5 mr-2" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Bulk Import</span>
+                  <span className="text-[0.625rem] text-muted-foreground">
+                    Upload or paste .env file
+                  </span>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ),
         breadcrumbs: [
           { label: "Dashboard", href: "/dashboard" },
@@ -324,11 +475,36 @@ function SecretsInner({
         )}
       </div>
 
-      <CreateSecretDialog
+      <SecretFormDialog
         open={createOpen}
-        onOpenChange={setCreateOpen}
-        onCreated={() => refetch()}
-        createSecret={createSecret}
+        onOpenChange={handleCloseDialog}
+        defaultType={selectedType}
+        onSubmit={async (data) => {
+          const secret = await createSecret({
+            name: data.name,
+            value: data.value,
+            description: data.description,
+            type: data.type,
+            metadata: data.metadata,
+          })
+          if (secret) {
+            refetch()
+          }
+        }}
+      />
+
+      <EnvVarBulkImport
+        open={bulkImportOpen}
+        onOpenChange={setBulkImportOpen}
+        existingSecretNames={secrets.map((s) => s.name)}
+        onImport={async (vars) => {
+          await Promise.all(
+            vars.map((v) =>
+              createSecret({ name: v.name, value: v.value, type: "env_var" })
+            )
+          )
+          refetch()
+        }}
       />
     </div>
   )
