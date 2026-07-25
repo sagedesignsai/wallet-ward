@@ -18,7 +18,6 @@ import {
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useSecrets, type SecretWithValue } from "@/hooks/use-secrets"
-import { PageHeader } from "@/components/dashboard/page-header"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
 import { DataTableToolbar } from "@/components/dashboard/data-table-toolbar"
@@ -129,8 +128,17 @@ function SecretsInner({
   useEffect(() => {
     if (project && environment) {
       setConfig({
-        title: environment.name,
         description: `Secrets in ${environment.name}`,
+        actions: (
+          <Button
+            size="default"
+            onClick={() => setCreateOpen(true)}
+            className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
+          >
+            <PlusIcon />
+            Add Secret
+          </Button>
+        ),
         breadcrumbs: [
           { label: "Dashboard", href: "/dashboard" },
           { label: "Projects", href: "/dashboard/projects" },
@@ -265,22 +273,6 @@ function SecretsInner({
           </button>
         </div>
       )}
-
-      <PageHeader
-        title="Secrets"
-        description={`${secrets.length} secret${secrets.length !== 1 ? "s" : ""} in ${environment?.name ?? "this environment"}`}
-        icon={<KeyIcon />}
-        actions={
-          <Button
-            size="default"
-            onClick={() => setCreateOpen(true)}
-            className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
-          >
-            <PlusIcon />
-            Add Secret
-          </Button>
-        }
-      />
 
       <div className="flex flex-col gap-2.5">
         <DataTableToolbar

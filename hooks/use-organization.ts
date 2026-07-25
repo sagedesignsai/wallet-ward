@@ -86,7 +86,7 @@ export function useOrganization() {
   const switchOrganization = useCallback(
     async (orgId: string) => {
       try {
-        const res = await fetch("/api/auth/api/organization/set-active", {
+        const res = await fetch("/api/auth/organization/set-active", {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

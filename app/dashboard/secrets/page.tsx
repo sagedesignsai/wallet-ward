@@ -22,7 +22,6 @@ import {
   type GlobalSecret,
   type GlobalSecretWithValue,
 } from "@/hooks/use-global-secrets"
-import { PageHeader } from "@/components/dashboard/page-header"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
@@ -112,7 +111,6 @@ export default function GlobalSecretsPage() {
 
   useEffect(() => {
     setConfig({
-      title: "Secrets",
       description: "All secrets across your projects",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
@@ -271,11 +269,6 @@ export default function GlobalSecretsPage() {
       )}
 
       {/* Page Header */}
-      <PageHeader
-        title="Secrets"
-        description={`${isLoading ? "Loading..." : `${secrets.length} secret${secrets.length !== 1 ? "s" : ""} across ${distinctProjects} project${distinctProjects !== 1 ? "s" : ""}`}`}
-        icon={<KeyIcon />}
-      />
 
       {/* Stats Row */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

@@ -120,7 +120,6 @@ function SectionHeader({
   children,
 }: {
   icon: React.ReactNode
-  title: string
   count?: number
   children?: React.ReactNode
 }) {
@@ -233,7 +232,6 @@ export default function OrganizationsPage() {
 
   useEffect(() => {
     setConfig({
-      title: "Organizations",
       description: "Manage your team and permissions",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },

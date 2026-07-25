@@ -128,7 +128,6 @@ export default function AuditLogsPage() {
 
   useEffect(() => {
     setConfig({
-      title: "Audit Log",
       description: "Track all activity across your organization",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },

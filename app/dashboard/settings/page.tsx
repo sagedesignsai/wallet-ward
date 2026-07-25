@@ -2,7 +2,6 @@
 
 import { useEffect } from "react"
 import {
-  GearSixIcon,
   UserIcon,
   ShieldCheckIcon,
   KeyIcon,
@@ -11,7 +10,6 @@ import { useSession } from "@/lib/auth-client"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { PageHeader } from "@/components/dashboard/page-header"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProfileForm } from "@/components/settings/profile-form"
@@ -28,7 +26,6 @@ export default function SettingsPage() {
 
   useEffect(() => {
     setConfig({
-      title: "Settings",
       description: "Manage your account and preferences",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
@@ -53,12 +50,6 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-5 animate-in fade-in duration-300">
-      <PageHeader
-        title="Settings"
-        description="Manage your account and preferences"
-        icon={<GearSixIcon />}
-      />
-
       <Tabs
         defaultValue="profile"
         orientation={isMobile ? "horizontal" : "vertical"}

@@ -10,7 +10,6 @@ import {
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useOrgDetail } from "@/hooks/use-org-detail"
-import { PageHeader } from "@/components/dashboard/page-header"
 import { DeleteOrgDialog } from "@/components/organizations/delete-org-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -53,7 +52,6 @@ function SettingsInner({ orgId }: { orgId: string }) {
   useEffect(() => {
     if (organization) {
       setConfig({
-        title: "Settings",
         description: `Configure ${organization.name}`,
         breadcrumbs: [
           { label: "Dashboard", href: "/dashboard" },
@@ -135,12 +133,6 @@ function SettingsInner({ orgId }: { orgId: string }) {
 
   return (
     <div className="flex flex-col gap-5 animate-in fade-in duration-300">
-      <PageHeader
-        title="Settings"
-        description={`Configure ${organization.name}`}
-        icon={<GearIcon />}
-      />
-
       {/* General Settings Card */}
       <Card className="gap-0">
         <CardHeader className="border-b border-border/40 pb-3">

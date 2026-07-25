@@ -8,7 +8,7 @@ type BreadcrumbItem = {
 }
 
 type DashboardConfig = {
-  title: string
+  title?: string
   description?: string
   breadcrumbs?: BreadcrumbItem[]
   actions?: React.ReactNode

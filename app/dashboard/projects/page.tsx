@@ -44,7 +44,6 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     setConfig({
-      title: "Projects",
       description: "Manage your vault projects and their environments",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },

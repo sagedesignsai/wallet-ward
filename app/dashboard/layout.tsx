@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { SidebarProvider, SidebarInset, SidebarRail } from "@/components/ui/sidebar"
 import { DashboardAuthGate } from "@/components/dashboard/dashboard-auth-gate"
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
@@ -20,16 +21,18 @@ export default function DashboardLayout({
 }) {
   return (
     <DashboardAuthGate>
-      <SidebarProvider defaultOpen>
-        <DashboardSidebar />
-        <SidebarRail />
-        <SidebarInset>
-          <DashboardConfigProvider>
-            <DashboardHeader />
-            <div className="flex-1 overflow-auto p-4 md:p-6">{children}</div>
-          </DashboardConfigProvider>
-        </SidebarInset>
-      </SidebarProvider>
+      <TooltipProvider>
+        <SidebarProvider defaultOpen={false}>
+          <DashboardSidebar />
+          <SidebarRail />
+          <SidebarInset>
+            <DashboardConfigProvider>
+              <DashboardHeader />
+              <div className="flex-1 overflow-auto p-4 md:p-6">{children}</div>
+            </DashboardConfigProvider>
+          </SidebarInset>
+        </SidebarProvider>
+      </TooltipProvider>
     </DashboardAuthGate>
   )
 }

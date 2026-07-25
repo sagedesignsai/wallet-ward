@@ -69,7 +69,7 @@ export function DashboardSidebar() {
   }
 
   return (
-    <Sidebar side="left" collapsible="offcanvas" variant="sidebar">
+    <Sidebar side="left" collapsible="icon" variant="floating">
       <SidebarHeader className="border-b border-sidebar-border/60">
         <SidebarMenu>
           <SidebarMenuItem>

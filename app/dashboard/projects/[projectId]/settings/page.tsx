@@ -9,7 +9,6 @@ import {
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
-import { PageHeader } from "@/components/dashboard/page-header"
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -57,7 +56,6 @@ function SettingsInner({ projectId }: { projectId: string }) {
   useEffect(() => {
     if (project) {
       setConfig({
-        title: "Settings",
         description: `Configure ${project.name}`,
         breadcrumbs: [
           { label: "Dashboard", href: "/dashboard" },
@@ -141,12 +139,6 @@ function SettingsInner({ projectId }: { projectId: string }) {
 
   return (
     <div className="flex flex-col gap-5 animate-in fade-in duration-300">
-      <PageHeader
-        title="Settings"
-        description={`Configure ${project.name}`}
-        icon={<GearIcon />}
-      />
-
       {/* Edit Project Card */}
       <Card className="gap-0">
         <CardHeader className="border-b border-border/40 pb-3">

@@ -7,9 +7,13 @@ import {
   ShieldCheckIcon,
   SignOutIcon,
   CaretDownIcon,
+  CheckIcon,
+  BuildingsIcon,
+  PlusIcon,
 } from "@phosphor-icons/react"
 
 import { useAuth } from "@/hooks/use-auth"
+import { useOrganization } from "@/hooks/use-organization"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -54,6 +58,72 @@ function Breadcrumbs({
   )
 }
 
+function OrgSwitcher() {
+  const { organizations, activeOrganizationId, activeOrganization, switchOrganization, isLoading } = useOrganization()
+  const router = useRouter()
+
+  if (isLoading || organizations.length === 0) return null
+
+  const initials = activeOrganization?.name
+    ? activeOrganization.name.split(/\s+/).map((w) => w[0]).join("").toUpperCase().slice(0, 2)
+    : "??"
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 gap-1.5 px-2 text-xs">
+          <div className="flex size-5 shrink-0 items-center justify-center rounded bg-primary/10 text-primary text-[9px] font-bold">
+            {initials}
+          </div>
+          <span className="hidden max-w-[120px] truncate font-medium text-foreground md:inline">
+            {activeOrganization?.name ?? "Select Org"}
+          </span>
+          <CaretDownIcon className="h-3 w-3 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent className="w-56" align="start">
+        <DropdownMenuLabel className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <BuildingsIcon className="size-3" />
+            Organization
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {organizations.map((org) => (
+          <DropdownMenuItem
+            key={org.id}
+            className={cn("text-xs cursor-pointer", org.id === activeOrganizationId && "bg-accent")}
+            onClick={() => {
+              if (org.id !== activeOrganizationId) {
+                switchOrganization(org.id)
+              }
+            }}
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-2 truncate">
+              {org.name}
+              <span className="shrink-0 rounded bg-muted px-1 py-0.5 text-[9px] font-mono text-muted-foreground uppercase">
+                {org.role}
+              </span>
+            </span>
+            {org.id === activeOrganizationId && (
+              <CheckIcon className="size-3.5 shrink-0 text-primary" weight="bold" />
+            )}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="text-xs cursor-pointer text-muted-foreground"
+          onClick={() => router.push("/dashboard/organizations/new")}
+        >
+          <PlusIcon className="size-3.5" />
+          New Organization
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 export function DashboardHeader() {
   const { config } = useDashboardConfig()
   const { user, signOut } = useAuth()
@@ -61,10 +131,8 @@ export function DashboardHeader() {
 
   const handleSignOut = async () => {
     await signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/")
-        },
+      fetchOptions: () => {
+        router.push("/")
       },
     })
   }
@@ -86,20 +154,17 @@ export function DashboardHeader() {
       <div className="flex flex-1 items-center justify-between gap-4 overflow-hidden">
         <div className="flex min-w-0 flex-col gap-0.5">
           <Breadcrumbs items={config.breadcrumbs ?? []} />
-          <div className="flex items-center gap-2">
-            <h1 className="truncate text-sm font-semibold leading-none text-foreground">
-              {config.title}
-            </h1>
-            {config.description && (
-              <span className="hidden truncate text-xs text-muted-foreground sm:inline">
-                {config.description}
-              </span>
-            )}
-          </div>
+          {config.description && (
+            <span className="hidden truncate text-xs text-muted-foreground sm:inline">
+              {config.description}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
           {config.actions}
+
+          <OrgSwitcher />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
