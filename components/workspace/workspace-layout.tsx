@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import { useWorkspacePanel } from "@/context/workspace-panel";
 import { AIChatPanel } from "./ai-chat-panel";
 import { ComputerPanel } from "./computer-panel";
@@ -10,11 +11,12 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import {
   DesktopIcon,
   ChatTeardropTextIcon,
 } from "@phosphor-icons/react";
+import type { PanelImperativeHandle } from "react-resizable-panels";
 
 // ─── Floating panel toggle toolbar ────────────────────────────────────────────
 
@@ -67,120 +69,78 @@ export function WorkspaceLayout({
   projectId,
   environmentId,
 }: WorkspaceLayoutProps) {
-  const { state } = useWorkspacePanel();
+  const { state, toggleComputer } = useWorkspacePanel();
   const { chatOpen, computerOpen } = state;
 
-  // When neither panel is open, render just the content
-  if (!chatOpen && !computerOpen) {
-    return <>{children}</>;
-  }
+  const chatPanelRef = useRef<PanelImperativeHandle>(null);
 
-  // All three panes visible: Chat | Content | Computer
-  if (chatOpen && computerOpen) {
-    return (
+  useEffect(() => {
+    const panel = chatPanelRef.current;
+    if (!panel) return;
+    if (chatOpen) {
+      panel.expand();
+    } else {
+      panel.collapse();
+    }
+  }, [chatOpen]);
+
+  return (
+    <div className="flex h-full overflow-hidden">
+      {/* 2-column resizable split: Chat | Content */}
       <ResizablePanelGroup
         orientation="horizontal"
         className="h-full"
       >
-        {/* AI Chat Panel */}
-        <ResizablePanel
-          id="chat"
-          defaultSize={22}
-          minSize={18}
-          maxSize={35}
-          className="border-r border-border/60"
-        >
-          <AIChatPanel
-            className="h-full"
-            projectId={projectId}
-            environmentId={environmentId}
-          />
-        </ResizablePanel>
+        {/* AI Chat Panel – collapsible when closed */}
+        {chatOpen && (
+          <>
+            <ResizablePanel
+              id="chat"
+              collapsible
+              collapsedSize="0%"
+              defaultSize="28%"
+              minSize="18%"
+              maxSize="35%"
+              panelRef={chatPanelRef}
+              className="border-r border-border/60"
+            >
+              <AIChatPanel
+                className="h-full"
+                projectId={projectId}
+                environmentId={environmentId}
+              />
+            </ResizablePanel>
 
-        <ResizableHandle withHandle />
+            <ResizableHandle withHandle />
+          </>
+        )}
 
-        {/* Main Content */}
+        {/* Main Content – always fills remaining space */}
         <ResizablePanel
           id="content"
-          defaultSize={40}
-          minSize={25}
+          defaultSize="100%"
+          minSize="25%"
         >
-          <div className="h-full overflow-auto p-4 md:p-6">
-            {children}
+          <div className="h-full overflow-auto">
+            <div className="p-4 md:p-6">
+              {children}
+            </div>
           </div>
         </ResizablePanel>
+      </ResizablePanelGroup>
 
-        <ResizableHandle withHandle />
-
-        {/* Computer Panel */}
-        <ResizablePanel
-          id="computer"
-          defaultSize={38}
-          minSize={25}
-          maxSize={60}
-          className="border-l border-border/60"
+      {/* Computer Panel – slides in as a Sheet overlay from the right */}
+      <Sheet open={computerOpen} onOpenChange={(open: boolean) => !open && toggleComputer()}>
+        <SheetContent
+          side="right"
+          className="w-[60vw] p-0 max-w-none sm:max-w-none"
+          showCloseButton
         >
+          <SheetTitle className="sr-only">Computer</SheetTitle>
           <ComputerPanel className="h-full" />
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    );
-  }
-
-  // Chat + Content (no computer)
-  if (chatOpen && !computerOpen) {
-    return (
-      <ResizablePanelGroup
-        orientation="horizontal"
-        className="h-full"
-      >
-        <ResizablePanel
-          id="chat"
-          defaultSize={28}
-          minSize={20}
-          maxSize={40}
-          className="border-r border-border/60"
-        >
-          <AIChatPanel
-            className="h-full"
-            projectId={projectId}
-            environmentId={environmentId}
-          />
-        </ResizablePanel>
-
-        <ResizableHandle withHandle />
-
-        <ResizablePanel id="content" defaultSize={72} minSize={50}>
-          <div className="h-full overflow-auto p-4 md:p-6">
-            {children}
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    );
-  }
-
-  // Computer + Content (no chat)
-  return (
-    <ResizablePanelGroup
-      orientation="horizontal"
-      className="h-full"
-    >
-      <ResizablePanel id="content" defaultSize={45} minSize={30}>
-        <div className="h-full overflow-auto p-4 md:p-6">
-          {children}
-        </div>
-      </ResizablePanel>
-
-      <ResizableHandle withHandle />
-
-      <ResizablePanel
-        id="computer"
-        defaultSize={55}
-        minSize={30}
-        className="border-l border-border/60"
-      >
-        <ComputerPanel className="h-full" />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 }
 

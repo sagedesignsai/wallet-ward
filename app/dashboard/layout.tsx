@@ -31,8 +31,7 @@ export default function DashboardLayout({
             <SidebarInset>
               <DashboardConfigProvider>
                 <DashboardHeader />
-                {/* Full-height content area — WorkspaceLayout handles split-view */}
-                <div className="flex flex-1 flex-col overflow-hidden" style={{ height: "calc(100vh - 3rem)" }}>
+                <div className="flex-1 min-h-0 overflow-hidden">
                   <WorkspaceLayout>
                     {children}
                   </WorkspaceLayout>
