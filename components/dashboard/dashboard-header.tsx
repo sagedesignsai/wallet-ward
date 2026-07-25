@@ -131,8 +131,10 @@ export function DashboardHeader() {
 
   const handleSignOut = async () => {
     await signOut({
-      fetchOptions: () => {
-        router.push("/")
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/")
+        },
       },
     })
   }

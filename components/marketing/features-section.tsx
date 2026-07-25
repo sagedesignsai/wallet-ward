@@ -5,150 +5,204 @@ import { cn } from "@/lib/utils"
 
 const FEATURES = [
   {
-    title: "Zero-Knowledge Encryption",
+    title: "Unified Workspace",
     description:
-      "Your secrets are encrypted client-side before leaving your device. We never see your plaintext data.",
+      "Projects, documents, tasks, and secrets — everything lives in one place. No more tab-switching between disconnected tools.",
     color: "text-blue-400",
     glowColor: "group-hover:shadow-blue-500/20",
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7 transition-transform group-hover:scale-110 duration-300">
-        <path
-          d="M16 4L6 9v8c0 7 4.5 12 10 15 5.5-3 10-8 10-15V9L16 4z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
-          className="group-hover:stroke-[2.2] transition-all duration-300"
-        />
-        <path
-          d="M11 16l3.5 3.5L21 12"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray="14"
-          strokeDashoffset="14"
+        {/* Dashboard grid icon */}
+        <rect x="4" y="4" width="11" height="11" rx="2.5" stroke="currentColor" strokeWidth="1.8"
+          strokeDasharray="28"
+          strokeDashoffset="28"
           className="group-hover:[stroke-dashoffset:0] transition-all duration-500"
         />
+        <rect x="17" y="4" width="11" height="7" rx="2.5" stroke="currentColor" strokeWidth="1.8"
+          strokeDasharray="22"
+          strokeDashoffset="22"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-100"
+        />
+        <rect x="4" y="17" width="11" height="11" rx="2.5" stroke="currentColor" strokeWidth="1.8"
+          strokeDasharray="28"
+          strokeDashoffset="28"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-150"
+        />
+        <rect x="17" y="13" width="11" height="15" rx="2.5" stroke="currentColor" strokeWidth="1.8"
+          strokeDasharray="34"
+          strokeDashoffset="34"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-200"
+        />
+        <circle cx="10" cy="9.5" r="1.5" fill="currentColor" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-500" />
+        <rect x="20" y="6.5" width="5" height="1.5" rx="0.75" fill="currentColor" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-500" />
       </svg>
     ),
   },
   {
-    title: "Team Access Control",
+    title: "Tool Integrations",
     description:
-      "Fine-grained RBAC with read/write/admin roles. Share secrets securely across teams and organizations.",
+      "Connect GitHub, Linear, Vercel, and Slack via OAuth. Your existing workflow stays intact — Nimbus just brings it all together.",
     color: "text-purple-400",
     glowColor: "group-hover:shadow-purple-500/20",
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7 transition-transform group-hover:scale-110 duration-300">
-        <circle cx="11" cy="11" r="4" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="21" cy="11" r="4" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M3 26c0-4.418 3.582-8 8-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M29 26c0-4.418-3.582-8-8-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        <path
-          d="M13 18h6"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
+        {/* Connected nodes icon */}
+        <circle cx="16" cy="16" r="5" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="6" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="26" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="6" cy="24" r="3" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="26" cy="24" r="3" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M12.5 13L8.5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          strokeDasharray="8"
+          strokeDashoffset="8"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500"
+        />
+        <path d="M19.5 13L23.5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
           strokeDasharray="8"
           strokeDashoffset="8"
           className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-100"
         />
+        <path d="M12.5 19L8.5 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          strokeDasharray="8"
+          strokeDashoffset="8"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-150"
+        />
+        <path d="M19.5 19L23.5 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          strokeDasharray="8"
+          strokeDashoffset="8"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-200"
+        />
       </svg>
     ),
   },
   {
-    title: "API Key Management",
+    title: "Team Collaboration",
     description:
-      "Generate, rotate, and revoke API keys with usage analytics, rate limiting, and metadata tagging.",
+      "Organizations, members, roles, and permissions. Invite your team, set granular access, and collaborate without friction.",
     color: "text-amber-400",
     glowColor: "group-hover:shadow-amber-500/20",
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7 transition-transform group-hover:scale-110 duration-300">
-        <path
-          d="M14 18a6 6 0 100-12 6 6 0 000 12z"
-          stroke="currentColor"
-          strokeWidth="1.8"
+        {/* People with roles */}
+        <circle cx="16" cy="10" r="4" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="16" cy="10" r="1.5" fill="currentColor" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-300" />
+        <path d="M8 26c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="6" cy="14" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="26" cy="14" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M1 28c0-3 2-5.5 5-5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          strokeDasharray="8"
+          strokeDashoffset="8"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500"
         />
-        <path
-          d="M14 18l-1.5 3 3 1.5-1.5 3L18 28"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray="16"
-          strokeDashoffset="16"
-          className="group-hover:[stroke-dashoffset:0] transition-all duration-600 delay-150"
+        <path d="M31 28c0-3-2-5.5-5-5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          strokeDasharray="8"
+          strokeDashoffset="8"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-100"
         />
-        <circle cx="11" cy="11" r="1.5" fill="currentColor" />
+        {/* Role badge */}
+        <rect x="21" y="6" width="8" height="5" rx="2.5" fill="oklch(0.148 0.004 228.8)" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M23.5 8.5L25 10L27 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-400"
+        />
       </svg>
     ),
   },
   {
-    title: "Two-Factor Auth (2FA)",
+    title: "Activity Feed",
     description:
-      "Protect your vault with TOTP-based 2FA. Compatible with Google Authenticator, Authy, 1Password, and more.",
+      "A unified timeline across all connected tools. See who did what, when — commits, deployments, task updates, and doc changes.",
     color: "text-green-400",
     glowColor: "group-hover:shadow-green-500/20",
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7 transition-transform group-hover:scale-110 duration-300">
-        <rect x="8" y="4" width="16" height="24" rx="3" stroke="currentColor" strokeWidth="1.8" />
-        <rect x="11" y="8" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-        <circle cx="16" cy="22" r="2" fill="currentColor">
-          <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
-        </circle>
-        <path d="M13 22h-2M19 22h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Timeline with entries */}
+        <line x1="10" y1="6" x2="10" y2="26" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+          strokeDasharray="20"
+          strokeDashoffset="20"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-600"
+        />
+        {/* Entry dots */}
+        <circle cx="10" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <circle cx="10" cy="9" r="1" fill="currentColor"
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-300"
+        />
+        <circle cx="10" cy="16" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <circle cx="10" cy="16" r="1" fill="currentColor"
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-400"
+        />
+        <circle cx="10" cy="23" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <circle cx="10" cy="23" r="1" fill="currentColor"
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-500"
+        />
+        {/* Content lines */}
+        <rect x="16" y="7" width="12" height="3" rx="1.5" fill="currentColor" opacity="0.5" />
+        <rect x="16" y="14" width="10" height="3" rx="1.5" fill="currentColor" opacity="0.4" />
+        <rect x="16" y="21" width="14" height="3" rx="1.5" fill="currentColor" opacity="0.3" />
+        {/* Sub-detail lines */}
+        <rect x="16" y="11" width="7" height="2" rx="1" fill="currentColor" opacity="0.2" />
+        <rect x="16" y="18" width="9" height="2" rx="1" fill="currentColor" opacity="0.15" />
       </svg>
     ),
   },
   {
-    title: "Audit Logs",
+    title: "Secrets Management",
     description:
-      "Complete tamper-evident audit trail for every access and mutation. Export as JSON or CSV for compliance.",
+      "Encrypted, versioned, and scoped to environments. Dev, staging, and production secrets — managed alongside your projects.",
     color: "text-cyan-400",
     glowColor: "group-hover:shadow-cyan-500/20",
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7 transition-transform group-hover:scale-110 duration-300">
-        <rect x="6" y="4" width="20" height="24" rx="3" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M11 11h10M11 16h10M11 21h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
-          strokeDasharray="12 12 8"
-          strokeDashoffset="0"
-          className="group-hover:animate-[dash_1s_ease-in-out]"
-        />
-        <circle cx="23" cy="23" r="5" fill="oklch(0.148 0.004 228.8)" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M21 23l1.5 1.5L25 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Lock with versioning */}
+        <rect x="8" y="14" width="16" height="14" rx="3" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M11 14V10a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="16" cy="21" r="2" fill="currentColor">
+          <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
+        </circle>
+        {/* Version badge */}
+        <rect x="20" y="6" width="9" height="6" rx="3" fill="oklch(0.148 0.004 228.8)" stroke="currentColor" strokeWidth="1.2" />
+        <text x="24.5" y="10.5" textAnchor="middle" fill="currentColor" fontSize="5" fontWeight="bold" fontFamily="sans-serif"
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-300"
+        >
+          v3
+        </text>
+        {/* Environment indicator */}
+        <circle cx="6" cy="21" r="1.5" fill="currentColor" opacity="0.4" />
+        <circle cx="6" cy="17" r="1.5" fill="currentColor" opacity="0.6" />
+        <circle cx="6" cy="13" r="1.5" fill="currentColor" opacity="0.8" />
       </svg>
     ),
   },
   {
-    title: "Secret Versioning",
+    title: "API-First",
     description:
-      "Full version history for every secret. Rollback instantly to any previous value with one click.",
+      "A full REST API for everything. Build custom workflows, automate deployments, and integrate Nimbus into any pipeline.",
     color: "text-rose-400",
     glowColor: "group-hover:shadow-rose-500/20",
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7 transition-transform group-hover:scale-110 duration-300">
-        <circle cx="16" cy="8" r="3" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="16" cy="20" r="3" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="16" cy="20" r="3" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M16 11v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
-          strokeDasharray="6"
-          strokeDashoffset="6"
-          className="group-hover:[stroke-dashoffset:0] transition-all duration-400"
+        {/* Code brackets with arrow */}
+        <path d="M10 8L4 16L10 24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+          strokeDasharray="26"
+          strokeDashoffset="26"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500"
         />
-        <path
-          d="M10 26c0-3.314 2.686-6 6-6s6 2.686 6 6"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
+        <path d="M22 8L28 16L22 24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+          strokeDasharray="26"
+          strokeDashoffset="26"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-100"
         />
-        <path
-          d="M8 5l3 3-3 3"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200"
+        <path d="M18 6L14 26" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+          strokeDasharray="20"
+          strokeDashoffset="20"
+          className="group-hover:[stroke-dashoffset:0] transition-all duration-500 delay-200"
         />
+        {/* Pulse dots on endpoints */}
+        <circle cx="4" cy="16" r="1.5" fill="currentColor" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-400">
+          <animate attributeName="r" values="1.5;2;1.5" dur="1.5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="28" cy="16" r="1.5" fill="currentColor" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-400">
+          <animate attributeName="r" values="1.5;2;1.5" dur="1.5s" repeatCount="indefinite" begin="0.5s" />
+        </circle>
       </svg>
     ),
   },
@@ -169,10 +223,10 @@ export function FeaturesSection({ className }: FeaturesSectionProps) {
             Everything You Need
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
-            Built for security-first teams
+            Built for modern remote teams
           </h2>
           <p className="text-muted-foreground text-base max-w-xl mx-auto leading-relaxed">
-            From solo developers to enterprise teams — Nimbus adapts to your workflow without compromising on security.
+            From solo developers to enterprise teams — Nimbus adapts to your workflow without forcing you to change how you work.
           </p>
         </div>
 

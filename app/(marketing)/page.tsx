@@ -7,9 +7,9 @@ import { PricingSection } from "@/components/marketing/pricing-section"
 import { CtaSection } from "@/components/marketing/cta-section"
 
 export const metadata: Metadata = {
-  title: "Nimbus — Zero-Knowledge Secrets Management",
+  title: "Nimbus — Remote Workspace Platform",
   description:
-    "Encrypt, organize, and share credentials across your team with military-grade AES-256 security and a zero-knowledge architecture. Start free.",
+    "Unify projects, documents, tasks, and secrets in one workspace. Connect GitHub, Linear, Vercel, and Slack without replacing your tools. Start free.",
 }
 
 export default function LandingPage() {

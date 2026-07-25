@@ -11,10 +11,10 @@ interface StatItem {
 }
 
 const STATS: StatItem[] = [
-  { value: 10, suffix: "k+", label: "Secrets Stored", prefix: "" },
-  { value: 256, suffix: "-bit", label: "AES Encryption", prefix: "" },
+  { value: 1200, suffix: "+", label: "Teams", prefix: "" },
+  { value: 4, suffix: "", label: "Integrations", prefix: "" },
   { value: 99.99, suffix: "%", label: "Uptime SLA", prefix: "" },
-  { value: 0, suffix: "", label: "Known Breaches", prefix: "" },
+  { value: 10, suffix: "k+", label: "Projects Created", prefix: "" },
 ]
 
 function AnimatedNumber({ value, suffix, prefix }: { value: number; suffix: string; prefix?: string }) {
@@ -37,7 +37,7 @@ function AnimatedNumber({ value, suffix, prefix }: { value: number; suffix: stri
             const progress = Math.min((now - start) / duration, 1)
             // Easing out
             const eased = 1 - Math.pow(1 - progress, 3)
-            const current = value === 0 ? 0 : value * eased
+            const current = value * eased
             setDisplayed(current)
             if (progress < 1) requestAnimationFrame(tick)
           }
@@ -51,9 +51,7 @@ function AnimatedNumber({ value, suffix, prefix }: { value: number; suffix: stri
   }, [value])
 
   const formatted =
-    value === 0
-      ? "0"
-      : value % 1 !== 0
+    value % 1 !== 0
       ? displayed.toFixed(2)
       : Math.round(displayed).toLocaleString()
 

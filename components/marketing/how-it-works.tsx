@@ -6,46 +6,61 @@ import { cn } from "@/lib/utils"
 const STEPS = [
   {
     number: "01",
-    title: "Store Your Secrets",
+    title: "Create Your Workspace",
     description:
-      "Add credentials, API keys, SSH keys, and any sensitive data. Organize with tags, projects, and environments.",
+      "Set up your organization, invite team members, and define roles and permissions. Your workspace is ready in minutes.",
     color: "text-blue-400",
     bgColor: "bg-blue-500/10",
     borderColor: "border-blue-500/30",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
-        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        {/* Building / org icon */}
+        <rect x="4" y="8" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+        <path d="M4 12h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M9 8V6a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <rect x="8" y="15" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
+        <rect x="13" y="15" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
       </svg>
     ),
   },
   {
     number: "02",
-    title: "Encrypt Everything",
+    title: "Connect Your Tools",
     description:
-      "AES-256 encryption happens automatically client-side. Your master key never touches our servers.",
+      "Link GitHub, Linear, Vercel, and Slack via OAuth. One-click integrations — no API keys to wrangle or webhooks to configure.",
     color: "text-purple-400",
     bgColor: "bg-purple-500/10",
     borderColor: "border-purple-500/30",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
-        <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
-        <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="12" cy="16" r="1.5" fill="currentColor" />
+        {/* Plug / connection icon */}
+        <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
+        <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
       </svg>
     ),
   },
   {
     number: "03",
-    title: "Access Anywhere",
+    title: "Work Together",
     description:
-      "Retrieve secrets via dashboard, CLI, or REST API. Instant sync across all devices with zero friction.",
+      "Write docs, manage tasks, store secrets, and track activity — all in one place. Everything syncs in real-time across your team.",
     color: "text-emerald-400",
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-500/30",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-        <path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {/*协作 / workspace icon */}
+        <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
+        <path d="M3 9h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M9 3v18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Mini content indicators */}
+        <circle cx="6" cy="6" r="1" fill="currentColor" opacity="0.5" />
+        <rect x="12" y="5" width="6" height="1.5" rx="0.75" fill="currentColor" opacity="0.4" />
+        <rect x="12" y="11" width="4" height="1.5" rx="0.75" fill="currentColor" opacity="0.3" />
+        <rect x="5" y="12" width="2" height="2" rx="0.5" fill="currentColor" opacity="0.3" />
+        <rect x="5" y="16" width="2" height="2" rx="0.5" fill="currentColor" opacity="0.2" />
+        <rect x="12" y="15" width="6" height="4" rx="1" fill="currentColor" opacity="0.15" />
       </svg>
     ),
   },
@@ -114,7 +129,7 @@ export function HowItWorksSection({ className }: HowItWorksSectionProps) {
             Three steps. That&apos;s it.
           </h2>
           <p className="text-muted-foreground text-base max-w-lg mx-auto">
-            No complex setup. No vendor lock-in. Start securing your secrets in minutes.
+            No complex setup. No vendor lock-in. Start unifying your workspace in minutes.
           </p>
         </div>
 

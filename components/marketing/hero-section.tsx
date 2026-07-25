@@ -4,9 +4,7 @@ import React from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { VaultAnimation } from "@/components/marketing/vault-animation"
-import { FloatingCards } from "@/components/marketing/floating-cards"
-import { SecurityGrid } from "@/components/marketing/security-grid"
+import { WorkspaceHeroVisual } from "@/components/marketing/workspace-hero-visual"
 
 interface HeroSectionProps {
   className?: string
@@ -20,14 +18,11 @@ export function HeroSection({ className }: HeroSectionProps) {
         className
       )}
     >
-      {/* Animated background grid */}
-      <SecurityGrid />
-
       {/* Background radial gradient blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-primary/8 rounded-full blur-3xl animate-[pulse_8s_ease-in-out_infinite]" />
         <div className="absolute top-1/3 -right-24 w-80 h-80 bg-cyan-500/6 rounded-full blur-3xl animate-[pulse_10s_ease-in-out_2s_infinite]" />
-        <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-[pulse_7s_ease-in-out_1s_infinite]" />
+        <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-violet-500/5 rounded-full blur-3xl animate-[pulse_7s_ease-in-out_1s_infinite]" />
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
@@ -42,33 +37,33 @@ export function HeroSection({ className }: HeroSectionProps) {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
               <span className="text-xs font-semibold text-primary tracking-wide">
-                Enterprise-grade security
+                Remote Work Platform
               </span>
             </div>
 
             {/* Headline */}
             <div className="space-y-3">
               <h1 className="text-5xl sm:text-6xl font-black leading-[1.05] tracking-tight text-foreground">
-                Your Secrets.
+                Your Workspace.
                 <br />
-                Your Control.
+                One Place.
               </h1>
               <div className="text-5xl sm:text-6xl font-black leading-[1.05] tracking-tight">
                 <span className="bg-gradient-to-r from-primary via-blue-400 to-cyan-400 bg-clip-text text-transparent animate-[pulse_4s_ease-in-out_infinite]">
-                  Zero Compromise.
+                  Everything Connected.
                 </span>
               </div>
             </div>
 
             {/* Subheading */}
             <p className="text-muted-foreground text-base leading-relaxed">
-              Encrypt, organize, and share credentials across your team with military-grade
-              AES-256 security and a zero-knowledge architecture. Nothing leaves your device unencrypted.
+              Projects, documents, tasks, and secrets — unified in one workspace.
+              Connect your existing tools like GitHub, Linear, Vercel, and Slack without replacing a thing.
             </p>
 
             {/* Trust badges inline */}
             <div className="flex flex-wrap gap-3">
-              {["AES-256", "Zero-Knowledge", "SOC 2 Ready", "Open Source"].map((badge) => (
+              {["GitHub Integration", "Real-time Collaboration", "API-First", "Team Workspaces"].map((badge) => (
                 <span
                   key={badge}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground border border-border/50 px-2.5 py-1 rounded-full bg-foreground/[0.03]"
@@ -90,7 +85,7 @@ export function HeroSection({ className }: HeroSectionProps) {
                 className="font-semibold gap-2 shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-shadow duration-300"
               >
                 <Link href="/sign-up">
-                  Start Free — No Card Required
+                  Start Free
                   <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
                     <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -104,10 +99,10 @@ export function HeroSection({ className }: HeroSectionProps) {
               >
                 <Link href="/#features">
                   <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-                    <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M8 7.5L13 10 8 12.5V7.5z" fill="currentColor" />
+                    <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M6 10h8M6 7h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
-                  View Demo
+                  View Features
                 </Link>
               </Button>
             </div>
@@ -127,21 +122,15 @@ export function HeroSection({ className }: HeroSectionProps) {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">1,200+</span> developers already using Nimbus
+                <span className="font-semibold text-foreground">1,200+</span> teams building on Nimbus
               </p>
             </div>
           </div>
 
-          {/* RIGHT: Visual */}
+          {/* RIGHT: Workspace Visual */}
           <div className="relative hidden lg:flex items-center justify-center h-[500px]">
-            {/* Vault animation (back) */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <VaultAnimation />
-            </div>
-
-            {/* Floating credential cards (front layer) */}
-            <div className="absolute inset-0">
-              <FloatingCards />
+              <WorkspaceHeroVisual />
             </div>
           </div>
         </div>
