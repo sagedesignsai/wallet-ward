@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useLayoutEffect, useState, useRef } from "react"
 import {
   UserIcon,
   ShieldCheckIcon,
@@ -9,8 +9,6 @@ import {
 import { useSession } from "@/lib/auth-client"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProfileForm } from "@/components/settings/profile-form"
 import { PasswordForm } from "@/components/settings/password-form"
@@ -19,10 +17,90 @@ import { SessionsList } from "@/components/settings/sessions-list"
 import { ApiKeysTable } from "@/components/settings/api-keys-table"
 import { cn } from "@/lib/utils"
 
+const TABS = [
+  { id: "profile", label: "Profile", icon: UserIcon },
+  { id: "security", label: "Security", icon: ShieldCheckIcon },
+  { id: "api-keys", label: "API Keys", icon: KeyIcon },
+] as const
+
+type TabId = (typeof TABS)[number]["id"]
+
+/* ------------------------------------------------------------------ */
+/*  SegmentedControl — pill-shaped tab bar with a sliding indicator    */
+/* ------------------------------------------------------------------ */
+
+function SegmentedControl({
+  value,
+  onChange,
+}: {
+  value: TabId
+  onChange: (id: TabId) => void
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 })
+
+  // Measure the active button and position the sliding indicator
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    const active = container?.querySelector<HTMLElement>(
+      `[data-tab="${value}"]`
+    )
+    if (!container || !active) return
+
+    const cr = container.getBoundingClientRect()
+    const ar = active.getBoundingClientRect()
+    setIndicator({
+      left: ar.left - cr.left,
+      width: ar.width,
+    })
+  }, [value])
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative flex items-center rounded-lg bg-muted p-0.5"
+    >
+      {/* Sliding background pill */}
+      <div
+        className="absolute top-0.5 bottom-0.5 rounded-md bg-background shadow-sm transition-all duration-200 ease-out"
+        style={{
+          left: `${indicator.left}px`,
+          width: `${indicator.width}px`,
+        }}
+      />
+
+      {TABS.map((tab) => {
+        const Icon = tab.icon
+        const isActive = value === tab.id
+        return (
+          <button
+            key={tab.id}
+            data-tab={tab.id}
+            onClick={() => onChange(tab.id)}
+            className={cn(
+              "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors duration-200",
+              isActive
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground/70"
+            )}
+          >
+            <Icon className="size-3.5" />
+            {tab.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
 export default function SettingsPage() {
   const { setConfig } = useDashboardConfig()
   const { data: sessionData, isPending } = useSession()
-  const isMobile = useIsMobile()
+  const [activeTab, setActiveTab] = useState<TabId>("profile")
 
   useEffect(() => {
     setConfig({
@@ -49,53 +127,22 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 animate-in fade-in duration-300">
-      <Tabs
-        defaultValue="profile"
-        orientation={isMobile ? "horizontal" : "vertical"}
-        className={cn(
-          "gap-4",
-          !isMobile && "flex-row"
-        )}
-      >
-        <TabsList
-          variant="line"
-          className={cn(
-            isMobile
-              ? "w-full overflow-x-auto"
-              : "w-44 shrink-0 self-start"
-          )}
-        >
-          <TabsTrigger value="profile" className="gap-1.5">
-            <UserIcon className="size-3.5" />
-            Profile
-          </TabsTrigger>
-          <TabsTrigger value="security" className="gap-1.5">
-            <ShieldCheckIcon className="size-3.5" />
-            Security
-          </TabsTrigger>
-          <TabsTrigger value="api-keys" className="gap-1.5">
-            <KeyIcon className="size-3.5" />
-            API Keys
-          </TabsTrigger>
-        </TabsList>
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+      <SegmentedControl value={activeTab} onChange={setActiveTab} />
 
-        <div className="flex-1 min-w-0">
-          <TabsContent value="profile" className="mt-0">
-            <ProfileForm />
-          </TabsContent>
+      <div className="min-w-0">
+        {activeTab === "profile" && <ProfileForm />}
 
-          <TabsContent value="security" className="mt-0 flex flex-col gap-4">
+        {activeTab === "security" && (
+          <div className="flex flex-col gap-4">
             <PasswordForm />
             <TwoFactorSetup initialEnabled={twoFactorEnabled} />
             <SessionsList currentSessionId={session?.id ?? ""} />
-          </TabsContent>
+          </div>
+        )}
 
-          <TabsContent value="api-keys" className="mt-0">
-            <ApiKeysTable />
-          </TabsContent>
-        </div>
-      </Tabs>
+        {activeTab === "api-keys" && <ApiKeysTable />}
+      </div>
     </div>
   )
 }
