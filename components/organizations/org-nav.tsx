@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import {
   HouseIcon,
   UsersIcon,
+  ClockCounterClockwiseIcon,
   GearIcon,
 } from "@phosphor-icons/react"
 
@@ -25,6 +26,12 @@ const tabs = [
     label: "Members",
     href: "/members",
     icon: UsersIcon,
+  },
+  {
+    id: "activity",
+    label: "Activity",
+    href: "/activity",
+    icon: ClockCounterClockwiseIcon,
   },
   {
     id: "settings",

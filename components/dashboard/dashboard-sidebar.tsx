@@ -35,14 +35,14 @@ const NAV_GROUPS = [
     label: "Overview",
     items: [
       { label: "Dashboard", href: "/dashboard", icon: HouseIcon },
-      { label: "Audit Logs", href: "/dashboard/audit-logs", icon: ClockCounterClockwiseIcon },
     ],
   },
   {
-    label: "Vault",
+    label: "Workspace",
     items: [
       { label: "Projects", href: "/dashboard/projects", icon: FolderIcon },
       { label: "Secrets", href: "/dashboard/secrets", icon: KeyIcon },
+      { label: "Audit Logs", href: "/dashboard/audit-logs", icon: ClockCounterClockwiseIcon },
     ],
   },
   {
@@ -83,7 +83,7 @@ export function DashboardSidebar() {
                     Nimbus
                   </span>
                   <span className="truncate text-[10px] text-sidebar-foreground/60">
-                    Secrets Vault
+                    Workspace
                   </span>
                 </div>
               </Link>
