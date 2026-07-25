@@ -21,6 +21,12 @@ export type AuditAction =
   | "secret_export"
   | "secret_import"
   | "secret_version_create"
+  | "document_create"
+  | "document_update"
+  | "document_delete"
+  | "task_create"
+  | "task_update"
+  | "task_delete"
 
 export type AuditLog = {
   id: string

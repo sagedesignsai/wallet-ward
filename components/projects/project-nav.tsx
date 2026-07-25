@@ -5,6 +5,9 @@ import {
   HouseIcon,
   StackSimpleIcon,
   GearIcon,
+  FileTextIcon,
+  ListChecksIcon,
+  ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react"
 
 import { SegmentedControl } from "@/components/ui/segmented-control"
@@ -25,6 +28,24 @@ const tabs = [
     label: "Environments",
     href: "/environments",
     icon: StackSimpleIcon,
+  },
+  {
+    id: "documents",
+    label: "Documents",
+    href: "/documents",
+    icon: FileTextIcon,
+  },
+  {
+    id: "tasks",
+    label: "Tasks",
+    href: "/tasks",
+    icon: ListChecksIcon,
+  },
+  {
+    id: "activity",
+    label: "Activity",
+    href: "/activity",
+    icon: ClockCounterClockwiseIcon,
   },
   {
     id: "settings",

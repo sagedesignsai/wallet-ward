@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { SecretType } from "@/generated/prisma/client"
+import { SecretType, TaskStatus } from "@/generated/prisma/client"
 
 const secretTypeValues = [
   SecretType.password,
@@ -79,4 +79,31 @@ export const importSecretsSchema = z.object({
 
 export const exportQuerySchema = z.object({
   format: z.enum(["json", "dotenv"]).default("json"),
+})
+
+// ─── Documents ──────────────────────────────────────────────────────────────
+
+export const createDocumentSchema = z.object({
+  title: z.string().min(1).max(200),
+  content: z.string().optional(),
+})
+
+export const updateDocumentSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  content: z.string().optional(),
+})
+
+// ─── Tasks ──────────────────────────────────────────────────────────────────
+
+export const createTaskSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().max(5000).optional(),
+  assigneeId: z.string().nullable().optional(),
+})
+
+export const updateTaskSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().max(5000).nullable().optional(),
+  status: z.enum([TaskStatus.todo, TaskStatus.in_progress, TaskStatus.done]).optional(),
+  assigneeId: z.string().nullable().optional(),
 })
