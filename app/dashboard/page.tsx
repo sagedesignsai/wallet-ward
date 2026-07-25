@@ -8,6 +8,9 @@ import {
   ClockCounterClockwiseIcon,
   PlusIcon,
   StackSimpleIcon,
+  FileTextIcon,
+  ListChecksIcon,
+  PlugIcon,
   ClipboardTextIcon as EmptyIcon,
 } from "@phosphor-icons/react"
 
@@ -15,11 +18,18 @@ import { useSession } from "@/lib/auth-client"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProjects } from "@/hooks/use-projects"
 import { useGlobalSecrets } from "@/hooks/use-global-secrets"
+import { useGlobalDocuments } from "@/hooks/use-global-documents"
+import { useGlobalTasks } from "@/hooks/use-global-tasks"
+import { useGlobalIntegrations } from "@/hooks/use-global-integrations"
 import { useAuditLogs } from "@/hooks/use-audit-logs"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import {
+  RecentDocumentsCard,
+  MyTasksCard,
+} from "@/components/dashboard/dashboard-preview-cards"
 
 export default function DashboardPage() {
   const { setConfig } = useDashboardConfig()
@@ -27,6 +37,9 @@ export default function DashboardPage() {
   const { projects, isLoading: projectsLoading } = useProjects()
   const { secrets, isLoading: secretsLoading } = useGlobalSecrets()
   const { logs, isLoading: logsLoading } = useAuditLogs()
+  const { documents, isLoading: documentsLoading } = useGlobalDocuments()
+  const { tasks, isLoading: tasksLoading } = useGlobalTasks()
+  const { integrations, isLoading: integrationsLoading } = useGlobalIntegrations()
 
   const user = sessionData?.user
 
@@ -57,7 +70,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           label="Projects"
           value={projectsLoading ? "—" : projects.length}
@@ -77,11 +90,29 @@ export default function DashboardPage() {
           description="Across all projects"
         />
         <StatCard
-          label="Recent Activity"
-          value={logsLoading ? "—" : logs.length}
-          icon={<ClockCounterClockwiseIcon className="size-4" />}
-          description="Total audit events"
+          label="Documents"
+          value={documentsLoading ? "—" : documents.length}
+          icon={<FileTextIcon className="size-4" />}
+          description="Across all projects"
         />
+        <StatCard
+          label="Tasks"
+          value={tasksLoading ? "—" : tasks.length}
+          icon={<ListChecksIcon className="size-4" />}
+          description="Across all projects"
+        />
+        <StatCard
+          label="Integrations"
+          value={integrationsLoading ? "—" : integrations.length}
+          icon={<PlugIcon className="size-4" />}
+          description="Connected services"
+        />
+      </div>
+
+      {/* Preview Cards */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <RecentDocumentsCard documents={documents} isLoading={documentsLoading} />
+        <MyTasksCard tasks={tasks} isLoading={tasksLoading} userId={user?.id} />
       </div>
 
       {/* Two-column layout: Activity + Quick Actions */}
@@ -185,6 +216,24 @@ export default function DashboardPage() {
                 <Link href="/dashboard/audit-logs">
                   <ClockCounterClockwiseIcon className="size-3.5" />
                   Audit Logs
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
+                <Link href="/dashboard/documents">
+                  <FileTextIcon className="size-3.5" />
+                  Documents
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
+                <Link href="/dashboard/tasks">
+                  <ListChecksIcon className="size-3.5" />
+                  Tasks
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
+                <Link href="/dashboard/integrations">
+                  <PlugIcon className="size-3.5" />
+                  Integrations
                 </Link>
               </Button>
             </div>

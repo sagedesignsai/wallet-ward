@@ -11,6 +11,9 @@ import {
   GearIcon,
   SignOutIcon,
   ShieldCheckIcon,
+  FileTextIcon,
+  ListChecksIcon,
+  PlugIcon,
 } from "@phosphor-icons/react"
 
 import { useAuth } from "@/hooks/use-auth"
@@ -42,13 +45,16 @@ const NAV_GROUPS = [
     items: [
       { label: "Projects", href: "/dashboard/projects", icon: FolderIcon },
       { label: "Secrets", href: "/dashboard/secrets", icon: KeyIcon },
-      { label: "Audit Logs", href: "/dashboard/audit-logs", icon: ClockCounterClockwiseIcon },
+      { label: "Documents", href: "/dashboard/documents", icon: FileTextIcon },
+      { label: "Tasks", href: "/dashboard/tasks", icon: ListChecksIcon },
+      { label: "Integrations", href: "/dashboard/integrations", icon: PlugIcon },
     ],
   },
   {
     label: "Team",
     items: [
       { label: "Organizations", href: "/dashboard/organizations", icon: UsersIcon },
+      { label: "Audit Logs", href: "/dashboard/audit-logs", icon: ClockCounterClockwiseIcon },
     ],
   },
 ]
