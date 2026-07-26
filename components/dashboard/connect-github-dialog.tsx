@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { GitBranchIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -23,13 +23,23 @@ export function ConnectGitHubDialog({
   open,
   onOpenChange,
   projects,
+  defaultProjectId,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   projects: { id: string; name: string; slug: string }[]
+  defaultProjectId?: string
 }) {
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    defaultProjectId ?? null
+  )
   const [connecting, setConnecting] = useState(false)
+
+  useEffect(() => {
+    if (open && defaultProjectId) {
+      setSelectedProjectId(defaultProjectId)
+    }
+  }, [open, defaultProjectId])
 
   const handleConnectGitHub = useCallback(async () => {
     if (!selectedProjectId) return

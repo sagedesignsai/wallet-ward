@@ -1,0 +1,5 @@
+export { ApprovalCard } from "./approval-card"
+export { ProposalModal } from "./proposal-modal"
+export { ProposalDetail } from "./proposal-detail"
+export { RiskBadge } from "./risk-badge"
+export type { ActionProposalDto } from "./approval-card"

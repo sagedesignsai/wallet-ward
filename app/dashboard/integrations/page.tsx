@@ -18,7 +18,7 @@ import {
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
-import { ConnectGitHubDialog } from "@/components/dashboard/connect-github-dialog"
+import { ConnectIntegrationDialog } from "@/components/dashboard/connect-integration-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,8 +32,17 @@ import {
 
 function providerIcon(provider: string) {
   switch (provider) {
-    case "github": return GitBranchIcon
-    default: return PlugIcon
+    case "github": 
+    case "gitlab": 
+      return GitBranchIcon
+    case "slack": 
+      return PlugIcon
+    case "gmail": 
+      return PlugIcon
+    case "linear": 
+      return PlugIcon
+    default: 
+      return PlugIcon
   }
 }
 
@@ -41,8 +50,13 @@ function providerLabel(provider: string): string {
   const labels: Record<string, string> = {
     github: "GitHub",
     gitlab: "GitLab",
+    gmail: "Gmail",
     slack: "Slack",
+    linear: "Linear",
     jira: "Jira",
+    notion: "Notion",
+    airtable: "Airtable",
+    trello: "Trello",
   }
   return labels[provider] ?? provider
 }
@@ -54,7 +68,8 @@ export default function GlobalIntegrationsPage() {
     activeFilterCount, projects, providers,
     setFilter, clearFilters, refetch,
   } = useGlobalIntegrations()
-  const [connectOpen, setConnectOpen] = useState(false)
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false)
+  const [selectedProvider, setSelectedProvider] = useState<"github" | "gmail" | "slack" | "gitlab" | "linear" | "jira" | "notion" | "airtable" | "trello">("github")
 
   useEffect(() => {
     setConfig({
@@ -110,7 +125,7 @@ export default function GlobalIntegrationsPage() {
           const intg = row as unknown as GlobalIntegration
           return (
             <Link
-              href={`/dashboard/projects/${intg.projectId}`}
+              href={`/dashboard/projects/${intg.projectId}/integrations`}
               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
@@ -189,8 +204,20 @@ export default function GlobalIntegrationsPage() {
           {activeFilterCount > 0 && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>Clear filters</Button>
           )}
-          <div className="ml-auto">
-            <Button size="sm" onClick={() => setConnectOpen(true)}>
+          <div className="ml-auto flex gap-2 flex-wrap">
+            <Button size="sm" variant="outline" onClick={() => { setSelectedProvider("jira"); setConnectDialogOpen(true); }}>
+              Connect Jira
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => { setSelectedProvider("notion"); setConnectDialogOpen(true); }}>
+              Connect Notion
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => { setSelectedProvider("airtable"); setConnectDialogOpen(true); }}>
+              Connect Airtable
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => { setSelectedProvider("trello"); setConnectDialogOpen(true); }}>
+              Connect Trello
+            </Button>
+            <Button size="sm" onClick={() => { setSelectedProvider("github"); setConnectDialogOpen(true); }}>
               <GitBranchIcon /> Connect GitHub
             </Button>
           </div>
@@ -208,9 +235,23 @@ export default function GlobalIntegrationsPage() {
                   Connect your first integration to a project to get started.
                 </p>
               </div>
-              <Button onClick={() => setConnectOpen(true)}>
-                <GitBranchIcon /> Connect GitHub
-              </Button>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <Button onClick={() => { setSelectedProvider("jira"); setConnectDialogOpen(true); }}>
+                  Jira
+                </Button>
+                <Button variant="outline" onClick={() => { setSelectedProvider("notion"); setConnectDialogOpen(true); }}>
+                  Notion
+                </Button>
+                <Button variant="outline" onClick={() => { setSelectedProvider("airtable"); setConnectDialogOpen(true); }}>
+                  Airtable
+                </Button>
+                <Button variant="outline" onClick={() => { setSelectedProvider("trello"); setConnectDialogOpen(true); }}>
+                  Trello
+                </Button>
+                <Button variant="outline" onClick={() => { setSelectedProvider("github"); setConnectDialogOpen(true); }}>
+                  <GitBranchIcon /> GitHub
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
@@ -231,7 +272,12 @@ export default function GlobalIntegrationsPage() {
         )}
       </div>
 
-      <ConnectGitHubDialog open={connectOpen} onOpenChange={setConnectOpen} projects={projects} />
+      <ConnectIntegrationDialog 
+        open={connectDialogOpen} 
+        onOpenChange={setConnectDialogOpen} 
+        projects={projects}
+        provider={selectedProvider}
+      />
     </div>
   )
 }

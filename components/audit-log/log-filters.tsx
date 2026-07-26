@@ -14,7 +14,13 @@ import { Input } from "@/components/ui/input"
 // Types
 // ---------------------------------------------------------------------------
 
-export type ActionCategory = "all" | "projects" | "environments" | "secrets" | "organization"
+export type ActionCategory =
+  | "all"
+  | "projects"
+  | "environments"
+  | "secrets"
+  | "proposals"
+  | "organization"
 export type ActorFilter = "all" | "user" | "api_key"
 
 type LogFiltersProps = {
@@ -37,6 +43,7 @@ const CATEGORIES: { value: ActionCategory; label: string }[] = [
   { value: "projects", label: "Projects" },
   { value: "environments", label: "Environments" },
   { value: "secrets", label: "Secrets" },
+  { value: "proposals", label: "Proposals" },
   { value: "organization", label: "Organization" },
 ]
 

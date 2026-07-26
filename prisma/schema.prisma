@@ -30,6 +30,8 @@ model User {
   twofactors  TwoFactor[]
   createdDocuments Document[] @relation("DocumentAuthor")
   assignedTasks    Task[]     @relation("TaskAssignee")
+  proposalsCreated ActionProposal[] @relation("ProposalCreatedBy")
+  proposalsApproved ActionProposal[] @relation("ProposalApprovedBy")
 
   @@map("user")
 }
@@ -220,6 +222,7 @@ model Project {
   tasks        Task[]
   integrations Integration[]
   agentSessions AgentSession[]
+  proposals    ActionProposal[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -338,18 +341,21 @@ model Task {
 }
 
 model Integration {
-  id                   String   @id @default(cuid())
-  projectId            String   @map("project_id")
-  provider             String
-  name                 String
-  accessTokenEncrypted String?  @map("access_token_encrypted")
-  refreshTokenEncrypted String? @map("refresh_token_encrypted")
-  metadata             Json?
-  enabled              Boolean  @default(true)
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  id                    String    @id @default(cuid())
+  projectId             String    @map("project_id")
+  provider              String
+  name                  String
+  accessTokenEncrypted  String?   @map("access_token_encrypted")
+  refreshTokenEncrypted String?   @map("refresh_token_encrypted")
+  tokenExpiresAt        DateTime? @map("token_expires_at")
+  lastRefreshedAt       DateTime? @map("last_refreshed_at")
+  scopes                String[]  @default([])
+  metadata              Json?
+  enabled               Boolean   @default(true)
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
 
-  project              Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project               Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([projectId, provider])
@@ -387,11 +393,61 @@ model AgentSession {
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  proposals    ActionProposal[]
 
   @@index([projectId])
   @@index([projectId, status])
   @@map("agent_session")
+}
+
+enum ProposalStatus {
+  awaiting_approval
+  approved
+  rejected
+  executed
+  failed
+}
+
+enum ProposalRiskLevel {
+  low
+  medium
+  high
+  critical
+}
+
+model ActionProposal {
+  id             String          @id @default(cuid())
+  projectId      String          @map("project_id")
+  agentSessionId String?         @map("agent_session_id")
+  createdById    String?         @map("created_by_id")
+
+  title          String
+  description    String
+  riskLevel      ProposalRiskLevel @default(medium)
+  actionType     String
+  targetSystem   String
+
+  status         ProposalStatus  @default(awaiting_approval)
+  payload        Json            @default("{}")
+
+  approvedById   String?         @map("approved_by_id")
+  approvalNotes  String?         @map("approval_notes")
+  rejectionNotes String?         @map("rejection_notes")
+
+  executedAt     DateTime?       @map("executed_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  agentSession   AgentSession?   @relation(fields: [agentSessionId], references: [id], onDelete: SetNull)
+  createdBy      User?           @relation("ProposalCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  approvedBy     User?           @relation("ProposalApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("action_proposal")
 }
 
 enum AuditAction {
@@ -418,6 +474,10 @@ enum AuditAction {
   integration_create
   integration_delete
   agent_proxy_call
+  proposal_create
+  proposal_approve
+  proposal_reject
+  proposal_execute
 }
 
 model AuditLog {

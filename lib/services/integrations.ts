@@ -11,13 +11,48 @@ import type { AuthContext } from "@/lib/api/auth"
 
 export const createIntegrationSchema = z.object({
   name: z.string().min(1).max(100),
-  provider: z.enum(["github"]),
+  provider: z.enum(["github", "gmail", "slack", "gitlab", "linear", "jira", "notion", "airtable", "trello"]),
   metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const githubConnectSchema = z.object({
   projectId: z.string().min(1),
 })
+
+export const gmailConnectSchema = z.object({
+  projectId: z.string().min(1),
+})
+
+export const slackConnectSchema = z.object({
+  projectId: z.string().min(1),
+})
+
+export const gitlabConnectSchema = z.object({
+  projectId: z.string().min(1),
+})
+
+export const linearConnectSchema = z.object({
+  projectId: z.string().min(1),
+})
+
+export const jiraConnectSchema = z.object({
+  projectId: z.string().min(1),
+})
+
+export const notionConnectSchema = z.object({
+  projectId: z.string().min(1),
+})
+
+export const airtableConnectSchema = z.object({
+  projectId: z.string().min(1),
+})
+
+export const trelloConnectSchema = z.object({
+  projectId: z.string().min(1),
+})
+
+
+
 
 // ─── DTO helpers ──────────────────────────────────────────────────────────────
 
@@ -134,6 +169,26 @@ export async function deleteIntegration(input: {
   })
 }
 
+export async function updateIntegration(input: {
+  ctx: AuthContext
+  organizationId: string
+  integrationId: string
+  enabled?: boolean
+  name?: string
+}) {
+  const integration = await getIntegration(input.integrationId, input.organizationId)
+
+  const updated = await prisma.integration.update({
+    where: { id: integration.id },
+    data: {
+      ...(input.enabled !== undefined ? { enabled: input.enabled } : {}),
+      ...(input.name !== undefined ? { name: input.name } : {}),
+    },
+  })
+
+  return toIntegrationDto(updated)
+}
+
 // ─── OAuth state helpers ──────────────────────────────────────────────────────
 
 export async function createOAuthState(projectId: string): Promise<string> {
@@ -209,6 +264,242 @@ export async function getDecryptedToken(
 
   const dek = await getOrganizationDek(integration.project.organizationId)
   return decryptString(parseEncryptedPayload(raw), dek)
+}
+
+// ─── Token refresh ────────────────────────────────────────────────────────────
+
+export async function refreshTokenIfNeeded(
+  integrationId: string,
+  organizationId: string
+): Promise<boolean> {
+  const integration = await prisma.integration.findFirst({
+    where: {
+      id: integrationId,
+      project: { organizationId },
+    },
+    include: { project: true },
+  })
+
+  if (!integration) {
+    throw notFound("Integration not found")
+  }
+
+  // Check if token is about to expire (within 5 minutes)
+  if (
+    !integration.tokenExpiresAt ||
+    new Date() < new Date(integration.tokenExpiresAt.getTime() - 5 * 60 * 1000)
+  ) {
+    return false // Token still valid
+  }
+
+  // Check if we have a refresh token
+  if (!integration.refreshTokenEncrypted) {
+    throw badRequest("No refresh token available for this integration")
+  }
+
+  // Decrypt refresh token
+  const refreshToken = await getDecryptedToken(integration, "refresh")
+
+  // Provider-specific refresh logic
+  let newAccessToken: string
+  let newRefreshToken: string | null = null
+  let expiresIn: number | null = null
+
+  switch (integration.provider) {
+    case "github":
+      // GitHub tokens don't expire, but we support the pattern
+      throw badRequest("GitHub tokens do not require refresh")
+
+    case "gmail":
+    case "google": {
+      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: process.env.GOOGLE_CLIENT_ID!,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+          refresh_token: refreshToken,
+          grant_type: "refresh_token",
+        }),
+      })
+
+      if (!tokenRes.ok) {
+        throw badRequest("Failed to refresh Google token")
+      }
+
+      const tokenData = (await tokenRes.json()) as {
+        access_token: string
+        expires_in?: number
+        refresh_token?: string
+      }
+
+      newAccessToken = tokenData.access_token
+      newRefreshToken = tokenData.refresh_token ?? null
+      expiresIn = tokenData.expires_in ?? null
+      break
+    }
+
+    default:
+      throw badRequest(`Token refresh not implemented for provider: ${integration.provider}`)
+  }
+
+  // Store new tokens
+  await storeEncryptedToken(integrationId, newAccessToken, organizationId, "access")
+
+  if (newRefreshToken) {
+    await storeEncryptedToken(integrationId, newRefreshToken, organizationId, "refresh")
+  }
+
+  // Update expiry and refresh timestamp
+  await prisma.integration.update({
+    where: { id: integrationId },
+    data: {
+      tokenExpiresAt: expiresIn
+        ? new Date(Date.now() + expiresIn * 1000)
+        : null,
+      lastRefreshedAt: new Date(),
+    },
+  })
+
+  return true
+}
+
+// ─── Sandbox credential injection ─────────────────────────────────────────────
+
+const SERVICE_BASE_URLS: Record<string, string> = {
+  github: "https://api.github.com",
+  gmail: "https://gmail.googleapis.com",
+  google: "https://www.googleapis.com",
+  slack: "https://slack.com/api",
+  vercel: "https://api.vercel.com",
+}
+
+export async function injectIntegrationCredentials(
+  sandboxId: string,
+  projectId: string,
+  organizationId: string
+): Promise<{ injected: string[]; errors: string[] }> {
+  // Get all enabled integrations for project
+  const integrations = await prisma.integration.findMany({
+    where: {
+      projectId,
+      enabled: true,
+      project: { organizationId },
+    },
+    include: { project: true },
+  })
+
+  if (integrations.length === 0) {
+    return { injected: [], errors: [] }
+  }
+
+  const envVars: Record<string, string> = {}
+  const injected: string[] = []
+  const errors: string[] = []
+
+  // Decrypt tokens and prepare env vars
+  for (const integration of integrations) {
+    try {
+      // Refresh token if needed
+      await refreshTokenIfNeeded(integration.id, organizationId)
+
+      // Get decrypted access token
+      const token = await getDecryptedToken(integration, "access")
+
+      // Set provider-specific env vars
+      const providerUpper = integration.provider.toUpperCase()
+      envVars[`${providerUpper}_TOKEN`] = token
+      envVars[`${providerUpper}_API_URL`] = SERVICE_BASE_URLS[integration.provider] || ""
+      
+      // Add scopes if available
+      if (integration.scopes && integration.scopes.length > 0) {
+        envVars[`${providerUpper}_SCOPES`] = integration.scopes.join(",")
+      }
+
+      injected.push(integration.provider)
+    } catch (error) {
+      errors.push(
+        `Failed to inject ${integration.provider}: ${error instanceof Error ? error.message : "Unknown error"}`
+      )
+    }
+  }
+
+  // Inject into Daytona sandbox
+  if (Object.keys(envVars).length > 0) {
+    try {
+      const { getDaytonaClient } = await import("@/lib/daytona")
+      const client = getDaytonaClient()
+      
+      if (!client) {
+        throw new Error("Daytona client not configured")
+      }
+
+      const sandbox = await client.get(sandboxId)
+      
+      // Note: This is a placeholder - actual Daytona SDK method may differ
+      // Check Daytona SDK documentation for the correct method
+      if (typeof (sandbox as any).setEnvironmentVariables === "function") {
+        await (sandbox as any).setEnvironmentVariables(envVars)
+      } else {
+        throw new Error("Daytona SDK does not support environment variable injection")
+      }
+    } catch (error) {
+      errors.push(
+        `Failed to inject credentials into sandbox: ${error instanceof Error ? error.message : "Unknown error"}`
+      )
+      return { injected: [], errors }
+    }
+  }
+
+  // Log credential injection
+  await writeAuditLog({
+    organizationId,
+    action: "agent_proxy_call" as any, // Using existing audit action
+    resourceType: "sandbox",
+    resourceId: sandboxId,
+    metadata: {
+      action: "inject_credentials",
+      providers: injected,
+      projectId,
+    },
+  })
+
+  return { injected, errors }
+}
+
+export async function revokeIntegrationCredentials(
+  sandboxId: string,
+  organizationId: string
+): Promise<void> {
+  const { getDaytonaClient } = await import("@/lib/daytona")
+  
+  const client = getDaytonaClient()
+  if (!client) return
+
+  try {
+    const sandbox = await client.get(sandboxId)
+    
+    // Remove all integration-related env vars
+    const envVarsToRemove = Object.keys(SERVICE_BASE_URLS).flatMap((provider) => {
+      const upper = provider.toUpperCase()
+      return [`${upper}_TOKEN`, `${upper}_API_URL`, `${upper}_SCOPES`]
+    })
+
+    // Note: Placeholder - check Daytona SDK for actual method
+    if (typeof (sandbox as any).unsetEnvironmentVariables === "function") {
+      await (sandbox as any).unsetEnvironmentVariables(envVarsToRemove)
+    }
+
+    await writeAuditLog({
+      organizationId,
+      action: "agent_proxy_call" as any,
+      resourceType: "sandbox",
+      resourceId: sandboxId,
+      metadata: { action: "revoke_credentials" },
+    })
+  } catch (error) {
+    console.error("Failed to revoke sandbox credentials:", error)
+  }
 }
 
 // ─── GitHub API service ───────────────────────────────────────────────────────

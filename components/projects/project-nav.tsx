@@ -1,6 +1,5 @@
 "use client"
 
-import { usePathname } from "next/navigation"
 import {
   HouseIcon,
   StackSimpleIcon,
@@ -8,26 +7,45 @@ import {
   FileTextIcon,
   ListChecksIcon,
   ClockCounterClockwiseIcon,
+  RobotIcon,
+  CheckCircleIcon,
+  PlugIcon,
 } from "@phosphor-icons/react"
 
-import { SegmentedControl } from "@/components/ui/segmented-control"
+import { SectionNav } from "@/components/dashboard/section-nav"
 
 type ProjectNavProps = {
   projectId: string
 }
 
-const tabs = [
+const ITEMS = [
   {
     id: "overview",
     label: "Overview",
-    href: "", // base route
+    href: "",
     icon: HouseIcon,
+    primary: true,
   },
   {
     id: "environments",
     label: "Environments",
     href: "/environments",
     icon: StackSimpleIcon,
+    primary: true,
+  },
+  {
+    id: "tasks",
+    label: "Tasks",
+    href: "/tasks",
+    icon: ListChecksIcon,
+    primary: true,
+  },
+  {
+    id: "agents",
+    label: "Agents",
+    href: "/agents",
+    icon: RobotIcon,
+    primary: true,
   },
   {
     id: "documents",
@@ -36,10 +54,16 @@ const tabs = [
     icon: FileTextIcon,
   },
   {
-    id: "tasks",
-    label: "Tasks",
-    href: "/tasks",
-    icon: ListChecksIcon,
+    id: "proposals",
+    label: "Proposals",
+    href: "/proposals",
+    icon: CheckCircleIcon,
+  },
+  {
+    id: "integrations",
+    label: "Integrations",
+    href: "/integrations",
+    icon: PlugIcon,
   },
   {
     id: "activity",
@@ -56,26 +80,10 @@ const tabs = [
 ]
 
 export function ProjectNav({ projectId }: ProjectNavProps) {
-  const pathname = usePathname()
-  const base = `/dashboard/projects/${projectId}`
-
-  // Determine which tab is active based on the current route.
-  const activeId =
-    tabs.find((tab) => {
-      if (tab.href === "") return pathname === base
-      return pathname.startsWith(`${base}${tab.href}`)
-    })?.id ?? "overview"
-
-  // Resolve hrefs relative to the project base.
-  const resolvedTabs = tabs.map((tab) => ({
-    ...tab,
-    href: `${base}${tab.href}`,
-  }))
-
   return (
-    <SegmentedControl
-      tabs={resolvedTabs}
-      value={activeId}
+    <SectionNav
+      base={`/dashboard/projects/${projectId}`}
+      items={ITEMS}
     />
   )
 }

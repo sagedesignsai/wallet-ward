@@ -9,9 +9,6 @@ import {
   LightningIcon,
   ShieldCheckIcon,
   ClockCounterClockwiseIcon,
-  CheckCircleIcon,
-  WarningCircleIcon,
-  SpinnerGapIcon,
   ArrowRightIcon,
   LockSimpleIcon,
   ChatTeardropTextIcon,
@@ -23,43 +20,13 @@ import { useProjects } from "@/hooks/use-projects"
 import { useGlobalSecrets } from "@/hooks/use-global-secrets"
 import { useGlobalIntegrations } from "@/hooks/use-global-integrations"
 import { useAuditLogs } from "@/hooks/use-audit-logs"
+import { useAgentSessions } from "@/hooks/use-agent-sessions"
 import { TimeAgo } from "@/components/dashboard/time-ago"
+import { PendingApprovalsWidget } from "@/components/dashboard/pending-approvals-widget"
+import { AgentSessionRow } from "@/components/agents/agent-session-row"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
 import { useWorkspacePanel } from "@/context/workspace-panel"
-
-const MOCK_AGENT_ACTIVITY = [
-  {
-    agent: "Coding Agent",
-    action: "Scaffolded Next.js landing page, pushed to main branch",
-    status: "completed",
-    time: "2h ago",
-    color: "text-blue-400",
-  },
-  {
-    agent: "Ops Agent",
-    action: "Sent weekly deployment summary to #engineering",
-    status: "completed",
-    time: "5h ago",
-    color: "text-amber-400",
-  },
-  {
-    agent: "Content Agent",
-    action: "Q3 newsletter draft ready — awaiting approval",
-    status: "awaiting_approval",
-    time: "1d ago",
-    color: "text-violet-400",
-  },
-]
-
-function AgentStatusIcon({ status }: { status: string }) {
-  if (status === "completed") return <CheckCircleIcon className="size-3.5 text-emerald-400 shrink-0" />
-  if (status === "running") return <SpinnerGapIcon className="size-3.5 text-blue-400 shrink-0 animate-spin" />
-  if (status === "awaiting_approval") return <WarningCircleIcon className="size-3.5 text-amber-400 shrink-0" />
-  return null
-}
 
 export default function DashboardPage() {
   const { setConfig } = useDashboardConfig()
@@ -68,6 +35,10 @@ export default function DashboardPage() {
   const { secrets, isLoading: secretsLoading } = useGlobalSecrets()
   const { logs, isLoading: logsLoading } = useAuditLogs()
   const { integrations, isLoading: integrationsLoading } = useGlobalIntegrations()
+  const { sessions, isLoading: sessionsLoading } = useAgentSessions({
+    limit: 5,
+    polling: true,
+  })
   const { openChat } = useWorkspacePanel()
 
   const user = sessionData?.user
@@ -85,7 +56,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-
       {/* Welcome Banner */}
       <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-gradient-to-br from-primary/8 via-background to-background p-5 md:p-6">
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
@@ -101,7 +71,10 @@ export default function DashboardPage() {
               Your autonomous engine is online. What should we tackle today?
             </p>
           </div>
-          <Button className="gap-2 font-semibold shrink-0 shadow-lg shadow-primary/20" onClick={openChat}>
+          <Button
+            className="gap-2 font-semibold shrink-0 shadow-lg shadow-primary/20"
+            onClick={openChat}
+          >
             <LightningIcon className="size-4" />
             Launch Agent
           </Button>
@@ -122,7 +95,9 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">Launch Agent</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Delegate a task to an AI agent</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Delegate a task to an AI agent
+            </p>
           </div>
         </button>
 
@@ -157,16 +132,17 @@ export default function DashboardPage() {
           <div>
             <p className="text-sm font-semibold text-foreground">Connect Tool</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {integrationsLoading ? "Loading…" : `${connectedCount} tool${connectedCount !== 1 ? "s" : ""} connected`}
+              {integrationsLoading
+                ? "Loading…"
+                : `${connectedCount} tool${connectedCount !== 1 ? "s" : ""} connected`}
             </p>
           </div>
         </Link>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <PendingApprovalsWidget />
 
-        {/* Agent Activity + System Logs */}
+      <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2 border-border/40">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -180,34 +156,31 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-1">
-            {MOCK_AGENT_ACTIVITY.map((run, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-muted/30 transition-colors"
-              >
-                <AgentStatusIcon status={run.status} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className={cn("text-[10px] font-bold uppercase tracking-wide", run.color)}>
-                      {run.agent}
-                    </span>
-                    {run.status === "awaiting_approval" && (
-                      <Badge variant="outline" className="text-[9px] h-4 px-1 bg-amber-500/10 text-amber-400 border-amber-500/20">
-                        Needs Review
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground truncate">{run.action}</p>
-                </div>
-                <span className="text-[10px] text-muted-foreground shrink-0">{run.time}</span>
+            {sessionsLoading ? (
+              <div className="space-y-2 px-3">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-10 animate-pulse rounded-lg bg-muted/40" />
+                ))}
               </div>
-            ))}
+            ) : sessions.length === 0 ? (
+              <p className="text-xs text-muted-foreground px-3 py-4 italic">
+                No agent sessions yet. Launch an agent to get started.
+              </p>
+            ) : (
+              <div className="divide-y divide-border/30 -mx-1">
+                {sessions.map((session) => (
+                  <AgentSessionRow key={session.id} session={session} />
+                ))}
+              </div>
+            )}
 
             <div className="pt-2 border-t border-border/30 mt-1">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold px-3 pb-2">System Activity</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold px-3 pb-2">
+                System Activity
+              </p>
               {logsLoading ? (
                 <div className="space-y-2 px-3">
-                  {[0,1].map((i) => (
+                  {[0, 1].map((i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="size-3.5 animate-pulse rounded-full bg-muted" />
                       <div className="h-3 w-48 animate-pulse rounded bg-muted" />
@@ -215,7 +188,9 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : recentLogs.length === 0 ? (
-                <p className="text-xs text-muted-foreground px-3 italic">No recent activity.</p>
+                <p className="text-xs text-muted-foreground px-3 italic">
+                  No recent activity.
+                </p>
               ) : (
                 recentLogs.map((log) => {
                   const meta = log.metadata ?? {}
@@ -223,16 +198,25 @@ export default function DashboardPage() {
                     (meta.name as string) ??
                     (meta.projectName as string) ??
                     (meta.secretName as string) ??
+                    (meta.title as string) ??
                     log.resourceType
                   return (
-                    <div key={log.id} className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/30 transition-colors">
+                    <div
+                      key={log.id}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/30 transition-colors"
+                    >
                       <ClockCounterClockwiseIcon className="size-3.5 text-muted-foreground shrink-0" />
                       <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate">
                         <span>{log.action.replace(/_/g, " ")}</span>
                         {" · "}
-                        <span className="text-foreground font-medium">{resourceName}</span>
+                        <span className="text-foreground font-medium">
+                          {resourceName}
+                        </span>
                       </p>
-                      <TimeAgo date={log.createdAt} className="shrink-0 text-[10px]" />
+                      <TimeAgo
+                        date={log.createdAt}
+                        className="shrink-0 text-[10px]"
+                      />
                     </div>
                   )
                 })
@@ -241,7 +225,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Vault Health */}
         <Card className="border-border/40">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
@@ -255,19 +238,32 @@ export default function DashboardPage() {
                 <LockSimpleIcon className="size-4 text-emerald-400" weight="duotone" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-emerald-400">Zero-Leak Active</p>
-                <p className="text-[10px] text-muted-foreground">Agent proxy secured</p>
+                <p className="text-xs font-semibold text-emerald-400">
+                  Zero-Leak Active
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  Agent proxy secured
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               {[
                 { value: secretsLoading ? "—" : secrets.length, label: "Secrets" },
-                { value: projectsLoading ? "—" : projects.length, label: "Projects" },
-                { value: integrationsLoading ? "—" : connectedCount, label: "Tools" },
+                {
+                  value: projectsLoading ? "—" : projects.length,
+                  label: "Projects",
+                },
+                {
+                  value: integrationsLoading ? "—" : connectedCount,
+                  label: "Tools",
+                },
                 { value: "AES-256", label: "Encryption" },
               ].map((s) => (
-                <div key={s.label} className="rounded-lg border border-border/30 bg-muted/20 p-2.5 text-center">
+                <div
+                  key={s.label}
+                  className="rounded-lg border border-border/30 bg-muted/20 p-2.5 text-center"
+                >
                   <p className="text-lg font-black text-foreground">{s.value}</p>
                   <p className="text-[10px] text-muted-foreground">{s.label}</p>
                 </div>
@@ -275,19 +271,34 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <Button variant="ghost" size="sm" asChild className="justify-start gap-2 h-8 text-xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="justify-start gap-2 h-8 text-xs"
+              >
                 <Link href="/dashboard/secrets">
                   <KeyIcon className="size-3.5 text-cyan-400" />
                   Manage Secrets
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="justify-start gap-2 h-8 text-xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="justify-start gap-2 h-8 text-xs"
+              >
                 <Link href="/dashboard/audit-logs">
                   <ClockCounterClockwiseIcon className="size-3.5 text-muted-foreground" />
                   Audit Logs
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" className="justify-start gap-2 h-8 text-xs" onClick={openChat}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="justify-start gap-2 h-8 text-xs"
+                onClick={openChat}
+              >
                 <ChatTeardropTextIcon className="size-3.5 text-primary" />
                 Ask AI Assistant
               </Button>

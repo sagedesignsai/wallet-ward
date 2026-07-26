@@ -12,11 +12,9 @@ import {
   LockSimpleIcon,
   CloudIcon,
   ArrowRightIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  SpinnerGapIcon,
-  WarningCircleIcon,
   PlusIcon,
+  WarningCircleIcon,
+  SpinnerGapIcon,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -24,14 +22,17 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useWorkspacePanel } from "@/context/workspace-panel"
-
-// ─── Agent persona definitions ─────────────────────────────────────────────────
+import { usePendingApprovals } from "@/hooks/use-pending-approvals"
+import { useAgentSessions } from "@/hooks/use-agent-sessions"
+import { useSandboxes } from "@/hooks/use-sandboxes"
+import { AgentSessionRow, AgentStatusBadge } from "@/components/agents/agent-session-row"
 
 const AGENT_PERSONAS = [
   {
-    type: "coding",
+    type: "coding" as const,
     name: "Coding Agent",
-    description: "Builds, tests, and deploys applications inside isolated Daytona sandboxes. Pushes to GitHub, previews live.",
+    description:
+      "Builds, tests, and deploys applications inside isolated Daytona sandboxes. Pushes to GitHub, previews live.",
     icon: CodeIcon,
     color: "text-blue-400",
     bg: "bg-blue-500/10",
@@ -41,9 +42,10 @@ const AGENT_PERSONAS = [
     capabilities: ["Next.js / React", "Daytona Sandbox", "GitHub Push", "Live Preview"],
   },
   {
-    type: "content",
+    type: "content" as const,
     name: "Content Agent",
-    description: "Drafts blogs, newsletters, social posts, and documentation using your brand context. Publishes to CMS.",
+    description:
+      "Drafts blogs, newsletters, social posts, and documentation using your brand context. Publishes to CMS.",
     icon: PencilSimpleIcon,
     color: "text-violet-400",
     bg: "bg-violet-500/10",
@@ -53,9 +55,10 @@ const AGENT_PERSONAS = [
     capabilities: ["Blog Posts", "Newsletters", "Social Copy", "CMS Publish"],
   },
   {
-    type: "ops",
+    type: "ops" as const,
     name: "Ops Agent",
-    description: "Manages tasks, monitors deployments, sends team updates to Slack, and executes operational workflows autonomously.",
+    description:
+      "Manages tasks, monitors deployments, sends team updates to Slack, and executes operational workflows autonomously.",
     icon: GearIcon,
     color: "text-amber-400",
     bg: "bg-amber-500/10",
@@ -65,9 +68,10 @@ const AGENT_PERSONAS = [
     capabilities: ["Task Management", "Slack Alerts", "Deployment Watch", "Runbooks"],
   },
   {
-    type: "research",
+    type: "research" as const,
     name: "Research Agent",
-    description: "Summarizes documents, gathers competitive intelligence, synthesizes reports, and prepares briefings on demand.",
+    description:
+      "Summarizes documents, gathers competitive intelligence, synthesizes reports, and prepares briefings on demand.",
     icon: MagnifyingGlassIcon,
     color: "text-emerald-400",
     bg: "bg-emerald-500/10",
@@ -77,101 +81,6 @@ const AGENT_PERSONAS = [
     capabilities: ["Web Research", "Doc Summaries", "Competitor Intel", "Reports"],
   },
 ]
-
-// ─── Mock recent agent runs ────────────────────────────────────────────────────
-// TODO: Replace with real audit log data from /api/v1/audit-logs when available
-
-const RECENT_RUNS = [
-  {
-    agent: "Coding Agent",
-    action: "Scaffolded new Next.js landing page, pushed to GitHub",
-    status: "completed",
-    time: "2 hours ago",
-    color: "text-blue-400",
-  },
-  {
-    agent: "Ops Agent",
-    action: "Sent weekly deployment summary to #engineering Slack channel",
-    status: "completed",
-    time: "5 hours ago",
-    color: "text-amber-400",
-  },
-  {
-    agent: "Content Agent",
-    action: "Drafting Q3 product newsletter — awaiting your approval",
-    status: "awaiting_approval",
-    time: "1 day ago",
-    color: "text-violet-400",
-  },
-  {
-    agent: "Research Agent",
-    action: "Compiled competitive analysis report for 5 competitors",
-    status: "completed",
-    time: "2 days ago",
-    color: "text-emerald-400",
-  },
-]
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const AGENT_COLOR_MAP: Record<string, string> = {
-  coding: "text-blue-400",
-  content: "text-violet-400",
-  ops: "text-amber-400",
-  research: "text-emerald-400",
-}
-
-function timeAgo(dateStr: string): string {
-  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
-  if (seconds < 60) return "just now"
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
-}
-
-// ─── Sandbox types ─────────────────────────────────────────────────────────────
-
-interface SandboxInfo {
-  id: string
-  name: string
-  state: string
-  cpu: number
-  memory: number
-  disk: number
-  createdAt: string
-  previewUrl?: string
-}
-
-// ─── Status helpers ────────────────────────────────────────────────────────────
-
-function StatusIcon({ status }: { status: string }) {
-  if (status === "completed")
-    return <CheckCircleIcon className="size-4 text-emerald-400 shrink-0" />
-  if (status === "running")
-    return <SpinnerGapIcon className="size-4 text-blue-400 shrink-0 animate-spin" />
-  if (status === "awaiting_approval")
-    return <WarningCircleIcon className="size-4 text-amber-400 shrink-0" />
-  return <ClockIcon className="size-4 text-muted-foreground shrink-0" />
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; cls: string }> = {
-    completed: { label: "Completed", cls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-    running: { label: "Running", cls: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-    awaiting_approval: { label: "Awaiting Approval", cls: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-    failed: { label: "Failed", cls: "bg-red-500/10 text-red-400 border-red-500/20" },
-    idle: { label: "Idle", cls: "bg-muted text-muted-foreground border-border/40" },
-  }
-  const s = map[status] ?? map.idle
-  return (
-    <Badge variant="outline" className={cn("text-[10px] font-semibold h-5 px-1.5", s.cls)}>
-      {s.label}
-    </Badge>
-  )
-}
 
 function SandboxStateBadge({ state }: { state: string }) {
   const map: Record<string, { label: string; cls: string }> = {
@@ -192,23 +101,25 @@ function SandboxStateBadge({ state }: { state: string }) {
   )
 }
 
-// ─── Page ──────────────────────────────────────────────────────────────────────
-
 export default function AgentsPage() {
   const { setConfig } = useDashboardConfig()
   const { launchAgent } = useWorkspacePanel()
+  const { proposals: pendingProposals, count: pendingCount } = usePendingApprovals()
+  const { sessions, isLoading: sessionsLoading } = useAgentSessions({
+    limit: 8,
+    polling: true,
+  })
+  const {
+    sandboxes,
+    isLoading: sandboxLoading,
+    error: sandboxError,
+    daytonaConfigured,
+    creating: creatingSandbox,
+    activeCount: activeSandboxCount,
+    createSandbox,
+    sandboxAction,
+  } = useSandboxes()
 
-  // Agent sessions state
-  const [agentSessions, setAgentSessions] = useState<Array<{
-    agent: string; action: string; status: string; time: string; color: string
-  }>>([])
-
-  // Sandbox state
-  const [sandboxes, setSandboxes] = useState<SandboxInfo[]>([])
-  const [sandboxLoading, setSandboxLoading] = useState(true)
-  const [sandboxError, setSandboxError] = useState<string | null>(null)
-  const [daytonaConfigured, setDaytonaConfigured] = useState<boolean | null>(null)
-  const [creatingSandbox, setCreatingSandbox] = useState(false)
   const [newSandboxName, setNewSandboxName] = useState("")
   const [showCreateForm, setShowCreateForm] = useState(false)
 
@@ -220,113 +131,17 @@ export default function AgentsPage() {
     })
   }, [setConfig])
 
-  // Fetch real agent sessions on mount
-  useEffect(() => {
-    fetch("/api/agents/sessions?limit=4")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.data?.length) {
-          setAgentSessions(
-            data.data.map((s: any) => ({
-              agent: (s.type || "coding") + " agent",
-              action: s.currentTask || s.name,
-              status: s.status,
-              time: timeAgo(s.createdAt),
-              color: AGENT_COLOR_MAP[s.type] || "text-muted-foreground",
-            }))
-          )
-        }
-      })
-      .catch(() => {})
-  }, [])
-
-  // Fetch sandboxes on mount
-  const fetchSandboxes = useCallback(async () => {
-    try {
-      setSandboxLoading(true)
-      setSandboxError(null)
-      const res = await fetch("/api/agents/sandboxes")
-      const data = await res.json()
-
-      if (res.status === 503 && data.error?.code === "not_configured") {
-        setDaytonaConfigured(false)
-        setSandboxes([])
-        return
-      }
-
-      if (!res.ok) {
-        setSandboxError(data.error?.message ?? "Failed to load sandboxes")
-        return
-      }
-
-      setDaytonaConfigured(true)
-      setSandboxes(data.data ?? [])
-    } catch (err) {
-      setSandboxError(err instanceof Error ? err.message : "Failed to load sandboxes")
-    } finally {
-      setSandboxLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchSandboxes()
-  }, [fetchSandboxes])
-
-  // Create sandbox
   const handleCreateSandbox = useCallback(async () => {
-    if (!newSandboxName.trim()) return
-    setCreatingSandbox(true)
-    try {
-      const res = await fetch("/api/agents/sandboxes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newSandboxName.trim(), language: "javascript" }),
-      })
-      if (res.ok) {
-        setNewSandboxName("")
-        setShowCreateForm(false)
-        await fetchSandboxes()
-      } else {
-        const data = await res.json()
-        setSandboxError(data.error?.message ?? "Failed to create sandbox")
-      }
-    } catch (err) {
-      setSandboxError(err instanceof Error ? err.message : "Failed to create sandbox")
-    } finally {
-      setCreatingSandbox(false)
+    const ok = await createSandbox(newSandboxName)
+    if (ok) {
+      setNewSandboxName("")
+      setShowCreateForm(false)
     }
-  }, [newSandboxName, fetchSandboxes])
-
-  // Sandbox actions (stop / start / delete)
-  const handleSandboxAction = useCallback(
-    async (sandboxId: string, action: "stop" | "start" | "delete") => {
-      try {
-        const res = await fetch(`/api/agents/sandboxes/${sandboxId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action }),
-        })
-        if (res.ok) {
-          await fetchSandboxes()
-        } else {
-          const data = await res.json()
-          setSandboxError(data.error?.message ?? `Failed to ${action} sandbox`)
-        }
-      } catch (err) {
-        setSandboxError(err instanceof Error ? err.message : `Failed to ${action} sandbox`)
-      }
-    },
-    [fetchSandboxes],
-  )
-
-  const activeSandboxCount = sandboxes.filter(
-    (s) => s.state === "STARTED" || s.state === "STARTING",
-  ).length
+  }, [newSandboxName, createSandbox])
 
   return (
     <div className="flex flex-col gap-8">
-
-      {/* ── Hero Banner ────────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-gradient-to-br from-primary/10 via-background to-violet-500/5 p-6 md:p-8">
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div className="absolute -top-16 -left-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
@@ -350,17 +165,27 @@ export default function AgentsPage() {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground max-w-lg">
-                Your autonomous workforce. Each agent securely accesses credentials from your Vault and augments your existing tools — without replacing them.
+                Your autonomous workforce. Each agent securely accesses credentials from your Vault
+                and augments your existing tools — without replacing them.
               </p>
             </div>
           </div>
 
           <div className="flex gap-2 shrink-0">
-            <Button size="sm" variant="outline" className="gap-2 font-semibold" onClick={() => launchAgent("coding")}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 font-semibold"
+              onClick={() => launchAgent("coding")}
+            >
               <LightningIcon className="size-3.5" />
               Quick Prompt
             </Button>
-            <Button size="sm" className="gap-2 font-semibold" onClick={() => launchAgent("coding")}>
+            <Button
+              size="sm"
+              className="gap-2 font-semibold"
+              onClick={() => launchAgent("coding")}
+            >
               <PlusIcon className="size-3.5" />
               Launch Agent
             </Button>
@@ -371,17 +196,46 @@ export default function AgentsPage() {
           <LockSimpleIcon className="size-3.5 text-primary/60 shrink-0" />
           <span>
             Agents access credentials via{" "}
-            <span className="text-foreground font-medium">server-side vault proxy</span>
-            {" "}— raw keys are never exposed to the browser or agent runtime.
+            <span className="text-foreground font-medium">server-side vault proxy</span> — raw keys
+            are never exposed to the browser or agent runtime.
           </span>
         </div>
       </div>
 
-      {/* ── Agent Persona Cards ────────────────────────────────────────────────── */}
+      {/* Pending Approvals Alert */}
+      {pendingCount > 0 && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/5 px-4 py-3">
+          <WarningCircleIcon className="size-4 text-amber-400 shrink-0 mt-0.5" weight="fill" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-400">
+              {pendingCount} agent action{pendingCount !== 1 ? "s" : ""} awaiting your approval
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+              {pendingProposals
+                .slice(0, 2)
+                .map((p) => p.title)
+                .join(" · ")}
+              {pendingCount > 2 && ` · +${pendingCount - 2} more`}
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            asChild
+            className="shrink-0 h-7 text-xs border-amber-500/25 text-amber-400 hover:bg-amber-500/10"
+          >
+            <Link href="/dashboard/proposals?status=awaiting_approval">Review</Link>
+          </Button>
+        </div>
+      )}
+
+      {/* Persona Cards */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-foreground">Available Agents</h2>
-          <Badge variant="outline" className="text-[10px] text-muted-foreground">4 agents ready</Badge>
+          <Badge variant="outline" className="text-[10px] text-muted-foreground">
+            4 agents ready
+          </Badge>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -393,47 +247,53 @@ export default function AgentsPage() {
                 "bg-card/50 backdrop-blur-sm hover:bg-card/80",
                 agent.border,
                 "hover:shadow-xl",
-                agent.glow,
+                agent.glow
               )}
             >
-              {/* Accent top bar */}
-              <div className={cn("absolute top-0 left-0 right-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left", agent.accentBar)} />
-
-              {/* Corner glow */}
-              <div className="absolute top-0 right-0 w-24 h-24 overflow-hidden rounded-2xl pointer-events-none">
-                <div className={cn("absolute top-3 right-3 w-12 h-12 rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-500 blur-xl", agent.bg)} />
-              </div>
-
-              {/* Icon */}
-              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-300 relative z-10", agent.bg, agent.border, agent.color)}>
+              <div
+                className={cn(
+                  "absolute top-0 left-0 right-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left",
+                  agent.accentBar
+                )}
+              />
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-300 relative z-10",
+                  agent.bg,
+                  agent.border,
+                  agent.color
+                )}
+              >
                 <agent.icon className="size-5" weight="duotone" />
               </div>
-
-              {/* Name & Description */}
               <div className="space-y-1.5 relative z-10">
                 <h3 className="font-bold text-sm text-foreground">{agent.name}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">{agent.description}</p>
               </div>
-
-              {/* Capabilities */}
               <div className="flex flex-wrap gap-1.5 relative z-10">
                 {agent.capabilities.map((cap) => (
                   <span
                     key={cap}
-                    className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border", agent.bg, agent.border, agent.color)}
+                    className={cn(
+                      "text-[10px] font-medium px-2 py-0.5 rounded-full border",
+                      agent.bg,
+                      agent.border,
+                      agent.color
+                    )}
                   >
                     {cap}
                   </span>
                 ))}
               </div>
-
-              {/* Status + Launch */}
               <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/30 relative z-10">
-                <StatusBadge status="idle" />
+                <AgentStatusBadge status="idle" />
                 <Button
                   size="sm"
                   variant="ghost"
-                  className={cn("h-7 text-xs font-semibold gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity", agent.color)}
+                  className={cn(
+                    "h-7 text-xs font-semibold gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity",
+                    agent.color
+                  )}
                   onClick={() => launchAgent(agent.type)}
                 >
                   Launch
@@ -445,14 +305,9 @@ export default function AgentsPage() {
         </div>
       </div>
 
-      {/* ── Daytona + Activity ─────────────────────────────────────────────────── */}
+      {/* Daytona + Activity */}
       <div className="grid gap-4 lg:grid-cols-2">
-
-        {/* Daytona Sandbox Card */}
         <Card className="border-border/40 relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none" aria-hidden>
-            <div className="absolute -top-8 -right-8 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl" />
-          </div>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -461,25 +316,26 @@ export default function AgentsPage() {
                 </div>
                 <CardTitle className="text-sm">Daytona Sandboxes</CardTitle>
               </div>
-
-              {/* Connection status */}
               {daytonaConfigured === null || sandboxLoading ? (
-                <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground border-border/40">
+                <Badge
+                  variant="outline"
+                  className="text-[10px] bg-muted text-muted-foreground border-border/40"
+                >
                   <SpinnerGapIcon className="size-3 animate-spin mr-1" />
                   Checking
                 </Badge>
               ) : daytonaConfigured ? (
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                    <span className="relative flex h-1.5 w-1.5 mr-1">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
-                    </span>
-                    Connected
-                  </Badge>
-                </div>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                >
+                  Connected
+                </Badge>
               ) : (
-                <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-400 border-amber-500/20">
+                <Badge
+                  variant="outline"
+                  className="text-[10px] bg-amber-500/10 text-amber-400 border-amber-500/20"
+                >
                   Not Configured
                 </Badge>
               )}
@@ -487,10 +343,9 @@ export default function AgentsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Isolated cloud execution environments for your Coding Agent. Each sandbox runs your code safely, streams live terminal output, and exposes a live web preview — all inside Flowspace.
+              Isolated cloud execution environments for your Coding Agent.
             </p>
 
-            {/* Not-configured notice */}
             {daytonaConfigured === false && (
               <div className="flex items-center gap-2 rounded-lg border border-amber-500/15 bg-amber-500/5 px-3 py-2">
                 <WarningCircleIcon className="size-3.5 text-amber-400 shrink-0" />
@@ -500,7 +355,6 @@ export default function AgentsPage() {
               </div>
             )}
 
-            {/* Error notice */}
             {sandboxError && (
               <div className="flex items-center gap-2 rounded-lg border border-red-500/15 bg-red-500/5 px-3 py-2">
                 <WarningCircleIcon className="size-3.5 text-red-400 shrink-0" />
@@ -508,16 +362,16 @@ export default function AgentsPage() {
               </div>
             )}
 
-            {/* Sandbox stats when configured */}
             {daytonaConfigured && !sandboxLoading && (
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { label: "Active Sandboxes", desc: `${activeSandboxCount} running` },
                   { label: "Total Sandboxes", desc: `${sandboxes.length} provisioned` },
-                  { label: "Live Preview", desc: "Web server in-app iframe" },
-                  { label: "Auto Teardown", desc: "No lingering resources" },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-lg border border-border/30 bg-muted/20 p-2.5">
+                  <div
+                    key={item.label}
+                    className="rounded-lg border border-border/30 bg-muted/20 p-2.5"
+                  >
                     <p className="text-xs font-semibold text-foreground">{item.label}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</p>
                   </div>
@@ -525,36 +379,6 @@ export default function AgentsPage() {
               </div>
             )}
 
-            {/* Feature grid when not configured */}
-            {!daytonaConfigured && !sandboxLoading && (
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { label: "Isolated Execution", desc: "Air-gapped from production" },
-                  { label: "Live Preview", desc: "Web server in-app iframe" },
-                  { label: "Terminal Streaming", desc: "Real-time output" },
-                  { label: "Auto Teardown", desc: "No lingering resources" },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-lg border border-border/30 bg-muted/20 p-2.5">
-                    <p className="text-xs font-semibold text-foreground">{item.label}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Loading skeleton */}
-            {sandboxLoading && (
-              <div className="grid grid-cols-2 gap-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="rounded-lg border border-border/30 bg-muted/20 p-2.5 animate-pulse">
-                    <div className="h-3 bg-muted rounded w-20 mb-1.5" />
-                    <div className="h-2 bg-muted rounded w-16" />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Sandbox list */}
             {daytonaConfigured && sandboxes.length > 0 && (
               <div className="space-y-2">
                 {sandboxes.map((sb) => (
@@ -563,38 +387,24 @@ export default function AgentsPage() {
                     className="flex items-center justify-between gap-3 rounded-lg border border-border/30 bg-muted/10 px-3 py-2"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex size-7 items-center justify-center rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shrink-0">
-                        <CloudIcon className="size-3.5" />
-                      </div>
+                      <CloudIcon className="size-3.5 text-cyan-400 shrink-0" />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-xs font-semibold text-foreground truncate">{sb.name}</p>
+                          <p className="text-xs font-semibold truncate">{sb.name}</p>
                           <SandboxStateBadge state={sb.state} />
                         </div>
                         <p className="text-[10px] text-muted-foreground">
-                          {sb.cpu} CPU &middot; {sb.memory} GB RAM &middot; {sb.disk} GB Disk
+                          {sb.cpu} CPU · {sb.memory} GB RAM
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      {sb.previewUrl && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 text-[10px] font-semibold text-cyan-400 gap-1"
-                          asChild
-                        >
-                          <a href={sb.previewUrl} target="_blank" rel="noopener noreferrer">
-                            Preview
-                          </a>
-                        </Button>
-                      )}
                       {sb.state === "STARTED" && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 text-[10px] font-semibold text-amber-400"
-                          onClick={() => handleSandboxAction(sb.id, "stop")}
+                          className="h-6 text-[10px] text-amber-400"
+                          onClick={() => sandboxAction(sb.id, "stop")}
                         >
                           Stop
                         </Button>
@@ -603,8 +413,8 @@ export default function AgentsPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 text-[10px] font-semibold text-emerald-400"
-                          onClick={() => handleSandboxAction(sb.id, "start")}
+                          className="h-6 text-[10px] text-emerald-400"
+                          onClick={() => sandboxAction(sb.id, "start")}
                         >
                           Start
                         </Button>
@@ -612,8 +422,8 @@ export default function AgentsPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-6 text-[10px] font-semibold text-red-400"
-                        onClick={() => handleSandboxAction(sb.id, "delete")}
+                        className="h-6 text-[10px] text-red-400"
+                        onClick={() => sandboxAction(sb.id, "delete")}
                       >
                         Delete
                       </Button>
@@ -623,16 +433,6 @@ export default function AgentsPage() {
               </div>
             )}
 
-            {/* Empty state when configured but no sandboxes */}
-            {daytonaConfigured && !sandboxLoading && sandboxes.length === 0 && (
-              <div className="flex items-center justify-center rounded-lg border border-dashed border-border/30 bg-muted/10 px-3 py-6">
-                <p className="text-xs text-muted-foreground text-center">
-                  No sandboxes yet. Create one to get started.
-                </p>
-              </div>
-            )}
-
-            {/* Create sandbox button / form */}
             {daytonaConfigured && (
               <div>
                 {showCreateForm ? (
@@ -646,39 +446,27 @@ export default function AgentsPage() {
                         if (e.key === "Escape") setShowCreateForm(false)
                       }}
                       placeholder="Sandbox name..."
-                      className="flex-1 h-8 rounded-md border border-border/40 bg-muted/20 px-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      className="flex-1 h-8 rounded-md border border-border/40 bg-muted/20 px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
                       autoFocus
                     />
                     <Button
                       size="sm"
-                      className="h-8 text-xs font-semibold gap-1"
+                      className="h-8 text-xs"
                       onClick={handleCreateSandbox}
                       disabled={!newSandboxName.trim() || creatingSandbox}
                     >
                       {creatingSandbox ? (
                         <SpinnerGapIcon className="size-3 animate-spin" />
                       ) : (
-                        <PlusIcon className="size-3" />
+                        "Create"
                       )}
-                      Create
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 text-xs"
-                      onClick={() => {
-                        setShowCreateForm(false)
-                        setNewSandboxName("")
-                      }}
-                    >
-                      Cancel
                     </Button>
                   </div>
                 ) : (
                   <Button
                     size="sm"
                     variant="outline"
-                    className="w-full gap-2 font-semibold text-xs"
+                    className="w-full gap-2 text-xs"
                     onClick={() => setShowCreateForm(true)}
                   >
                     <PlusIcon className="size-3.5" />
@@ -690,36 +478,40 @@ export default function AgentsPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Agent Activity */}
         <Card className="border-border/40">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">Recent Agent Activity</CardTitle>
-              <Badge variant="outline" className="text-[10px] text-muted-foreground">Last 7 days</Badge>
+              <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                Live
+              </Badge>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col divide-y divide-border/30">
-              {(agentSessions.length > 0 ? agentSessions : RECENT_RUNS).map((run, i) => (
-                <div key={i} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-                  <StatusIcon status={run.status} />
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={cn("text-[10px] font-bold uppercase tracking-wide", run.color)}>
-                        {run.agent}
-                      </span>
-                      <StatusBadge status={run.status} />
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-snug">{run.action}</p>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0 pt-0.5">{run.time}</span>
-                </div>
-              ))}
-            </div>
+            {sessionsLoading ? (
+              <div className="space-y-3">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-12 animate-pulse rounded-lg bg-muted/40" />
+                ))}
+              </div>
+            ) : sessions.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic py-6 text-center">
+                No agent sessions yet. Launch an agent to get started.
+              </p>
+            ) : (
+              <div className="flex flex-col divide-y divide-border/30 -mx-1">
+                {sessions.map((session) => (
+                  <AgentSessionRow key={session.id} session={session} />
+                ))}
+              </div>
+            )}
             <div className="mt-4 pt-3 border-t border-border/30">
               <p className="text-[11px] text-muted-foreground text-center">
                 Full agent audit trail in{" "}
-                <Link href="/dashboard/audit-logs" className="text-primary hover:underline font-medium">
+                <Link
+                  href="/dashboard/audit-logs"
+                  className="text-primary hover:underline font-medium"
+                >
                   Audit Logs
                 </Link>
               </p>
@@ -727,7 +519,6 @@ export default function AgentsPage() {
           </CardContent>
         </Card>
       </div>
-
     </div>
   )
 }

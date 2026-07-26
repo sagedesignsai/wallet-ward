@@ -1,6 +1,8 @@
 "use client"
 
 import React, { useEffect, useState, useCallback, use } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   FileTextIcon,
   PlusIcon,
@@ -44,9 +46,10 @@ export default function DocumentsPage({
 }
 
 function DocumentsInner({ projectId }: { projectId: string }) {
+  const router = useRouter()
   const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
-  const { documents, isLoading, error, refetch, createDocument } =
+  const { documents, isLoading, error, createDocument } =
     useDocuments(projectId)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [title, setTitle] = useState("")
@@ -74,7 +77,7 @@ function DocumentsInner({ projectId }: { projectId: string }) {
         ],
       })
     }
-  }, [project, documents.length, setConfig])
+  }, [project, documents.length, setConfig, projectId])
 
   const handleCreate = useCallback(async () => {
     if (!title.trim()) return
@@ -87,9 +90,10 @@ function DocumentsInner({ projectId }: { projectId: string }) {
       setDialogOpen(false)
       setTitle("")
       setContent("")
+      router.push(`/dashboard/projects/${projectId}/documents/${result.id}`)
     }
     setSubmitting(false)
-  }, [title, content, createDocument])
+  }, [title, content, createDocument, router, projectId])
 
   if (isLoading) {
     return (
@@ -193,7 +197,14 @@ function DocumentCard({ doc }: { doc: Document }) {
           <div className="flex size-6 shrink-0 items-center justify-center rounded bg-muted/50 text-muted-foreground">
             <FileTextIcon className="size-3" />
           </div>
-          <CardTitle className="flex-1 truncate text-sm">{doc.title}</CardTitle>
+          <CardTitle className="flex-1 truncate text-sm">
+            <Link
+              href={`/dashboard/projects/${doc.projectId}/documents/${doc.id}`}
+              className="hover:text-primary transition-colors"
+            >
+              {doc.title}
+            </Link>
+          </CardTitle>
           <OpenInComputer
             tab={{
               type: "document",
@@ -210,17 +221,20 @@ function DocumentCard({ doc }: { doc: Document }) {
         </div>
       </CardHeader>
       <CardContent className="pt-2">
-        <p className="line-clamp-3 text-xs text-muted-foreground leading-relaxed">
-          {excerpt}
-        </p>
-        <div className="mt-2 flex items-center gap-3 text-[0.625rem] text-muted-foreground">
-          <span>
-            Updated <TimeAgo date={doc.updatedAt} />
-          </span>
-          {doc.createdBy && (
-            <span>by {doc.createdBy.name}</span>
-          )}
-        </div>
+        <Link
+          href={`/dashboard/projects/${doc.projectId}/documents/${doc.id}`}
+          className="block"
+        >
+          <p className="line-clamp-3 text-xs text-muted-foreground leading-relaxed">
+            {excerpt}
+          </p>
+          <div className="mt-2 flex items-center gap-3 text-[0.625rem] text-muted-foreground">
+            <span>
+              Updated <TimeAgo date={doc.updatedAt} />
+            </span>
+            {doc.createdBy && <span>by {doc.createdBy.name}</span>}
+          </div>
+        </Link>
       </CardContent>
     </Card>
   )

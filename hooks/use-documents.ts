@@ -47,6 +47,28 @@ export function useDocuments(projectId: string) {
     fetchDocuments()
   }, [fetchDocuments])
 
+  const getDocument = useCallback(
+    async (documentId: string): Promise<Document | null> => {
+      try {
+        const res = await fetch(
+          `/api/v1/projects/${encodeURIComponent(projectId)}/documents/${encodeURIComponent(documentId)}`,
+          { credentials: "include" }
+        )
+        if (!res.ok) {
+          throw new Error(`Failed to load document (${res.status})`)
+        }
+        const body: DocumentResponse = await res.json()
+        return body.data
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load document."
+        )
+        return null
+      }
+    },
+    [projectId]
+  )
+
   const createDocument = useCallback(
     async (input: {
       title: string
@@ -81,5 +103,178 @@ export function useDocuments(projectId: string) {
     [projectId]
   )
 
-  return { documents, isLoading, error, refetch, createDocument }
+  const updateDocument = useCallback(
+    async (
+      documentId: string,
+      input: { title?: string; content?: string | null }
+    ): Promise<Document | null> => {
+      try {
+        const res = await fetch(
+          `/api/v1/projects/${encodeURIComponent(projectId)}/documents/${encodeURIComponent(documentId)}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(input),
+          }
+        )
+        if (!res.ok) {
+          const body = await res.json().catch(() => null)
+          throw new Error(
+            body?.error?.message ?? `Failed to update document (${res.status})`
+          )
+        }
+        const body: DocumentResponse = await res.json()
+        setDocuments((prev) =>
+          prev.map((d) => (d.id === documentId ? body.data : d))
+        )
+        return body.data
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update document."
+        )
+        return null
+      }
+    },
+    [projectId]
+  )
+
+  const deleteDocument = useCallback(
+    async (documentId: string): Promise<boolean> => {
+      try {
+        const res = await fetch(
+          `/api/v1/projects/${encodeURIComponent(projectId)}/documents/${encodeURIComponent(documentId)}`,
+          { method: "DELETE", credentials: "include" }
+        )
+        if (!res.ok) {
+          const body = await res.json().catch(() => null)
+          throw new Error(
+            body?.error?.message ?? `Failed to delete document (${res.status})`
+          )
+        }
+        setDocuments((prev) => prev.filter((d) => d.id !== documentId))
+        return true
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to delete document."
+        )
+        return false
+      }
+    },
+    [projectId]
+  )
+
+  return {
+    documents,
+    isLoading,
+    error,
+    refetch,
+    getDocument,
+    createDocument,
+    updateDocument,
+    deleteDocument,
+  }
+}
+
+/** Fetch a single document without requiring the full list hook. */
+export function useDocument(projectId: string, documentId: string | undefined) {
+  const [document, setDocument] = useState<Document | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const fetchDocument = useCallback(async () => {
+    if (!documentId) {
+      setIsLoading(false)
+      return
+    }
+    setIsLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/v1/projects/${encodeURIComponent(projectId)}/documents/${encodeURIComponent(documentId)}`,
+        { credentials: "include" }
+      )
+      if (!res.ok) throw new Error(`Failed to load document (${res.status})`)
+      const body: DocumentResponse = await res.json()
+      setDocument(body.data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load document.")
+      setDocument(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [projectId, documentId])
+
+  useEffect(() => {
+    fetchDocument()
+  }, [fetchDocument])
+
+  const save = useCallback(
+    async (input: { title?: string; content?: string | null }) => {
+      if (!documentId) return null
+      setIsSaving(true)
+      try {
+        const res = await fetch(
+          `/api/v1/projects/${encodeURIComponent(projectId)}/documents/${encodeURIComponent(documentId)}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(input),
+          }
+        )
+        if (!res.ok) {
+          const body = await res.json().catch(() => null)
+          throw new Error(
+            body?.error?.message ?? `Failed to update document (${res.status})`
+          )
+        }
+        const body: DocumentResponse = await res.json()
+        setDocument(body.data)
+        return body.data
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update document."
+        )
+        return null
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [projectId, documentId]
+  )
+
+  const remove = useCallback(async () => {
+    if (!documentId) return false
+    try {
+      const res = await fetch(
+        `/api/v1/projects/${encodeURIComponent(projectId)}/documents/${encodeURIComponent(documentId)}`,
+        { method: "DELETE", credentials: "include" }
+      )
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        throw new Error(
+          body?.error?.message ?? `Failed to delete document (${res.status})`
+        )
+      }
+      setDocument(null)
+      return true
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete document."
+      )
+      return false
+    }
+  }, [projectId, documentId])
+
+  return {
+    document,
+    isLoading,
+    isSaving,
+    error,
+    refetch: fetchDocument,
+    save,
+    remove,
+  }
 }

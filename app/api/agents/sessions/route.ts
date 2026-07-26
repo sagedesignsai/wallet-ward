@@ -1,8 +1,10 @@
 import { handleRouteError, json } from "@/lib/api/http"
 import { requireAuth } from "@/lib/api/auth"
-import { prisma } from "@/lib/db"
+import { prisma as db } from "@/lib/db"
 import { z } from "zod"
 import { notFound, forbidden } from "@/lib/api/errors"
+
+const prisma = db
 
 // ---------------------------------------------------------------------------
 // GET /api/agents/sessions — List agent sessions

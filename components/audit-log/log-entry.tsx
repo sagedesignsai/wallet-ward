@@ -103,6 +103,7 @@ function getResourceName(log: AuditLog): string {
   // Try common metadata keys for the resource name
   return (
     (meta.name as string) ??
+    (meta.title as string) ??
     (meta.projectName as string) ??
     (meta.environmentName as string) ??
     (meta.secretName as string) ??
@@ -156,8 +157,34 @@ function describeAction(log: AuditLog): { verb: string; resource: string; detail
       return { verb: "Imported secret", resource: name }
     case "secret_version_create":
       return { verb: "Versioned secret", resource: name }
+    case "proposal_create":
+      return { verb: "Proposed action", resource: name }
+    case "proposal_approve":
+      return { verb: "Approved proposal", resource: name }
+    case "proposal_reject":
+      return { verb: "Rejected proposal", resource: name }
+    case "proposal_execute":
+      return { verb: "Executed proposal", resource: name }
+    case "agent_proxy_call":
+      return { verb: "Agent proxy call", resource: name }
+    case "integration_create":
+      return { verb: "Connected integration", resource: name }
+    case "integration_delete":
+      return { verb: "Removed integration", resource: name }
+    case "document_create":
+      return { verb: "Created document", resource: name }
+    case "document_update":
+      return { verb: "Updated document", resource: name }
+    case "document_delete":
+      return { verb: "Deleted document", resource: name }
+    case "task_create":
+      return { verb: "Created task", resource: name }
+    case "task_update":
+      return { verb: "Updated task", resource: name }
+    case "task_delete":
+      return { verb: "Deleted task", resource: name }
     default:
-      return { verb: log.action, resource: name }
+      return { verb: String(log.action).replace(/_/g, " "), resource: name }
   }
 }
 

@@ -7,10 +7,18 @@ import {
   ClockCounterClockwiseIcon,
   FolderOpenIcon,
   StackSimpleIcon,
+  RobotIcon,
+  CheckCircleIcon,
+  PlugIcon,
+  ListChecksIcon,
+  FileTextIcon,
 } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
+import { useAgentSessions } from "@/hooks/use-agent-sessions"
+import { useProposals } from "@/hooks/use-proposals"
+import { useProjectIntegrations } from "@/hooks/use-project-integrations"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -45,6 +53,13 @@ export default function ProjectOverviewPage({
 function ProjectOverviewInner({ projectId }: { projectId: string }) {
   const { setConfig } = useDashboardConfig()
   const { project, isLoading, error } = useProject(projectId)
+  const { sessions } = useAgentSessions({ projectId, limit: 50 })
+  const { proposals } = useProposals({
+    projectId,
+    status: "awaiting_approval" as any,
+    orgWide: false,
+  })
+  const { integrations } = useProjectIntegrations(projectId)
 
   useEffect(() => {
     if (project) {
@@ -149,22 +164,76 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
         </Card>
 
         {/* Stats */}
-        <div className="grid gap-3 grid-cols-1">
+        <div className="grid gap-3 grid-cols-2">
           <StatCard
             label="Environments"
             value={environments.length}
-            icon={
-              <div className="relative">
-                <StackSimpleIcon className="size-4" />
-              </div>
-            }
+            icon={<StackSimpleIcon className="size-4" />}
             description={
               environments.length === 1
-                ? "1 environment configured"
-                : `${environments.length} environments configured`
+                ? "1 environment"
+                : `${environments.length} environments`
+            }
+          />
+          <StatCard
+            label="Agents"
+            value={sessions.length}
+            icon={<RobotIcon className="size-4" />}
+            description={
+              proposals.length > 0
+                ? `${proposals.length} pending approval`
+                : "Sessions in this project"
             }
           />
         </div>
+      </div>
+
+      {/* Quick links */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        {[
+          {
+            href: `/dashboard/projects/${projectId}/agents`,
+            label: "Agents",
+            icon: RobotIcon,
+            meta: `${sessions.length}`,
+          },
+          {
+            href: `/dashboard/projects/${projectId}/proposals`,
+            label: "Proposals",
+            icon: CheckCircleIcon,
+            meta: proposals.length > 0 ? `${proposals.length} pending` : "All",
+          },
+          {
+            href: `/dashboard/projects/${projectId}/integrations`,
+            label: "Integrations",
+            icon: PlugIcon,
+            meta: `${integrations.length}`,
+          },
+          {
+            href: `/dashboard/projects/${projectId}/tasks`,
+            label: "Tasks",
+            icon: ListChecksIcon,
+            meta: "Open",
+          },
+          {
+            href: `/dashboard/projects/${projectId}/documents`,
+            label: "Documents",
+            icon: FileTextIcon,
+            meta: "Open",
+          },
+        ].map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="group flex flex-col gap-2 rounded-xl border border-border/40 bg-card/50 p-3 hover:bg-card hover:border-border/60 transition-colors"
+          >
+            <item.icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            <div>
+              <p className="text-xs font-semibold text-foreground">{item.label}</p>
+              <p className="text-[10px] text-muted-foreground">{item.meta}</p>
+            </div>
+          </Link>
+        ))}
       </div>
 
       {/* Environments Section */}

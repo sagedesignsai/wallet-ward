@@ -6,10 +6,13 @@ import { z } from "zod";
  * 
  * Retrieves secrets from a project environment.
  * Returns secret names and types, but NOT values (for security).
+ * 
+ * RESTRICTED: Only coding and ops agents can access secrets.
+ * Content and research agents cannot use this tool.
  */
 export const getSecretsTool = tool({
   description:
-    "Retrieve secrets from a project environment. Returns secret names and types, but NOT values (for security).",
+    "Retrieve secrets from a project environment. Returns secret names and types, but NOT values (for security). Restricted to coding and ops agents.",
   inputSchema: z.object({
     projectId: z.string().describe("The project ID"),
     environmentId: z.string().describe("The environment ID (e.g., prod, staging)"),
@@ -20,6 +23,7 @@ export const getSecretsTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    agentType: z.enum(["coding", "ops"]).describe("Only coding and ops agents can access secrets"),
   }),
   execute: async ({ projectId, environmentId, filterByType }, { context }) => {
     try {

@@ -1,6 +1,8 @@
 "use client"
 
 import React, { useEffect, useState, useCallback, useMemo, use } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   ListChecksIcon,
   PlusIcon,
@@ -65,9 +67,10 @@ export default function TasksPage({
 }
 
 function TasksInner({ projectId }: { projectId: string }) {
+  const router = useRouter()
   const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
-  const { tasks, isLoading, error, refetch, createTask, updateTaskStatus } =
+  const { tasks, isLoading, error, createTask, updateTaskStatus } =
     useTasks(projectId)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [title, setTitle] = useState("")
@@ -95,7 +98,7 @@ function TasksInner({ projectId }: { projectId: string }) {
         ],
       })
     }
-  }, [project, tasks.length, setConfig])
+  }, [project, tasks.length, setConfig, projectId])
 
   const grouped = useMemo(() => {
     const groups: Record<Task["status"], Task[]> = {
@@ -120,9 +123,10 @@ function TasksInner({ projectId }: { projectId: string }) {
       setDialogOpen(false)
       setTitle("")
       setDescription("")
+      router.push(`/dashboard/projects/${projectId}/tasks/${result.id}`)
     }
     setSubmitting(false)
-  }, [title, description, createTask])
+  }, [title, description, createTask, router, projectId])
 
   if (isLoading) {
     return (
@@ -265,10 +269,17 @@ function TaskCard({
   onStatusChange: (taskId: string, status: Task["status"]) => Promise<unknown>
 }) {
   return (
-    <Card className="gap-0 py-3">
+    <Card className="gap-0 py-3 hover:border-border/60 transition-colors">
       <CardHeader className="px-3 pb-1.5">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-sm">{task.title}</CardTitle>
+          <CardTitle className="text-sm">
+            <Link
+              href={`/dashboard/projects/${task.projectId}/tasks/${task.id}`}
+              className="hover:text-primary transition-colors"
+            >
+              {task.title}
+            </Link>
+          </CardTitle>
           <OpenInComputer
             tab={{
               type: "task",

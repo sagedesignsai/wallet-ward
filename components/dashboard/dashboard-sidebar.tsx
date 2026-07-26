@@ -15,13 +15,12 @@ import {
   ListChecksIcon,
   PlugIcon,
   RobotIcon,
-  VaultIcon,
-  LinkSimpleIcon,
+  CheckCircleIcon,
 } from "@phosphor-icons/react"
 
 import { useAuth } from "@/hooks/use-auth"
+import { usePendingApprovals } from "@/hooks/use-pending-approvals"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   Sidebar,
@@ -34,55 +33,60 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar"
-
-const NAV_GROUPS = [
-  {
-    label: "Overview",
-    items: [
-      { label: "Dashboard", href: "/dashboard", icon: HouseIcon },
-    ],
-  },
-  {
-    label: "⚡ Autonomous",
-    items: [
-      { label: "Agent Hub", href: "/dashboard/agents", icon: RobotIcon, badge: "New" },
-      { label: "Tasks", href: "/dashboard/tasks", icon: ListChecksIcon },
-    ],
-  },
-  {
-    label: "🔒 Secure Vault",
-    items: [
-      { label: "Projects", href: "/dashboard/projects", icon: FolderIcon },
-      { label: "Secrets & Keys", href: "/dashboard/secrets", icon: KeyIcon },
-      { label: "Documents", href: "/dashboard/documents", icon: FileTextIcon },
-      { label: "Audit Logs", href: "/dashboard/audit-logs", icon: ClockCounterClockwiseIcon },
-    ],
-  },
-  {
-    label: "🔌 Augmentation",
-    items: [
-      { label: "Integrations", href: "/dashboard/integrations", icon: PlugIcon },
-      { label: "Organizations", href: "/dashboard/organizations", icon: UsersIcon },
-    ],
-  },
-]
 
 export function DashboardSidebar() {
   const pathname = usePathname()
   const { signOut } = useAuth()
   const router = useRouter()
+  const { count: pendingCount } = usePendingApprovals()
 
   const handleSignOut = async () => {
     await signOut({
       fetchOptions: {
-        onSuccess: () => {
-          router.push("/")
-        },
+        onSuccess: () => router.push("/"),
       },
     })
   }
+
+  const NAV_GROUPS = [
+    {
+      label: "Overview",
+      items: [
+        { label: "Dashboard", href: "/dashboard", icon: HouseIcon },
+      ],
+    },
+    {
+      label: "⚡ Autonomous",
+      items: [
+        { label: "Agent Hub", href: "/dashboard/agents", icon: RobotIcon, badge: "New", badgeVariant: "primary" as const },
+        {
+          label: "Proposals",
+          href: "/dashboard/proposals",
+          icon: CheckCircleIcon,
+          badge: pendingCount > 0 ? String(pendingCount) : null,
+          badgeVariant: "urgent" as const,
+        },
+        { label: "Tasks", href: "/dashboard/tasks", icon: ListChecksIcon },
+      ],
+    },
+    {
+      label: "🔒 Secure Vault",
+      items: [
+        { label: "Projects", href: "/dashboard/projects", icon: FolderIcon },
+        { label: "Secrets & Keys", href: "/dashboard/secrets", icon: KeyIcon },
+        { label: "Documents", href: "/dashboard/documents", icon: FileTextIcon },
+        { label: "Audit Logs", href: "/dashboard/audit-logs", icon: ClockCounterClockwiseIcon },
+      ],
+    },
+    {
+      label: "🔌 Augmentation",
+      items: [
+        { label: "Integrations", href: "/dashboard/integrations", icon: PlugIcon },
+        { label: "Organizations", href: "/dashboard/organizations", icon: UsersIcon },
+      ],
+    },
+  ]
 
   return (
     <Sidebar side="left" collapsible="icon" variant="floating">
@@ -121,19 +125,20 @@ export function DashboardSidebar() {
                       : pathname.startsWith(item.href)
 
                   return (
-                  <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        tooltip={item.label}
-                      >
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
                         <Link href={item.href} className="flex items-center gap-2 w-full">
                           <item.icon className="size-4 shrink-0" />
                           <span className="flex-1 truncate">{item.label}</span>
                           {"badge" in item && item.badge && (
                             <Badge
-                              className="ml-auto h-4 px-1.5 text-[9px] font-bold bg-primary/15 text-primary border-primary/20 shrink-0"
                               variant="outline"
+                              className={cn(
+                                "ml-auto h-4 px-1.5 text-[9px] font-bold shrink-0",
+                                item.badgeVariant === "urgent"
+                                  ? "bg-amber-500/15 text-amber-400 border-amber-500/25 animate-pulse"
+                                  : "bg-primary/15 text-primary border-primary/20"
+                              )}
                             >
                               {item.badge}
                             </Badge>

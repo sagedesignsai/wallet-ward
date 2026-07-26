@@ -52,6 +52,13 @@ const CATEGORY_ACTIONS: Record<ActionCategory, AuditAction[]> = {
     "secret_import",
     "secret_version_create",
   ],
+  proposals: [
+    "proposal_create",
+    "proposal_approve",
+    "proposal_reject",
+    "proposal_execute",
+    "agent_proxy_call",
+  ],
   organization: ["organization_create"],
 }
 

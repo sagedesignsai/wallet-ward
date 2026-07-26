@@ -27,6 +27,13 @@ export type AuditAction =
   | "task_create"
   | "task_update"
   | "task_delete"
+  | "integration_create"
+  | "integration_delete"
+  | "agent_proxy_call"
+  | "proposal_create"
+  | "proposal_approve"
+  | "proposal_reject"
+  | "proposal_execute"
 
 export type AuditLog = {
   id: string

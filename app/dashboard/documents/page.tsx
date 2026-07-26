@@ -68,9 +68,12 @@ export default function GlobalDocumentsPage() {
                   <FileTextIcon className="size-3" />
                 </div>
                 <div className="min-w-0">
-                  <span className="font-medium text-foreground truncate block">
+                  <Link
+                    href={`/dashboard/projects/${doc.projectId}/documents/${doc.id}`}
+                    className="font-medium text-foreground truncate block hover:text-primary transition-colors"
+                  >
                     {doc.title}
-                  </span>
+                  </Link>
                   {doc.content && (
                     <span className="text-[0.625rem] text-muted-foreground truncate block">
                       {doc.content.slice(0, 80).replace(/[#*_`~\[\]]/g, "")}

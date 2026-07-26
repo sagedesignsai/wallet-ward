@@ -5,10 +5,11 @@ import { z } from "zod";
  * Create Sandbox Tool
  *
  * Creates a new Daytona sandbox for isolated code execution.
+ * RESTRICTED: Only coding agents can create sandboxes.
  */
 export const createSandboxTool = tool({
   description:
-    "Create a new Daytona sandbox for isolated code execution. Returns the sandbox ID, name, state, and resource allocation.",
+    "Create a new Daytona sandbox for isolated code execution. Returns the sandbox ID, name, state, and resource allocation. Restricted to coding agents.",
   inputSchema: z.object({
     name: z.string().describe("A descriptive name for the sandbox"),
     language: z
@@ -18,6 +19,7 @@ export const createSandboxTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    agentType: z.enum(["coding"]).describe("Only coding agents can create sandboxes"),
   }),
   execute: async ({ name, language }, { context }) => {
     try {

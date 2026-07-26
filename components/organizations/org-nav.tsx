@@ -1,6 +1,5 @@
 "use client"
 
-import { usePathname } from "next/navigation"
 import {
   HouseIcon,
   UsersIcon,
@@ -8,60 +7,48 @@ import {
   GearIcon,
 } from "@phosphor-icons/react"
 
-import { SegmentedControl } from "@/components/ui/segmented-control"
+import { SectionNav } from "@/components/dashboard/section-nav"
 
 type OrgNavProps = {
   orgId: string
 }
 
-const tabs = [
+const ITEMS = [
   {
     id: "overview",
     label: "Overview",
-    href: "", // base route
+    href: "",
     icon: HouseIcon,
+    primary: true,
   },
   {
     id: "members",
     label: "Members",
     href: "/members",
     icon: UsersIcon,
+    primary: true,
   },
   {
     id: "activity",
     label: "Activity",
     href: "/activity",
     icon: ClockCounterClockwiseIcon,
+    primary: true,
   },
   {
     id: "settings",
     label: "Settings",
     href: "/settings",
     icon: GearIcon,
+    primary: true,
   },
 ]
 
 export function OrgNav({ orgId }: OrgNavProps) {
-  const pathname = usePathname()
-  const base = `/dashboard/organizations/${orgId}`
-
-  // Determine which tab is active based on the current route.
-  const activeId =
-    tabs.find((tab) => {
-      if (tab.href === "") return pathname === base
-      return pathname.startsWith(`${base}${tab.href}`)
-    })?.id ?? "overview"
-
-  // Resolve hrefs relative to the org base.
-  const resolvedTabs = tabs.map((tab) => ({
-    ...tab,
-    href: `${base}${tab.href}`,
-  }))
-
   return (
-    <SegmentedControl
-      tabs={resolvedTabs}
-      value={activeId}
+    <SectionNav
+      base={`/dashboard/organizations/${orgId}`}
+      items={ITEMS}
     />
   )
 }

@@ -71,10 +71,16 @@ export async function createSandbox(
 
 export async function listSandboxes(): Promise<SandboxInfo[]> {
   const client = requireClient();
-  const sandboxes = await client.list();
-  return (sandboxes as unknown as Record<string, unknown>[]).map(
-    extractSandboxInfo,
-  );
+  const response = await client.list();
+  
+  // client.list() returns an object with a sandboxes array, not an array directly
+  const sandboxesArray = Array.isArray(response)
+    ? response
+    : Array.isArray((response as any).sandboxes)
+      ? (response as any).sandboxes
+      : [];
+  
+  return sandboxesArray.map((s: any) => extractSandboxInfo(s as unknown as Record<string, unknown>));
 }
 
 export async function getSandbox(id: string): Promise<SandboxInfo> {

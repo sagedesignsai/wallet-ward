@@ -5,10 +5,11 @@ import { z } from "zod";
  * Execute Command Tool
  *
  * Executes a shell command inside a running Daytona sandbox.
+ * RESTRICTED: Only coding agents can execute commands.
  */
 export const executeCommandTool = tool({
   description:
-    "Execute a shell command inside a running Daytona sandbox. Returns stdout, stderr, and exit code.",
+    "Execute a shell command inside a running Daytona sandbox. Returns stdout, stderr, and exit code. Restricted to coding agents.",
   inputSchema: z.object({
     sandboxId: z.string().describe("The ID of the sandbox to execute in"),
     command: z.string().describe("The shell command to execute"),
@@ -23,6 +24,7 @@ export const executeCommandTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    agentType: z.enum(["coding"]).describe("Only coding agents can execute commands"),
   }),
   execute: async ({ sandboxId, command, cwd, timeout }, { context }) => {
     try {

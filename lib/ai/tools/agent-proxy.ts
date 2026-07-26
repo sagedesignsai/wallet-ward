@@ -3,7 +3,14 @@ import { z } from "zod"
 
 const SERVICE_BASE_URLS: Record<string, string> = {
   github: "https://api.github.com",
+  gmail: "https://gmail.googleapis.com",
   slack: "https://slack.com/api",
+  gitlab: "https://gitlab.com/api/v4",
+  linear: "https://api.linear.app",
+  jira: "https://api.atlassian.com",
+  notion: "https://api.notion.com",
+  airtable: "https://api.airtable.com",
+  trello: "https://api.trello.com",
   vercel: "https://api.vercel.com",
 }
 
@@ -94,8 +101,35 @@ export const agentProxyTool = tool({
           headers.Authorization = `Bearer ${token}`
           headers["X-GitHub-Api-Version"] = "2022-11-28"
           break
+        case "gmail":
+          headers.Authorization = `Bearer ${token}`
+          headers["Content-Type"] = "application/json"
+          break
         case "slack":
           headers.Authorization = `Bearer ${token}`
+          break
+        case "gitlab":
+          headers.Authorization = `Bearer ${token}`
+          break
+        case "linear":
+          headers.Authorization = `Bearer ${token}`
+          headers["Content-Type"] = "application/json"
+          break
+        case "jira":
+          headers.Authorization = `Bearer ${token}`
+          headers["Content-Type"] = "application/json"
+          break
+        case "notion":
+          headers.Authorization = `Bearer ${token}`
+          headers["Content-Type"] = "application/json"
+          headers["Notion-Version"] = "2022-06-28"
+          break
+        case "airtable":
+          headers.Authorization = `Bearer ${token}`
+          break
+        case "trello":
+          // Trello uses key + token in query params, handled separately
+          headers.Authorization = `OAuth oauth_consumer_key="${integration.metadata?.apiKey}", oauth_token="${token}"`
           break
         case "vercel":
           headers.Authorization = `Bearer ${token}`

@@ -164,9 +164,16 @@ function TaskColumn({
 
 function TaskCard({ task }: { task: GlobalTask }) {
   return (
-    <Card className="gap-0 py-3">
+    <Card className="gap-0 py-3 hover:border-border/60 transition-colors">
       <CardHeader className="px-3 pb-1.5">
-        <CardTitle className="text-sm">{task.title}</CardTitle>
+        <CardTitle className="text-sm">
+          <Link
+            href={`/dashboard/projects/${task.projectId}/tasks/${task.id}`}
+            className="hover:text-primary transition-colors"
+          >
+            {task.title}
+          </Link>
+        </CardTitle>
       </CardHeader>
       <CardContent className="px-3">
         {task.description && (
