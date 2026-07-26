@@ -151,7 +151,7 @@ export function ApiKeysTable() {
               </EmptyMedia>
               <EmptyTitle>No API keys</EmptyTitle>
               <EmptyDescription>
-                Create an API key to access Nimbus programmatically
+                Create an API key to access Flowspace programmatically
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>

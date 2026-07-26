@@ -69,7 +69,7 @@ export function CtaSection({ className }: CtaSectionProps) {
                 </span>
               </h2>
               <p className="text-muted-foreground text-base max-w-md mx-auto">
-                Join thousands of teams who use Nimbus to bring projects, docs, tasks, and integrations into one place.
+                Join thousands of teams who use Flowspace to bring projects, docs, tasks, and integrations into one place.
                 Free forever. No credit card needed.
               </p>
             </div>

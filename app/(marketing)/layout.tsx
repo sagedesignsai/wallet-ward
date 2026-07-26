@@ -4,16 +4,16 @@ import { MarketingFooter } from "@/components/marketing/footer"
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Nimbus",
-    default: "Nimbus — Zero-Knowledge Secrets Management",
+    template: "%s | Flowspace",
+    default: "Flowspace — Zero-Knowledge Secrets Management",
   },
   description:
     "Encrypt, organize, and share credentials across your team with military-grade AES-256 security and a zero-knowledge architecture.",
   keywords: ["secrets management", "credential vault", "API keys", "encryption", "security", "2FA"],
   openGraph: {
     type: "website",
-    siteName: "Nimbus",
-    title: "Nimbus — Zero-Knowledge Secrets Management",
+    siteName: "Flowspace",
+    title: "Flowspace — Zero-Knowledge Secrets Management",
     description:
       "Military-grade AES-256 encryption. Zero-knowledge architecture. Store and share your secrets with absolute confidence.",
   },

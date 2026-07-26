@@ -48,6 +48,15 @@ import { toast } from "sonner";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 
+// ─── Agent type display config ────────────────────────────────────────────────
+
+const AGENT_TYPE_LABELS: Record<string, { label: string; color: string }> = {
+  coding: { label: "Coding Agent", color: "text-blue-400" },
+  content: { label: "Content Agent", color: "text-violet-400" },
+  ops: { label: "Ops Agent", color: "text-amber-400" },
+  research: { label: "Research Agent", color: "text-emerald-400" },
+};
+
 const SUGGESTIONS = [
   "What's in this project?",
   "Help me write a document",
@@ -165,8 +174,11 @@ export function AIChatPanel({
   projectId?: string;
   environmentId?: string;
 }) {
-  const { activeSession, openTab } = useWorkspacePanel();
+  const { activeSession, openTab, openComputer, state, appendTerminalLines } = useWorkspacePanel();
   const [text, setText] = useState("");
+
+  const agentType = activeSession?.agentType;
+  const agentInfo = agentType ? AGENT_TYPE_LABELS[agentType] : null;
 
   // Use DefaultChatTransport for structured message parts
   const { messages, sendMessage, status, error, regenerate } = useChat({
@@ -176,6 +188,7 @@ export function AIChatPanel({
       body: {
         projectId,
         environmentId,
+        agentType: agentType || undefined,
       },
     }),
     onFinish: ({ message }) => {
@@ -191,6 +204,62 @@ export function AIChatPanel({
                 type: "code",
                 code: codeMatch[2],
                 language: codeMatch[1] ?? "text",
+              },
+            });
+          }
+        }
+
+        // Daytona tool invocation detection
+        if (part.type === "tool-invocation" && part.toolInvocation?.state === "result") {
+          const { toolName, result, args } = part.toolInvocation;
+
+          if (toolName === "createSandbox" && result?.id) {
+            openComputer();
+            openTab({
+              type: "terminal",
+              title: `Sandbox: ${result.name || result.id}`,
+              pinned: true,
+              content: {
+                type: "terminal",
+                lines: [
+                  `\x1b[36m╭─ Daytona Sandbox ─────────────────────────────────────╮\x1b[0m`,
+                  `\x1b[36m│\x1b[0m  Name:   ${result.name || "unnamed"}`,
+                  `\x1b[36m│\x1b[0m  ID:     ${result.id}`,
+                  `\x1b[36m│\x1b[0m  State:  ${result.state}`,
+                  `\x1b[36m│\x1b[0m  CPU:    ${result.cpu}  |  RAM: ${result.memory}GB  |  Disk: ${result.disk}GB`,
+                  `\x1b[36m╰──────────────────────────────────────────────────────╯\x1b[0m`,
+                  "",
+                ],
+                title: `Sandbox: ${result.name || result.id}`,
+              },
+            });
+          }
+
+          if (toolName === "executeCommand" && result) {
+            const terminalTab = state.tabs.findLast(
+              (t) => t.type === "terminal" && t.pinned
+            );
+            if (terminalTab) {
+              const cmd = args?.command || "unknown";
+              const output = result.result || result.output || JSON.stringify(result);
+              const exitCode = result.exitCode ?? 0;
+              const exitColor = exitCode === 0 ? "\x1b[32m" : "\x1b[31m";
+              appendTerminalLines(terminalTab.id, [
+                `\x1b[1m$ ${cmd}\x1b[0m`,
+                output,
+                `${exitColor}exit: ${exitCode}\x1b[0m`,
+                "",
+              ]);
+            }
+          }
+
+          if (toolName === "getSandboxPreview" && result?.url) {
+            openTab({
+              type: "preview",
+              title: `Preview`,
+              content: {
+                type: "preview",
+                url: result.url,
               },
             });
           }
@@ -244,7 +313,14 @@ export function AIChatPanel({
     <div className={cn("flex h-full flex-col overflow-hidden", className)}>
       {/* Session header */}
       <div className="flex items-center justify-between border-b border-border/60 px-3 py-1.5">
-        <SessionSelector />
+        <div className="flex items-center gap-2 min-w-0">
+          <SessionSelector />
+          {agentInfo && (
+            <span className={cn("text-[10px] font-semibold uppercase tracking-wide shrink-0", agentInfo.color)}>
+              {agentInfo.label}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1">
           <div
             className={cn(
@@ -265,7 +341,7 @@ export function AIChatPanel({
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
               <p className="text-xs text-muted-foreground">
-                Start a conversation with Nimbus AI
+                Start a conversation with Flowspace AI
               </p>
             </div>
           ) : (
@@ -309,7 +385,7 @@ export function AIChatPanel({
             <PromptInputTextarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Ask Nimbus AI…"
+              placeholder="Ask Flowspace AI…"
               className="text-sm min-h-[60px]"
             />
           </PromptInputBody>

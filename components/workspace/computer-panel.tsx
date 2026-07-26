@@ -38,7 +38,7 @@ import {
   DownloadIcon,
 } from "@phosphor-icons/react";
 import type { FileNode } from "@/context/workspace-panel";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // ─── Tab icon mapping ──────────────────────────────────────────────────────────
@@ -203,15 +203,43 @@ function PreviewRenderer({ tab }: { tab: ComputerTab }) {
 
 function TerminalRenderer({ tab }: { tab: ComputerTab }) {
   const content = tab.content as { type: "terminal"; lines: string[]; title?: string };
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when lines change
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [content.lines.length]);
+
   return (
-    <div className="h-full bg-zinc-950 text-green-400 font-mono text-xs p-4 overflow-auto">
-      <div className="mb-2 text-zinc-500">— {content.title ?? "Terminal"} —</div>
-      {content.lines.map((line, i) => (
-        <div key={i} className="leading-5">{line}</div>
-      ))}
-      <div className="mt-2 flex items-center gap-1">
-        <span className="text-green-500">$</span>
-        <span className="animate-pulse">▊</span>
+    <div className="h-full flex flex-col">
+      {/* Sandbox header when pinned */}
+      {tab.pinned && (
+        <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/50 px-4 py-2">
+          <div className="flex items-center gap-2">
+            <div className="flex size-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-medium text-zinc-300">Daytona Sandbox</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-zinc-500 font-mono">{content.title}</span>
+          </div>
+        </div>
+      )}
+      {/* Terminal output */}
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-auto bg-zinc-950 p-4 font-mono text-xs leading-5"
+      >
+        {content.lines.map((line, i) => (
+          <div key={i} className="whitespace-pre-wrap break-all">
+            {line}
+          </div>
+        ))}
+        <div className="mt-2 flex items-center gap-1 text-green-500">
+          <span>$</span>
+          <span className="animate-pulse">▊</span>
+        </div>
       </div>
     </div>
   );

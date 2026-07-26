@@ -118,7 +118,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
       <CardContent className="pt-6 space-y-6">
         <AuthCardHeader
           title="Create an Account"
-          description="Start managing your secrets securely with Nimbus"
+          description="Start managing your secrets securely with Flowspace"
           badgeText="Encrypted Storage"
           icon="shield"
         />

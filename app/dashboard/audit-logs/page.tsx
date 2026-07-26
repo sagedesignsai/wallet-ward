@@ -247,7 +247,7 @@ export default function AuditLogsPage() {
               </EmptyTitle>
               <EmptyDescription>
                 {logs.length === 0
-                  ? "Activity will appear here as your team uses Nimbus."
+                  ? "Activity will appear here as your team uses Flowspace."
                   : "Try adjusting your filters or search to find what you're looking for."}
               </EmptyDescription>
             </EmptyHeader>

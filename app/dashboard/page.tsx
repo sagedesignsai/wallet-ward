@@ -3,33 +3,63 @@
 import { useEffect, useMemo } from "react"
 import Link from "next/link"
 import {
-  FolderIcon,
+  RobotIcon,
   KeyIcon,
-  ClockCounterClockwiseIcon,
-  PlusIcon,
-  StackSimpleIcon,
-  FileTextIcon,
-  ListChecksIcon,
   PlugIcon,
-  ClipboardTextIcon as EmptyIcon,
+  LightningIcon,
+  ShieldCheckIcon,
+  ClockCounterClockwiseIcon,
+  CheckCircleIcon,
+  WarningCircleIcon,
+  SpinnerGapIcon,
+  ArrowRightIcon,
+  LockSimpleIcon,
+  ChatTeardropTextIcon,
 } from "@phosphor-icons/react"
 
 import { useSession } from "@/lib/auth-client"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProjects } from "@/hooks/use-projects"
 import { useGlobalSecrets } from "@/hooks/use-global-secrets"
-import { useGlobalDocuments } from "@/hooks/use-global-documents"
-import { useGlobalTasks } from "@/hooks/use-global-tasks"
 import { useGlobalIntegrations } from "@/hooks/use-global-integrations"
 import { useAuditLogs } from "@/hooks/use-audit-logs"
-import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import {
-  RecentDocumentsCard,
-  MyTasksCard,
-} from "@/components/dashboard/dashboard-preview-cards"
+import { cn } from "@/lib/utils"
+import { useWorkspacePanel } from "@/context/workspace-panel"
+
+const MOCK_AGENT_ACTIVITY = [
+  {
+    agent: "Coding Agent",
+    action: "Scaffolded Next.js landing page, pushed to main branch",
+    status: "completed",
+    time: "2h ago",
+    color: "text-blue-400",
+  },
+  {
+    agent: "Ops Agent",
+    action: "Sent weekly deployment summary to #engineering",
+    status: "completed",
+    time: "5h ago",
+    color: "text-amber-400",
+  },
+  {
+    agent: "Content Agent",
+    action: "Q3 newsletter draft ready — awaiting approval",
+    status: "awaiting_approval",
+    time: "1d ago",
+    color: "text-violet-400",
+  },
+]
+
+function AgentStatusIcon({ status }: { status: string }) {
+  if (status === "completed") return <CheckCircleIcon className="size-3.5 text-emerald-400 shrink-0" />
+  if (status === "running") return <SpinnerGapIcon className="size-3.5 text-blue-400 shrink-0 animate-spin" />
+  if (status === "awaiting_approval") return <WarningCircleIcon className="size-3.5 text-amber-400 shrink-0" />
+  return null
+}
 
 export default function DashboardPage() {
   const { setConfig } = useDashboardConfig()
@@ -37,204 +67,229 @@ export default function DashboardPage() {
   const { projects, isLoading: projectsLoading } = useProjects()
   const { secrets, isLoading: secretsLoading } = useGlobalSecrets()
   const { logs, isLoading: logsLoading } = useAuditLogs()
-  const { documents, isLoading: documentsLoading } = useGlobalDocuments()
-  const { tasks, isLoading: tasksLoading } = useGlobalTasks()
   const { integrations, isLoading: integrationsLoading } = useGlobalIntegrations()
+  const { openChat } = useWorkspacePanel()
 
   const user = sessionData?.user
-
-  const recentLogs = useMemo(() => logs.slice(0, 5), [logs])
-  const totalEnvironments = useMemo(
-    () => projects.reduce((sum, p) => sum + p.environments.length, 0),
-    [projects]
-  )
+  const firstName = user?.name?.split(" ")[0] ?? null
+  const recentLogs = useMemo(() => logs.slice(0, 3), [logs])
+  const connectedCount = integrations.filter((i) => i.enabled).length
 
   useEffect(() => {
     setConfig({
       title: "Dashboard",
-      description: "Overview of your workspace",
+      description: "Your autonomous operations command center",
       breadcrumbs: [{ label: "Dashboard" }],
     })
   }, [setConfig])
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Welcome */}
-      <div>
-        <h1 className="text-lg font-semibold text-foreground">
-          Welcome back{user?.name ? `, ${user.name}` : ""}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Here&apos;s an overview of your workspace.
-        </p>
+
+      {/* Welcome Banner */}
+      <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-gradient-to-br from-primary/8 via-background to-background p-5 md:p-6">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute -top-12 -left-12 w-48 h-48 bg-primary/8 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-8 w-32 h-32 bg-violet-500/6 rounded-full blur-2xl" />
+        </div>
+        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+          <div>
+            <h1 className="text-base font-bold text-foreground">
+              Welcome back{firstName ? `, ${firstName}` : ""}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Your autonomous engine is online. What should we tackle today?
+            </p>
+          </div>
+          <Button className="gap-2 font-semibold shrink-0 shadow-lg shadow-primary/20" onClick={openChat}>
+            <LightningIcon className="size-4" />
+            Launch Agent
+          </Button>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          label="Projects"
-          value={projectsLoading ? "—" : projects.length}
-          icon={<FolderIcon className="size-4" />}
-          description={projects.length === 1 ? "1 project" : `${projects.length} projects`}
-        />
-        <StatCard
-          label="Secrets"
-          value={secretsLoading ? "—" : secrets.length}
-          icon={<KeyIcon className="size-4" />}
-          description="Across all environments"
-        />
-        <StatCard
-          label="Environments"
-          value={projectsLoading ? "—" : totalEnvironments}
-          icon={<StackSimpleIcon className="size-4" />}
-          description="Across all projects"
-        />
-        <StatCard
-          label="Documents"
-          value={documentsLoading ? "—" : documents.length}
-          icon={<FileTextIcon className="size-4" />}
-          description="Across all projects"
-        />
-        <StatCard
-          label="Tasks"
-          value={tasksLoading ? "—" : tasks.length}
-          icon={<ListChecksIcon className="size-4" />}
-          description="Across all projects"
-        />
-        <StatCard
-          label="Integrations"
-          value={integrationsLoading ? "—" : integrations.length}
-          icon={<PlugIcon className="size-4" />}
-          description="Connected services"
-        />
+      {/* Command Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <button
+          onClick={openChat}
+          className="group flex flex-col gap-3 p-4 rounded-xl border border-primary/25 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 transition-all duration-200 text-left"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
+              <RobotIcon className="size-5" weight="duotone" />
+            </div>
+            <ArrowRightIcon className="size-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Launch Agent</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Delegate a task to an AI agent</p>
+          </div>
+        </button>
+
+        <Link
+          href="/dashboard/secrets"
+          className="group flex flex-col gap-3 p-4 rounded-xl border border-cyan-500/25 bg-cyan-500/5 hover:bg-cyan-500/10 hover:border-cyan-500/40 transition-all duration-200"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
+              <KeyIcon className="size-5" weight="duotone" />
+            </div>
+            <ArrowRightIcon className="size-4 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Open Vault</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {secretsLoading ? "Loading…" : `${secrets.length} encrypted secrets`}
+            </p>
+          </div>
+        </Link>
+
+        <Link
+          href="/dashboard/integrations"
+          className="group flex flex-col gap-3 p-4 rounded-xl border border-violet-500/25 bg-violet-500/5 hover:bg-violet-500/10 hover:border-violet-500/40 transition-all duration-200"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-violet-500/15 text-violet-400">
+              <PlugIcon className="size-5" weight="duotone" />
+            </div>
+            <ArrowRightIcon className="size-4 text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Connect Tool</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {integrationsLoading ? "Loading…" : `${connectedCount} tool${connectedCount !== 1 ? "s" : ""} connected`}
+            </p>
+          </div>
+        </Link>
       </div>
 
-      {/* Preview Cards */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <RecentDocumentsCard documents={documents} isLoading={documentsLoading} />
-        <MyTasksCard tasks={tasks} isLoading={tasksLoading} userId={user?.id} />
-      </div>
-
-      {/* Two-column layout: Activity + Quick Actions */}
+      {/* Main Grid */}
       <div className="grid gap-4 lg:grid-cols-3">
-        {/* Recent Activity */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
+
+        {/* Agent Activity + System Logs */}
+        <Card className="lg:col-span-2 border-border/40">
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle>Recent Activity</CardTitle>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard/audit-logs">
-                  View all
-                </Link>
+              <div className="flex items-center gap-2">
+                <RobotIcon className="size-4 text-primary" weight="duotone" />
+                <CardTitle className="text-sm">Agent Activity</CardTitle>
+              </div>
+              <Button variant="ghost" size="sm" asChild className="h-7 text-xs">
+                <Link href="/dashboard/agents">View agents</Link>
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            {logsLoading ? (
-              <div className="flex flex-col gap-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 rounded-md border border-border/30 px-3 py-2"
-                  >
-                    <div className="size-6 animate-pulse rounded-full bg-muted" />
-                    <div className="flex-1 space-y-1.5">
-                      <div className="h-3 w-40 animate-pulse rounded bg-muted" />
-                      <div className="h-2.5 w-20 animate-pulse rounded bg-muted" />
-                    </div>
+          <CardContent className="space-y-1">
+            {MOCK_AGENT_ACTIVITY.map((run, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-muted/30 transition-colors"
+              >
+                <AgentStatusIcon status={run.status} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wide", run.color)}>
+                      {run.agent}
+                    </span>
+                    {run.status === "awaiting_approval" && (
+                      <Badge variant="outline" className="text-[9px] h-4 px-1 bg-amber-500/10 text-amber-400 border-amber-500/20">
+                        Needs Review
+                      </Badge>
+                    )}
                   </div>
-                ))}
-              </div>
-            ) : recentLogs.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 py-8 text-center">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground">
-                  <EmptyIcon className="size-5" />
+                  <p className="text-xs text-muted-foreground truncate">{run.action}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  No activity yet. Things will show up here as your team uses Nimbus.
-                </p>
+                <span className="text-[10px] text-muted-foreground shrink-0">{run.time}</span>
               </div>
-            ) : (
-              <div className="flex flex-col divide-y divide-border/30">
-                {recentLogs.map((log) => {
+            ))}
+
+            <div className="pt-2 border-t border-border/30 mt-1">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold px-3 pb-2">System Activity</p>
+              {logsLoading ? (
+                <div className="space-y-2 px-3">
+                  {[0,1].map((i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="size-3.5 animate-pulse rounded-full bg-muted" />
+                      <div className="h-3 w-48 animate-pulse rounded bg-muted" />
+                    </div>
+                  ))}
+                </div>
+              ) : recentLogs.length === 0 ? (
+                <p className="text-xs text-muted-foreground px-3 italic">No recent activity.</p>
+              ) : (
+                recentLogs.map((log) => {
                   const meta = log.metadata ?? {}
                   const resourceName =
                     (meta.name as string) ??
                     (meta.projectName as string) ??
                     (meta.secretName as string) ??
                     log.resourceType
-
                   return (
-                    <div
-                      key={log.id}
-                      className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0"
-                    >
-                      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                        <ClockCounterClockwiseIcon className="size-3" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs text-foreground">
-                          <span className="text-muted-foreground">{log.action.replace(/_/g, " ")}</span>{" "}
-                          <span className="font-medium">{resourceName}</span>
-                        </p>
-                      </div>
-                      <TimeAgo date={log.createdAt} className="shrink-0" />
+                    <div key={log.id} className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/30 transition-colors">
+                      <ClockCounterClockwiseIcon className="size-3.5 text-muted-foreground shrink-0" />
+                      <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate">
+                        <span>{log.action.replace(/_/g, " ")}</span>
+                        {" · "}
+                        <span className="text-foreground font-medium">{resourceName}</span>
+                      </p>
+                      <TimeAgo date={log.createdAt} className="shrink-0 text-[10px]" />
                     </div>
                   )
-                })}
-              </div>
-            )}
+                })
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+        {/* Vault Health */}
+        <Card className="border-border/40">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheckIcon className="size-4 text-cyan-400" weight="duotone" />
+              <CardTitle className="text-sm">Vault Health</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-2">
-              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
-                <Link href="/dashboard/projects">
-                  <PlusIcon className="size-3.5" />
-                  Create Project
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/15">
+                <LockSimpleIcon className="size-4 text-emerald-400" weight="duotone" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-emerald-400">Zero-Leak Active</p>
+                <p className="text-[10px] text-muted-foreground">Agent proxy secured</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: secretsLoading ? "—" : secrets.length, label: "Secrets" },
+                { value: projectsLoading ? "—" : projects.length, label: "Projects" },
+                { value: integrationsLoading ? "—" : connectedCount, label: "Tools" },
+                { value: "AES-256", label: "Encryption" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-lg border border-border/30 bg-muted/20 p-2.5 text-center">
+                  <p className="text-lg font-black text-foreground">{s.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Button variant="ghost" size="sm" asChild className="justify-start gap-2 h-8 text-xs">
                 <Link href="/dashboard/secrets">
-                  <KeyIcon className="size-3.5" />
-                  View Secrets
+                  <KeyIcon className="size-3.5 text-cyan-400" />
+                  Manage Secrets
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
-                <Link href="/dashboard/organizations">
-                  <FolderIcon className="size-3.5" />
-                  Manage Organizations
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
+              <Button variant="ghost" size="sm" asChild className="justify-start gap-2 h-8 text-xs">
                 <Link href="/dashboard/audit-logs">
-                  <ClockCounterClockwiseIcon className="size-3.5" />
+                  <ClockCounterClockwiseIcon className="size-3.5 text-muted-foreground" />
                   Audit Logs
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
-                <Link href="/dashboard/documents">
-                  <FileTextIcon className="size-3.5" />
-                  Documents
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
-                <Link href="/dashboard/tasks">
-                  <ListChecksIcon className="size-3.5" />
-                  Tasks
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild className="justify-start gap-2">
-                <Link href="/dashboard/integrations">
-                  <PlugIcon className="size-3.5" />
-                  Integrations
-                </Link>
+              <Button variant="ghost" size="sm" className="justify-start gap-2 h-8 text-xs" onClick={openChat}>
+                <ChatTeardropTextIcon className="size-3.5 text-primary" />
+                Ask AI Assistant
               </Button>
             </div>
           </CardContent>

@@ -3,7 +3,7 @@ import { SignInForm } from "@/components/auth/sign-in-form"
 
 export const metadata: Metadata = {
   title: "Sign In",
-  description: "Sign in to your Nimbus account",
+  description: "Sign in to your Flowspace account",
 }
 
 export default function SignInPage() {

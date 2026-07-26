@@ -45,11 +45,9 @@ interface MessageRendererProps {
   isStreaming?: boolean;
 }
 
-// ─── User Message ─────────────────────────────────────────────────────────────
-
 const UserMessage = memo(function UserMessage({ message }: { message: UIMessage }) {
   const text =
-    message.parts?.find((p: any) => p.type === "text")?.text ??
+    (message.parts?.find((p: any) => p.type === "text") as any)?.text ??
     (message as any).content ??
     "";
 

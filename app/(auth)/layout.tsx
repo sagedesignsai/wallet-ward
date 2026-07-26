@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Nimbus",
-    default: "Authentication | Nimbus",
+    template: "%s | Flowspace",
+    default: "Authentication | Flowspace",
   },
   description: "Secure secrets management platform with end-to-end multi-factor encryption",
 }
@@ -23,10 +23,10 @@ export default function AuthLayout({
         <div className="flex flex-col items-center space-y-2 text-center">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black text-lg shadow-md shadow-primary/20">
-              N
+              F
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Nimbus
+              Flowspace
             </h1>
           </div>
           <p className="text-xs text-muted-foreground font-medium">

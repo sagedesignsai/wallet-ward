@@ -11,13 +11,14 @@ const PLANS = [
     name: "Free",
     monthlyPrice: 0,
     yearlyPrice: 0,
-    description: "Perfect for solo developers and personal projects.",
+    description: "For solo developers and personal projects.",
     cta: "Get Started Free",
     ctaHref: "/sign-up",
     variant: "outline" as const,
     highlight: false,
     features: [
-      "Up to 50 secrets",
+      "1 Autonomous Agent",
+      "Up to 50 encrypted secrets",
       "1 project",
       "7-day audit log retention",
       "Basic 2FA (TOTP)",
@@ -26,28 +27,31 @@ const PLANS = [
     ],
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="10" r="4" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M5 21c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
   {
     name: "Pro",
-    monthlyPrice: 12,
-    yearlyPrice: 9,
-    description: "For growing teams that need full control and collaboration.",
+    monthlyPrice: 19,
+    yearlyPrice: 14,
+    description: "For growing teams that need full autonomy and control.",
     cta: "Start Pro Trial",
     ctaHref: "/sign-up?plan=pro",
     variant: "default" as const,
     highlight: true,
     badge: "Most Popular",
     features: [
-      "Unlimited secrets",
-      "Unlimited projects",
+      "5 Autonomous Agents",
+      "Unlimited encrypted secrets",
+      "Unlimited projects & environments",
+      "Daytona Sandbox execution",
+      "GitHub, Slack, Vercel integrations",
+      "Secret versioning & rollback",
       "90-day audit log retention",
-      "Advanced 2FA + Backup Codes",
-      "Team access (up to 10 members)",
-      "Secret versioning",
       "API key management",
+      "Team access (up to 10 members)",
       "Priority support",
     ],
     icon: (
@@ -60,18 +64,20 @@ const PLANS = [
     name: "Enterprise",
     monthlyPrice: 49,
     yearlyPrice: 39,
-    description: "Advanced security, compliance, and unlimited scale for large organizations.",
+    description: "Unlimited scale, compliance, and custom security.",
     cta: "Contact Sales",
     ctaHref: "/contact",
     variant: "outline" as const,
     highlight: false,
     features: [
+      "Unlimited Autonomous Agents",
       "Everything in Pro",
       "Unlimited team members",
-      "1-year audit log retention",
+      "Custom KMS / HSM key wrapping",
       "SSO / SAML integration",
       "Custom roles & permissions",
-      "Dedicated support",
+      "1-year audit log retention",
+      "SIEM log forwarding",
       "SLA guarantee (99.99%)",
       "On-premise deployment option",
     ],
@@ -84,25 +90,19 @@ const PLANS = [
   },
 ]
 
-interface PricingSectionProps {
-  className?: string
-  showFullPage?: boolean
-}
-
-export function PricingSection({ className, showFullPage = false }: PricingSectionProps) {
+export function PricingSection({ className, showFullPage }: { className?: string; showFullPage?: boolean }) {
   const [isAnnual, setIsAnnual] = useState(false)
 
   return (
     <section id="pricing" className={cn("py-24 relative", className)}>
       <div className="container mx-auto px-6">
-        {/* Header */}
         <div className="text-center mb-12 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-xs font-semibold text-primary uppercase tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             Transparent Pricing
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
-            Start free. Scale when ready.
+            Start free. Scale your agents.
           </h2>
           <p className="text-muted-foreground text-base max-w-md mx-auto">
             No hidden fees. No credit card required for free plan.
@@ -113,7 +113,6 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
             <span className={cn("text-sm font-medium transition-colors", !isAnnual ? "text-foreground" : "text-muted-foreground")}>
               Monthly
             </span>
-
             <button
               onClick={() => setIsAnnual(!isAnnual)}
               className={cn(
@@ -130,7 +129,6 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
                 )}
               />
             </button>
-
             <span className={cn("text-sm font-medium transition-colors flex items-center gap-1.5", isAnnual ? "text-foreground" : "text-muted-foreground")}>
               Annual
               <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
@@ -140,7 +138,6 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
           </div>
         </div>
 
-        {/* Plans grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {PLANS.map((plan, i) => (
             <div
@@ -152,7 +149,6 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
                   : "border-border/40 bg-card/50 hover:border-border/70 hover:bg-card/80"
               )}
             >
-              {/* Popular badge */}
               {plan.badge && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                   <Badge className="bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 shadow-lg">
@@ -161,7 +157,6 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
                 </div>
               )}
 
-              {/* Plan header */}
               <div className="flex items-center gap-3 mb-5">
                 <div className={cn(
                   "w-9 h-9 rounded-lg flex items-center justify-center",
@@ -177,7 +172,6 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
                 </div>
               </div>
 
-              {/* Price */}
               <div className="mb-6">
                 <div className="flex items-end gap-1">
                   <span className="text-4xl font-black text-foreground tabular-nums">
@@ -194,7 +188,6 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
                 )}
               </div>
 
-              {/* CTA */}
               <Button
                 asChild
                 variant={plan.highlight ? "default" : "outline"}
@@ -203,10 +196,8 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
                 <Link href={plan.ctaHref}>{plan.cta}</Link>
               </Button>
 
-              {/* Divider */}
               <div className="border-t border-border/30 mb-5" />
 
-              {/* Features */}
               <ul className="flex flex-col gap-3 flex-1">
                 {plan.features.map((feature, j) => (
                   <li key={j} className="flex items-start gap-2.5 text-xs text-muted-foreground">
@@ -222,7 +213,6 @@ export function PricingSection({ className, showFullPage = false }: PricingSecti
           ))}
         </div>
 
-        {/* Footer note */}
         <div className="text-center mt-12 text-xs text-muted-foreground space-y-1">
           <p>All plans include 14-day free trial on paid features. Cancel any time.</p>
           <p>

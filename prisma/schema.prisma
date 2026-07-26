@@ -1,4 +1,4 @@
-// Nimbus — auth (Better Auth) + encrypted vault schema
+// Flowspace — auth (Better Auth) + encrypted vault schema
 // Runtime can use Prisma Accelerate (prisma://). Migrations use DIRECT_DATABASE_URL.
 
 generator client {
@@ -219,6 +219,7 @@ model Project {
   documents    Document[]
   tasks        Task[]
   integrations Integration[]
+  agentSessions AgentSession[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -355,6 +356,44 @@ model Integration {
   @@map("integration")
 }
 
+// ─── Agent Runtimes ─────────────────────────────────────────────────────────
+
+enum AgentStatus {
+  idle
+  running
+  awaiting_approval
+  completed
+  failed
+}
+
+enum AgentType {
+  coding
+  content
+  ops
+  research
+}
+
+model AgentSession {
+  id               String      @id @default(cuid())
+  projectId        String      @map("project_id")
+  name             String
+  type             AgentType   @default(coding)
+  status           AgentStatus @default(idle)
+  prompt           String?
+  daytonaSandboxId String?     @map("daytona_sandbox_id")
+  sandboxUrl       String?     @map("sandbox_url")
+  currentTask      String?     @map("current_task")
+  metadata         Json?
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([projectId, status])
+  @@map("agent_session")
+}
+
 enum AuditAction {
   organization_create
   project_create
@@ -378,6 +417,7 @@ enum AuditAction {
   task_delete
   integration_create
   integration_delete
+  agent_proxy_call
 }
 
 model AuditLog {

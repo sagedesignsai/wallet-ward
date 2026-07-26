@@ -1,5 +1,5 @@
 /**
- * Tool Definitions for Nimbus AI Agent
+ * Tool Definitions for Flowspace AI Agent
  * 
  * This module exports all workspace tools that the agent can use.
  * Each tool is defined in its own file for better organization and maintainability.
@@ -12,6 +12,10 @@ import { getTasksTool } from "./get-tasks";
 import { createTaskTool } from "./create-task";
 import { getProjectsTool } from "./get-projects";
 import { searchAuditLogsTool } from "./search-audit-logs";
+import { createSandboxTool } from "./create-sandbox";
+import { executeCommandTool } from "./execute-command";
+import { getSandboxPreviewTool } from "./get-sandbox-preview";
+import { agentProxyTool } from "./agent-proxy";
 
 /**
  * All available tools for the base agent
@@ -24,4 +28,8 @@ export const workspaceTools = {
   createTask: createTaskTool,
   getProjects: getProjectsTool,
   searchAuditLogs: searchAuditLogsTool,
+  createSandbox: createSandboxTool,
+  executeCommand: executeCommandTool,
+  getSandboxPreview: getSandboxPreviewTool,
+  agentProxy: agentProxyTool,
 } as const;

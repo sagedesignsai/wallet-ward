@@ -10,10 +10,10 @@ import { WorkspaceLayout } from "@/components/workspace"
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Nimbus",
-    default: "Dashboard | Nimbus",
+    template: "%s | Flowspace",
+    default: "Dashboard | Flowspace",
   },
-  description: "Nimbus — your AI-first remote workspace.",
+  description: "Flowspace — your AI-first remote workspace.",
 }
 
 export default function DashboardLayout({

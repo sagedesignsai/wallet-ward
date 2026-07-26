@@ -3,7 +3,7 @@ import { SignUpForm } from "@/components/auth/sign-up-form"
 
 export const metadata: Metadata = {
   title: "Create Account",
-  description: "Create a new Nimbus account",
+  description: "Create a new Flowspace account",
 }
 
 export default function SignUpPage() {

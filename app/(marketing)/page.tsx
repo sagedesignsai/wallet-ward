@@ -7,9 +7,9 @@ import { PricingSection } from "@/components/marketing/pricing-section"
 import { CtaSection } from "@/components/marketing/cta-section"
 
 export const metadata: Metadata = {
-  title: "Nimbus — Remote Workspace Platform",
+  title: "Flowspace — Autonomous Execution & Security Hub",
   description:
-    "Unify projects, documents, tasks, and secrets in one workspace. Connect GitHub, Linear, Vercel, and Slack without replacing your tools. Start free.",
+    "Deploy autonomous AI agents secured by an enterprise-grade credential vault. Augment your existing tools like GitHub, Slack, Vercel, and Daytona without replacing your workflow.",
 }
 
 export default function LandingPage() {

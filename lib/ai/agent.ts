@@ -1,6 +1,6 @@
 import { ToolLoopAgent, tool, isStepCount } from "ai";
 import { z } from "zod";
-import { getModel, SYSTEM_PROMPTS } from "./config";
+import { getModel, SYSTEM_PROMPTS, type SystemPromptKey } from "./config";
 import type { User } from "@/generated/prisma/client";
 import { workspaceTools } from "./tools";
 
@@ -24,23 +24,40 @@ export interface AgentRuntimeContext {
   timestamp: string;
 }
 
-// ─── Base Agent Definition ───────────────────────────────────────────────────
+// ─── Agent Factory ───────────────────────────────────────────────────────────
 
 /**
- * Nimbus Base Agent
+ * Create a type-aware agent instance.
+ * When agentType matches a system prompt key, the agent gets
+ * persona-specific instructions; otherwise falls back to the
+ * general secretsManager prompt.
+ */
+export function createAgent(agentType?: string) {
+  const promptKey: SystemPromptKey =
+    agentType && agentType in SYSTEM_PROMPTS
+      ? (agentType as SystemPromptKey)
+      : "secretsManager";
+
+  return new ToolLoopAgent({
+    model: getModel("openrouter", "openrouter/free"),
+    instructions: SYSTEM_PROMPTS[promptKey],
+    tools: workspaceTools,
+    // Allow up to 30 steps for complex multi-tool workflows
+    stopWhen: isStepCount(30),
+  } as any);
+}
+
+// ─── Base Agent Definition (fallback) ────────────────────────────────────────
+
+/**
+ * Flowspace Base Agent
  * 
- * The core AI agent for Nimbus workspace with workspace-aware tools.
+ * The core AI agent for Flowspace workspace with workspace-aware tools.
  * Can retrieve secrets, documents, tasks, and create new resources.
  * 
  * Tools are modular and defined in ./tools/ directory.
  */
-export const nimbusBaseAgent = new ToolLoopAgent({
-  model: getModel("openrouter", "openrouter/free"),
-  instructions: SYSTEM_PROMPTS.secretsManager,
-  tools: workspaceTools,
-  // Allow up to 30 steps for complex multi-tool workflows
-  stopWhen: isStepCount(30),
-} as any);
+export const nimbusBaseAgent = createAgent();
 
 // ─── Type exports for frontend ───────────────────────────────────────────────
 

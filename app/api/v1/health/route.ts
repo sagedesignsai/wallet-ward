@@ -4,7 +4,7 @@ export async function GET() {
   return json({
     data: {
       ok: true,
-      service: "nimbus",
+      service: "flowspace",
       version: "0.0.1",
       phase: 1,
     },

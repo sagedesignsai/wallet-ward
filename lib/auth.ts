@@ -6,7 +6,7 @@ import { nextCookies } from "better-auth/next-js"
 import { prisma } from "@/lib/db"
 
 export const auth = betterAuth({
-  appName: "Nimbus",
+  appName: "Flowspace",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -27,7 +27,7 @@ export const auth = betterAuth({
       },
     }),
     twoFactor({
-      issuer: "Nimbus",
+      issuer: "Flowspace",
     }),
     nextCookies(),
   ],

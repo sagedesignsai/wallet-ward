@@ -112,14 +112,14 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
   // Download backup codes
   const handleDownloadBackupCodes = () => {
     if (backupCodes.length === 0) return
-    const text = `Nimbus - 2FA Recovery Backup Codes\nGenerated at: ${new Date().toISOString()}\n\nKeep these codes in a secure, offline location. Each code can only be used once.\n\n${backupCodes.join(
+    const text = `Flowspace - 2FA Recovery Backup Codes\nGenerated at: ${new Date().toISOString()}\n\nKeep these codes in a secure, offline location. Each code can only be used once.\n\n${backupCodes.join(
       "\n"
     )}`
     const blob = new Blob([text], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "nimbus-backup-codes.txt"
+    a.download = "flowspace-backup-codes.txt"
     a.click()
     URL.revokeObjectURL(url)
     toast.success("Backup codes downloaded")
@@ -326,7 +326,7 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
           <div className="space-y-5">
             <AuthCardHeader
               title="Save Backup Recovery Codes"
-              description="Store these backup codes safely. If you lose your phone, backup codes are the only way to regain access to your Nimbus account."
+              description="Store these backup codes safely. If you lose your phone, backup codes are the only way to regain access to your Flowspace account."
               badgeText="Crucial Step"
               icon="shield"
             />

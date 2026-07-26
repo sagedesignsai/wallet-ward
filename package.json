@@ -1,5 +1,5 @@
 {
-  "name": "nimbus",
+  "name": "flowspace",
   "version": "0.0.1",
   "type": "module",
   "private": true,
@@ -21,6 +21,7 @@
     "@ai-sdk/react": "^4.0.40",
     "@base-ui/react": "^1.6.0",
     "@better-auth/api-key": "^1.6.23",
+    "@daytona/sdk": "^0.200.1",
     "@phosphor-icons/react": "^2.1.10",
     "@prisma/client": "^7.8.0",
     "@prisma/extension-accelerate": "^3.0.1",

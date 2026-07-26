@@ -149,6 +149,8 @@ export interface ChatSession {
   /** Optional project context */
   projectId?: string;
   environmentId?: string;
+  /** Agent type if launched from Agent Hub */
+  agentType?: "coding" | "content" | "ops" | "research";
 }
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -179,28 +181,34 @@ type Action =
   | { type: "CLOSE_TAB"; tabId: string }
   | { type: "SET_ACTIVE_TAB"; tabId: string }
   | { type: "PIN_TAB"; tabId: string }
-  | { type: "NEW_SESSION"; projectId?: string; environmentId?: string }
+  | { type: "NEW_SESSION"; projectId?: string; environmentId?: string; agentType?: ChatSession["agentType"] }
   | { type: "SELECT_SESSION"; sessionId: string }
   | { type: "DELETE_SESSION"; sessionId: string }
   | { type: "UPDATE_SESSION_TITLE"; sessionId: string; title: string }
   | { type: "ADD_MESSAGE"; sessionId: string; message: Omit<ChatMessage, "id" | "createdAt"> }
+  | { type: "APPEND_TERMINAL_LINES"; tabId: string; lines: string[] }
   | { type: "HYDRATE"; state: WorkspacePanelState };
 
 // ─── Reducer ─────────────────────────────────────────────────────────────────
 
 function createSession(
   projectId?: string,
-  environmentId?: string
+  environmentId?: string,
+  agentType?: ChatSession["agentType"]
 ): ChatSession {
   const now = new Date().toISOString();
+  const title = agentType
+    ? `${agentType.charAt(0).toUpperCase() + agentType.slice(1)} Agent`
+    : "New conversation";
   return {
     id: nanoid(),
-    title: "New conversation",
+    title,
     messages: [],
     createdAt: now,
     updatedAt: now,
     projectId,
     environmentId,
+    agentType,
   };
 }
 
@@ -277,7 +285,7 @@ function reducer(
       };
 
     case "NEW_SESSION": {
-      const session = createSession(action.projectId, action.environmentId);
+      const session = createSession(action.projectId, action.environmentId, action.agentType);
       return {
         ...state,
         sessions: [session, ...state.sessions],
@@ -329,6 +337,23 @@ function reducer(
       };
     }
 
+    case "APPEND_TERMINAL_LINES": {
+      return {
+        ...state,
+        tabs: state.tabs.map((t) => {
+          if (t.id !== action.tabId || t.type !== "terminal") return t;
+          const content = t.content as { type: "terminal"; lines: string[]; title?: string };
+          return {
+            ...t,
+            content: {
+              ...content,
+              lines: [...content.lines, ...action.lines],
+            },
+          };
+        }),
+      };
+    }
+
     default:
       return state;
   }
@@ -369,6 +394,10 @@ interface WorkspacePanelContextValue {
   deleteSession: (sessionId: string) => void;
   updateSessionTitle: (sessionId: string, title: string) => void;
   addMessage: (sessionId: string, message: Omit<ChatMessage, "id" | "createdAt">) => void;
+  // Terminal
+  appendTerminalLines: (tabId: string, lines: string[]) => void;
+  // Agent
+  launchAgent: (agentType: string) => void;
   // Convenience
   activeSession: ChatSession | null;
   activeTab: ComputerTab | null;
@@ -469,6 +498,23 @@ export function WorkspacePanelProvider({
     []
   );
 
+  const appendTerminalLines = useCallback(
+    (tabId: string, lines: string[]) =>
+      dispatch({ type: "APPEND_TERMINAL_LINES", tabId, lines }),
+    []
+  );
+
+  const launchAgent = useCallback(
+    (agentType: string) => {
+      dispatch({
+        type: "NEW_SESSION",
+        agentType: agentType as ChatSession["agentType"],
+      });
+      dispatch({ type: "OPEN_CHAT" });
+    },
+    []
+  );
+
   const activeSession =
     state.sessions.find((s) => s.id === state.activeSessionId) ?? null;
   const activeTab = state.tabs.find((t) => t.id === state.activeTabId) ?? null;
@@ -489,6 +535,8 @@ export function WorkspacePanelProvider({
       deleteSession,
       updateSessionTitle,
       addMessage,
+      appendTerminalLines,
+      launchAgent,
       activeSession,
       activeTab,
     }),
@@ -507,6 +555,8 @@ export function WorkspacePanelProvider({
       deleteSession,
       updateSessionTitle,
       addMessage,
+      appendTerminalLines,
+      launchAgent,
       activeSession,
       activeTab,
     ]

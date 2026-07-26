@@ -116,7 +116,7 @@ export async function requireAuth(): Promise<AuthContext> {
 
         return {
           userId: key.referenceId,
-          userEmail: "api-key@nimbus.local",
+          userEmail: "api-key@flowspace.local",
           userName: "API Key",
           organizationId,
           memberRole,
