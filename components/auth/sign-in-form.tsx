@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import {
   EyeIcon,
@@ -71,7 +71,7 @@ export function SignInForm({
             setIsLoading(false)
             setError(
               ctx.error.message ||
-                "Failed to sign in. Please check your credentials."
+              "Failed to sign in. Please check your credentials."
             )
           },
           onTwoFactorRedirect: () => {

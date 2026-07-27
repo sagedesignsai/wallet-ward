@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import {
   UserIcon,
@@ -198,13 +198,12 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Strength:</span>
                     <span
-                      className={`font-semibold ${
-                        strengthScore <= 40
+                      className={`font-semibold ${strengthScore <= 40
                           ? "text-destructive"
                           : strengthScore <= 80
                             ? "text-amber-500"
                             : "text-emerald-500"
-                      }`}
+                        }`}
                     >
                       {strengthLabel}
                     </span>

@@ -21,7 +21,7 @@ import {
   MagnifyingGlassIcon,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { useEffect, useState } from "react"
 import {
   DropdownMenu,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import {
   PlugIcon,
@@ -144,29 +144,29 @@ export default function GlobalIntegrationsPage() {
     if (integrations.length === 0) return
     let cancelled = false
 
-    ;(async () => {
-      setHealthLoading(true)
-      const results = await Promise.allSettled(
-        integrations.map(async (intg) => {
-          const res = await fetch(`/api/v1/integrations/${intg.id}/health`, {
-            credentials: "include",
+      ; (async () => {
+        setHealthLoading(true)
+        const results = await Promise.allSettled(
+          integrations.map(async (intg) => {
+            const res = await fetch(`/api/v1/integrations/${intg.id}/health`, {
+              credentials: "include",
+            })
+            if (!res.ok) throw new Error(`${res.status}`)
+            const body: { status: HealthStatus["status"]; message: string } =
+              await res.json()
+            return { id: intg.id, status: body.status, message: body.message }
           })
-          if (!res.ok) throw new Error(`${res.status}`)
-          const body: { status: HealthStatus["status"]; message: string } =
-            await res.json()
-          return { id: intg.id, status: body.status, message: body.message }
-        })
-      )
-      if (cancelled) return
-      const map: Record<string, HealthStatus> = {}
-      for (const r of results) {
-        if (r.status === "fulfilled") {
-          map[r.value.id] = { status: r.value.status, message: r.value.message }
+        )
+        if (cancelled) return
+        const map: Record<string, HealthStatus> = {}
+        for (const r of results) {
+          if (r.status === "fulfilled") {
+            map[r.value.id] = { status: r.value.status, message: r.value.message }
+          }
         }
-      }
-      setHealthMap(map)
-      setHealthLoading(false)
-    })()
+        setHealthMap(map)
+        setHealthLoading(false)
+      })()
 
     return () => {
       cancelled = true

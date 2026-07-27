@@ -1,7 +1,7 @@
 "use client"
 
 import { use, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { WarningIcon } from "@phosphor-icons/react"
 import type { FileType, FileVisibility } from "@prisma/client"
 

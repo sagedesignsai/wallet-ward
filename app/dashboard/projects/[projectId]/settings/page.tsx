@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, use } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { GearIcon, WarningIcon } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"

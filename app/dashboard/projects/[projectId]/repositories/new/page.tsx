@@ -1,7 +1,7 @@
 "use client"
 
 import { use, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import { GitBranchIcon, WarningIcon } from "@phosphor-icons/react"
 

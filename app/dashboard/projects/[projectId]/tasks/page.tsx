@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo, use } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { ListChecksIcon, PlusIcon, WarningIcon } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
