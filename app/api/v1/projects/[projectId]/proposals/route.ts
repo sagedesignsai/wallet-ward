@@ -5,7 +5,7 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { listProposals } from "@/lib/services/proposals"
-import type { ProposalStatus } from "@/generated/prisma/client"
+import type { ProposalStatus } from "@prisma/client"
 
 type Ctx = { params: Promise<{ projectId: string }> }
 

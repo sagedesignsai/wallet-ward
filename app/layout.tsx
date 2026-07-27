@@ -3,7 +3,6 @@ import { sans, heading, mono } from "./fonts"
 import { ThemeProvider } from "@/components/theme-provider"
 import NextTopLoader from "nextjs-toploader"
 import { cn } from "@/lib/utils"
-import { AppwritePing } from "@/components/appwrite-ping"
 
 export default function RootLayout({
   children,

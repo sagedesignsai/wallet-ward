@@ -17,6 +17,7 @@ import {
   MagnifyingGlassIcon,
   ArrowCounterClockwiseIcon,
   CopyIcon,
+  type IconWeight,
 } from "@phosphor-icons/react"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -35,7 +36,7 @@ import { toast } from "sonner"
 import type {
   ProposalStatus,
   ProposalRiskLevel,
-} from "@/generated/prisma/client"
+} from "@prisma/client"
 
 // ─── DTO ──────────────────────────────────────────────────────────────────────
 
@@ -66,7 +67,7 @@ const STATUS_CONFIG: Record<
   ProposalStatus,
   {
     label: string
-    icon: React.ComponentType<{ className?: string; weight?: string }>
+    icon: React.ComponentType<{ className?: string; weight?: IconWeight }>
     color: string
     bg: string
   }

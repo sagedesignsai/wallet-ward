@@ -177,8 +177,9 @@ function FileVersionsInner({
     }
   }
 
-  const handleRequestRestore = (version: FileVersion) => {
-    setConfirmRestore(version)
+  const handleRequestRestore = (versionId: string) => {
+    const version = versions.find(v => v.id === versionId)
+    if (version) setConfirmRestore(version)
   }
 
   const handleConfirmRestore = () => {

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db"
 import { requireAuth, requireOrganization } from "@/lib/api/auth"
 import { toProposalDto } from "@/lib/services/proposals"
-import type { ProposalStatus } from "@/generated/prisma/client"
+import type { ProposalStatus } from "@prisma/client"
 
 export const dynamic = "force-dynamic"
 

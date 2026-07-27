@@ -62,7 +62,7 @@ export class FileService {
         storageId: input.storageId,
         url: input.url,
         tags: input.tags || [],
-        metadata: input.metadata,
+        metadata: input.metadata as any,
         visibility: input.visibility || "private",
         createdById: input.createdById,
       },
@@ -95,7 +95,7 @@ export class FileService {
         storageId: input.storageId,
         url: input.url,
         tags: input.tags || parent.tags,
-        metadata: input.metadata,
+        metadata: input.metadata as any,
         visibility: input.visibility || parent.visibility,
         createdById: input.createdById,
         parentId: parentId,
@@ -192,7 +192,7 @@ export class FileService {
   static async update(id: string, input: UpdateFileInput): Promise<ProjectFile> {
     return db.projectFile.update({
       where: { id },
-      data: input,
+      data: input as any,
     })
   }
 
@@ -280,7 +280,7 @@ export class FileService {
         storageId: version.storageId,
         url: version.url,
         tags: version.tags,
-        metadata: version.metadata,
+        metadata: version.metadata as any,
         visibility: version.visibility,
         createdById: createdById,
         parentId: fileId,

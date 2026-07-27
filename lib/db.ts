@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/generated/prisma/client"
+import { PrismaClient } from "@prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
 import { withAccelerate } from "@prisma/extension-accelerate"
 import { Pool } from "pg"
@@ -42,10 +42,13 @@ function createPrismaClient(): PrismaClient {
   return new PrismaClient({ adapter })
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient()
+const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma
 }
+
+export { prisma as db }
+export { prisma }
 
 export type DbClient = PrismaClient

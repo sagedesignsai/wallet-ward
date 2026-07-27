@@ -16,6 +16,8 @@ export type ComputerTabType =
   | "task"
   | "image"
   | "file-tree"
+  | "desktop"
+  | "web-terminal"
 
 export interface ComputerTab {
   id: string
@@ -29,6 +31,8 @@ export interface ComputerTab {
   pinned?: boolean
   /** ISO timestamp when opened */
   openedAt: string
+  /** Sandbox ID (for desktop/web-terminal tabs) */
+  sandboxId?: string
 }
 
 // ─── Content payloads per type ───────────────────────────────────────────────
@@ -43,6 +47,8 @@ export type ComputerContent =
   | TaskContent
   | ImageContent
   | FileTreeContent
+  | DesktopContent
+  | WebTerminalContent
 
 export interface CodeContent {
   type: "code"
@@ -115,6 +121,22 @@ export interface FileTreeContent {
   tree: FileNode[]
   /** Initially selected path */
   selectedPath?: string
+}
+
+export interface DesktopContent {
+  type: "desktop"
+  url: string          // Signed preview URL for port 6080 (noVNC)
+  token: string        // For refresh/revocation
+  sandboxId: string
+  sandboxName: string
+}
+
+export interface WebTerminalContent {
+  type: "web-terminal"
+  url: string          // Signed preview URL for port 22222
+  token: string
+  sandboxId: string
+  sandboxName: string
 }
 
 export interface FileNode {
@@ -191,6 +213,7 @@ interface WorkspacePanelStore {
   closeTab: (tabId: string) => void
   setActiveTab: (tabId: string) => void
   pinTab: (tabId: string) => void
+  refreshTabUrl: (tabId: string, newUrl: string, newToken?: string) => void
 
   // Sessions
   newSession: (
@@ -234,12 +257,18 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
 
       openTab: (tab) => {
         const state = get()
-        const existing = state.tabs.find(
-          (t) =>
-            t.type === tab.type &&
-            (t.content as { resourceId?: string }).resourceId ===
-              (tab.content as { resourceId?: string }).resourceId
-        )
+        const existing = state.tabs.find((t) => {
+          if (t.type !== tab.type) return false
+          const content = tab.content as unknown as Record<string, unknown>
+          const tabContent = t.content as unknown as Record<string, unknown>
+          const newSandboxId = content.sandboxId as string | undefined
+          const oldSandboxId = tabContent.sandboxId as string | undefined
+          const newResourceId = content.resourceId as string | undefined
+          const oldResourceId = tabContent.resourceId as string | undefined
+          if (newSandboxId && oldSandboxId) return oldSandboxId === newSandboxId
+          if (newResourceId && oldResourceId) return oldResourceId === newResourceId
+          return false
+        })
         if (existing) {
           set({ computerOpen: true, activeTabId: existing.id })
           return
@@ -266,7 +295,7 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
         set({
           tabs,
           activeTabId,
-          computerOpen: tabs.length > 0 ? state.computerOpen : false,
+          computerOpen: state.computerOpen,
         })
       },
 
@@ -277,6 +306,27 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
           tabs: s.tabs.map((t) =>
             t.id === tabId ? { ...t, pinned: !t.pinned } : t
           ),
+        })),
+
+      refreshTabUrl: (tabId, newUrl, newToken) =>
+        set((s) => ({
+          tabs: s.tabs.map((t) => {
+            if (t.id !== tabId) return t
+            const content = t.content as unknown as {
+              type: string
+              url?: string
+              token?: string
+            }
+            if (!("url" in content)) return t
+            return {
+              ...t,
+              content: {
+                ...content,
+                url: newUrl,
+                ...(newToken !== undefined ? { token: newToken } : {}),
+              } as ComputerContent,
+            }
+          }),
         })),
 
       // ─── Sessions ─────────────────────────────────────────────────────────

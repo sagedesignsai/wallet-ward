@@ -129,7 +129,7 @@ export class RepositoryService {
       data: {
         syncStatus: status,
         lastSyncAt: status === "synced" ? new Date() : undefined,
-        metadata: metadata ? metadata : undefined,
+        metadata: metadata ? (metadata as any) : undefined,
       },
     })
   }

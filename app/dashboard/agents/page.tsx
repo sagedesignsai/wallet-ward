@@ -1,6 +1,6 @@
 "use client"
 
-import { useAgentSessions } from "@/hooks/use-agent-sessions"
+import { useAgentSessions, type AgentSessionDto } from "@/hooks/use-agent-sessions"
 import { usePendingApprovals } from "@/hooks/use-pending-approvals"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -165,7 +165,7 @@ function LaunchAgentButton() {
 
 export default function AgentsPage() {
   const { setConfig } = useDashboardConfig()
-  const { data: sessions, isLoading: sessionsLoading } = useAgentSessions()
+  const { sessions, isLoading: sessionsLoading } = useAgentSessions()
   const {
     proposals,
     count: proposalCount,
@@ -173,9 +173,9 @@ export default function AgentsPage() {
     refresh: refreshProposals,
   } = usePendingApprovals()
 
-  const activeSessions = sessions?.filter((s) => s.status === "active") ?? []
+  const activeSessions = sessions?.filter((s: { status: string }) => s.status === "active") ?? []
   const completedToday =
-    sessions?.filter((s) => {
+    sessions?.filter((s: { status: string; updatedAt: string | Date }) => {
       if (s.status !== "completed") return false
       const today = new Date()
       const sessionDate = new Date(s.updatedAt)
@@ -349,7 +349,7 @@ export default function AgentsPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {activeSessions.map((session) => (
+              {activeSessions.map((session: AgentSessionDto) => (
                 <AgentSessionRow key={session.id} session={session} />
               ))}
             </div>
@@ -371,7 +371,7 @@ export default function AgentsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {completedToday.slice(0, 5).map((session) => (
+              {completedToday.slice(0, 5).map((session: AgentSessionDto) => (
                 <AgentSessionRow key={session.id} session={session} />
               ))}
             </div>

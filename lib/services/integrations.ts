@@ -1,5 +1,5 @@
 import { z } from "zod"
-import type { Prisma } from "@/generated/prisma/client"
+import type { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db"
 import { decryptString, encryptString, type EncryptedPayload } from "@/lib/crypto"
 import { notFound, badRequest } from "@/lib/api/errors"
@@ -446,6 +446,7 @@ export async function injectIntegrationCredentials(
 
   // Log credential injection
   await writeAuditLog({
+    ctx: { userId: "system", actorType: "api_key" as const },
     organizationId,
     action: "agent_proxy_call" as any, // Using existing audit action
     resourceType: "sandbox",
@@ -481,6 +482,7 @@ export async function revokeIntegrationCredentials(
     await sandbox.updateEnv({}, { unset: envVarsToRemove })
 
     await writeAuditLog({
+      ctx: { userId: "system", actorType: "api_key" as const },
       organizationId,
       action: "agent_proxy_call" as any,
       resourceType: "sandbox",

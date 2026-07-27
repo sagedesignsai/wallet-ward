@@ -13,11 +13,11 @@ export const airtableCreateRecordTool = tool({
   
   The tool will automatically use the connected Airtable integration for the current project.`,
   
-  parameters: z.object({
+  inputSchema: z.object({
     projectId: z.string().describe("The project ID that has the Airtable integration"),
     baseId: z.string().describe("Airtable base ID (starts with 'app')"),
     tableIdOrName: z.string().describe("Table ID or table name"),
-    fields: z.record(z.unknown()).describe("Record fields as key-value pairs (e.g., {'Name': 'John', 'Status': 'Active'})"),
+    fields: z.record(z.string(), z.unknown()).describe("Record fields as key-value pairs (e.g., {'Name': 'John', 'Status': 'Active'})"),
   }),
   
   execute: async (input) => {
@@ -47,8 +47,7 @@ export const airtableCreateRecordTool = tool({
 
       // Get the decrypted access token
       const token = await getDecryptedToken(
-        integration.id,
-        integration.project.organizationId,
+        integration,
         "access"
       )
 

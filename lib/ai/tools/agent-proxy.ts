@@ -151,7 +151,7 @@ export const agentProxyTool = tool({
           break
         case "trello":
           // Trello uses key + token in query params, handled separately
-          headers.Authorization = `OAuth oauth_consumer_key="${integration.metadata?.apiKey}", oauth_token="${token}"`
+          headers.Authorization = `OAuth oauth_consumer_key="${(integration.metadata as { apiKey?: string })?.apiKey}", oauth_token="${token}"`
           break
         case "vercel":
           headers.Authorization = `Bearer ${token}`

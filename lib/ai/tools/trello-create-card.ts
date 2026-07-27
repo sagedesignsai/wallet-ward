@@ -13,7 +13,7 @@ export const trelloCreateCardTool = tool({
   
   The tool will automatically use the connected Trello integration for the current project.`,
   
-  parameters: z.object({
+  inputSchema: z.object({
     projectId: z.string().describe("The project ID that has the Trello integration"),
     listId: z.string().describe("Trello list ID where the card will be created"),
     name: z.string().min(1).describe("Name/title of the card"),
@@ -51,8 +51,7 @@ export const trelloCreateCardTool = tool({
 
       // Get the decrypted access token
       const token = await getDecryptedToken(
-        integration.id,
-        integration.project.organizationId,
+        integration,
         "access"
       )
 
@@ -64,7 +63,7 @@ export const trelloCreateCardTool = tool({
       }
 
       // Get API key from metadata
-      const apiKey = integration.metadata?.apiKey as string | undefined
+      const apiKey = (integration.metadata as { apiKey?: string })?.apiKey
       if (!apiKey) {
         return {
           success: false,

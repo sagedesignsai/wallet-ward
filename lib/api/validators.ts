@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { SecretType, TaskStatus } from "@/generated/prisma/client"
+import { SecretType, TaskStatus } from "@prisma/client"
 
 const secretTypeValues = [
   SecretType.password,

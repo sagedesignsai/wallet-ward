@@ -206,8 +206,8 @@ function OrgSwitcher() {
 }
 
 function AgentStatusIndicator() {
-  const { data: sessions } = useAgentSessions()
-  const activeSessions = sessions?.filter((s) => s.status === "active") ?? []
+  const { sessions } = useAgentSessions()
+  const activeSessions = sessions?.filter((s: { status: string }) => s.status === "active") ?? []
 
   if (activeSessions.length === 0) return null
 

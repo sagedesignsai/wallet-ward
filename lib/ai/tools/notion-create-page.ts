@@ -13,12 +13,12 @@ export const notionCreatePageTool = tool({
   
   The tool will automatically use the connected Notion integration for the current project.`,
   
-  parameters: z.object({
+  inputSchema: z.object({
     projectId: z.string().describe("The project ID that has the Notion integration"),
     parentId: z.string().describe("Parent page or database ID where the page will be created"),
     title: z.string().min(1).describe("Title of the page"),
     content: z.string().optional().describe("Content to add to the page (plain text, will be converted to blocks)"),
-    properties: z.record(z.unknown()).optional().describe("Additional properties for database pages (JSON object)"),
+    properties: z.record(z.string(), z.unknown()).optional().describe("Additional properties for database pages (JSON object)"),
   }),
   
   execute: async (input) => {
@@ -48,8 +48,7 @@ export const notionCreatePageTool = tool({
 
       // Get the decrypted access token
       const token = await getDecryptedToken(
-        integration.id,
-        integration.project.organizationId,
+        integration,
         "access"
       )
 

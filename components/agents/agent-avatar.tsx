@@ -10,6 +10,7 @@ import {
   ClockIcon,
   CheckCircleIcon,
   WarningCircleIcon,
+  type IconWeight,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
@@ -29,7 +30,7 @@ interface AgentAvatarProps {
 const TYPE_CONFIG: Record<
   string,
   {
-    icon: React.ComponentType<{ className?: string; weight?: string }>
+    icon: React.ComponentType<{ className?: string; weight?: IconWeight }>
     color: string
     bg: string
     border: string

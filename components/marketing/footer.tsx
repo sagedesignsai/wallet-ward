@@ -1,6 +1,7 @@
 import React from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { Logomark } from "@/components/brand/logo"
 
 const FOOTER_LINKS = {
   Product: [
@@ -37,15 +38,13 @@ export function MarketingFooter() {
           {/* Brand column */}
           <div className="col-span-2 space-y-4 md:col-span-1">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-lg font-black text-primary-foreground">
-                F
-              </div>
+              <Logomark size={28} animated={false} />
               <span className="text-sm font-bold text-foreground">
                 Flowspace
               </span>
             </div>
             <p className="max-w-[180px] text-xs leading-relaxed text-muted-foreground">
-              Zero-knowledge secrets management for security-first teams.
+              Autonomous AI agents secured by a zero-leak credential vault.
             </p>
             {/* Social icons */}
             <div className="flex gap-2">

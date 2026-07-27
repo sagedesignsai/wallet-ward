@@ -1,6 +1,6 @@
 "use client";
 
-import { useWorkspacePanelStore, type ComputerTab } from "@/stores/workspace-panel-store";
+import { useWorkspacePanelStore, type ComputerTab, type DesktopContent, type WebTerminalContent } from "@/stores/workspace-panel-store";
 import type { FileNode } from "@/stores/workspace-panel-store";
 import {
   Artifact,
@@ -19,7 +19,12 @@ import {
 } from "@/components/ai-elements/file-tree";
 import { Terminal } from "@/components/ai-elements/terminal";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
@@ -30,10 +35,13 @@ import {
   KeyIcon,
   ListChecksIcon,
   TerminalIcon,
+  TerminalWindowIcon,
   FolderIcon,
+  DesktopIcon,
   PushPinIcon,
   XIcon,
   PlusIcon,
+  CaretDownIcon,
   ArrowsOutIcon,
   CopyIcon,
   DownloadIcon,
@@ -55,6 +63,8 @@ function TabIcon({ type }: { type: ComputerTab["type"] }) {
     case "task":      return <ListChecksIcon className={cls} />;
     case "image":     return <ImageIcon className={cls} />;
     case "file-tree": return <FolderIcon className={cls} />;
+    case "desktop":      return <DesktopIcon className={cls} />;
+    case "web-terminal": return <TerminalWindowIcon className={cls} />;
     default:          return <FileTextIcon className={cls} />;
   }
 }
@@ -178,10 +188,13 @@ function ArtifactRenderer({ tab }: { tab: ComputerTab }) {
 
 function PreviewRenderer({ tab }: { tab: ComputerTab }) {
   const content = tab.content as { type: "preview"; url: string };
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
   return (
     <Artifact className="h-full border-0 rounded-none">
       <ArtifactHeader>
-        <ArtifactTitle className="font-mono text-xs">{content.url}</ArtifactTitle>
+        <ArtifactTitle className="font-mono text-xs truncate">{content.url}</ArtifactTitle>
         <ArtifactActions>
           <ArtifactAction
             tooltip="Open in new tab"
@@ -190,14 +203,180 @@ function PreviewRenderer({ tab }: { tab: ComputerTab }) {
           />
         </ArtifactActions>
       </ArtifactHeader>
-      <ArtifactContent className="p-0">
+      <ArtifactContent className="p-0 relative">
+        {!loaded && !error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/10">
+            <div className="flex flex-col items-center gap-2">
+              <div className="size-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              <span className="text-xs text-muted-foreground">Loading preview...</span>
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/10">
+            <div className="text-center space-y-2">
+              <p className="text-sm text-muted-foreground">Failed to load preview</p>
+              <Button size="sm" variant="outline" onClick={() => { setError(false); setLoaded(false); }}>
+                Retry
+              </Button>
+            </div>
+          </div>
+        )}
         <iframe
           src={content.url}
-          className="w-full h-full border-0"
+          className={`w-full h-full border-0 ${loaded ? "" : "invisible"}`}
           title={tab.title}
+          sandbox="allow-scripts allow-same-origin allow-popups"
+          allow="clipboard-read; clipboard-write"
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
         />
       </ArtifactContent>
     </Artifact>
+  );
+}
+
+function DesktopRenderer({ tab }: { tab: ComputerTab }) {
+  const content = tab.content as DesktopContent;
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const refreshTabUrl = useWorkspacePanelStore((s) => s.refreshTabUrl);
+  const [timeRemaining, setTimeRemaining] = useState(3600);
+
+  useEffect(() => {
+    const startedAt = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      setTimeRemaining(Math.max(0, 3600 - elapsed));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="h-full flex flex-col">
+      {/* Sandbox header bar */}
+      <div className="flex items-center justify-between border-b border-border/60 bg-muted/20 px-4 py-1.5">
+        <div className="flex items-center gap-2">
+          <div className={cn(
+            "flex size-2 rounded-full",
+            timeRemaining <= 0 ? "bg-red-500" :
+            timeRemaining < 300 ? "bg-amber-400" :
+            "bg-emerald-400"
+          )} />
+          <span className="text-xs font-medium text-foreground">Desktop</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted-foreground font-mono">{content.sandboxName}</span>
+          {timeRemaining < 300 && timeRemaining > 0 && (
+            <span className="text-[10px] text-amber-400">· {Math.floor(timeRemaining / 60)}m left</span>
+          )}
+          {timeRemaining <= 0 && loaded && (
+            <span className="text-[10px] text-destructive">· expired</span>
+          )}
+        </div>
+      </div>
+      {/* VNC iframe */}
+      <div className="flex-1 relative bg-zinc-950">
+        {!loaded && !error && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="size-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              <span className="text-xs text-muted-foreground">Connecting to desktop...</span>
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center space-y-2">
+              <p className="text-sm text-muted-foreground">Failed to connect to desktop</p>
+              <Button size="sm" variant="outline" onClick={() => { setError(false); setLoaded(false); }}>
+                Retry
+              </Button>
+            </div>
+          </div>
+        )}
+        <iframe
+          src={content.url}
+          className={`w-full h-full border-0 ${loaded ? "" : "invisible"}`}
+          title={`Desktop: ${content.sandboxName}`}
+          allow="clipboard-read; clipboard-write"
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function WebTerminalRenderer({ tab }: { tab: ComputerTab }) {
+  const content = tab.content as WebTerminalContent;
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const refreshTabUrl = useWorkspacePanelStore((s) => s.refreshTabUrl);
+  const [timeRemaining, setTimeRemaining] = useState(3600);
+
+  useEffect(() => {
+    const startedAt = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      setTimeRemaining(Math.max(0, 3600 - elapsed));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="h-full flex flex-col">
+      {/* Sandbox header bar */}
+      <div className="flex items-center justify-between border-b border-border/60 bg-muted/20 px-4 py-1.5">
+        <div className="flex items-center gap-2">
+          <div className={cn(
+            "flex size-2 rounded-full",
+            timeRemaining <= 0 ? "bg-red-500" :
+            timeRemaining < 300 ? "bg-amber-400" :
+            "bg-emerald-400"
+          )} />
+          <span className="text-xs font-medium text-foreground">Terminal</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted-foreground font-mono">{content.sandboxName}</span>
+          {timeRemaining < 300 && timeRemaining > 0 && (
+            <span className="text-[10px] text-amber-400">· {Math.floor(timeRemaining / 60)}m left</span>
+          )}
+          {timeRemaining <= 0 && loaded && (
+            <span className="text-[10px] text-destructive">· expired</span>
+          )}
+        </div>
+      </div>
+      {/* Terminal iframe */}
+      <div className="flex-1 relative bg-zinc-950">
+        {!loaded && !error && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="size-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              <span className="text-xs text-muted-foreground">Connecting to terminal...</span>
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center space-y-2">
+              <p className="text-sm text-muted-foreground">Failed to connect to terminal</p>
+              <Button size="sm" variant="outline" onClick={() => { setError(false); setLoaded(false); }}>
+                Retry
+              </Button>
+            </div>
+          </div>
+        )}
+        <iframe
+          src={content.url}
+          className={`w-full h-full border-0 ${loaded ? "" : "invisible"}`}
+          title={`Terminal: ${content.sandboxName}`}
+          allow="clipboard-read; clipboard-write"
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -368,6 +547,8 @@ function TabContent({ tab }: { tab: ComputerTab }) {
     case "task":      return <TaskRenderer tab={tab} />;
     case "image":     return <ImageRenderer tab={tab} />;
     case "file-tree": return <FileTreeRenderer tab={tab} />;
+    case "desktop":      return <DesktopRenderer tab={tab} />;
+    case "web-terminal": return <WebTerminalRenderer tab={tab} />;
     default:          return <div className="p-4 text-muted-foreground text-sm">Unknown content type</div>;
   }
 }
@@ -390,7 +571,7 @@ function ComputerEmptyState() {
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-2 pt-1">
-          {(["code", "document", "task", "secret", "artifact", "terminal"] as const).map((t) => (
+          {(["code", "document", "task", "secret", "artifact", "terminal", "desktop", "web-terminal"] as const).map((t) => (
             <div key={t} className="flex items-center gap-1.5 rounded-full border border-border/40 bg-muted/30 px-2.5 py-1 text-xs text-muted-foreground">
               <TabIcon type={t} />
               {t}
@@ -417,37 +598,52 @@ export function ComputerPanel({ className }: { className?: string }) {
     <div className={cn("flex h-full flex-col bg-background", className)}>
       {/* Tab bar */}
       {tabs.length > 0 && (
-        <div className="flex items-center border-b border-border/60 bg-muted/20 min-h-9 overflow-x-auto">
-          <ScrollArea orientation="horizontal" className="flex-1">
-            <div className="flex items-center">
+        <div className="flex items-center border-b border-border/60 bg-muted/20 min-h-9">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex flex-1 items-center gap-1.5 h-9 px-3 text-xs text-left truncate min-w-0">
+                <TabIcon type={activeTab!.type} />
+                <span className="flex-1 truncate">{activeTab!.title}</span>
+                {activeTab!.pinned && <PushPinIcon className="size-3 shrink-0 text-primary" />}
+                <CaretDownIcon className="size-3 shrink-0 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="max-h-[300px]">
               {tabs.map((tab) => (
-                <button
+                <DropdownMenuItem
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onSelect={() => setActiveTab(tab.id)}
                   className={cn(
-                    "group flex h-9 min-w-0 max-w-[180px] shrink-0 items-center gap-1.5 border-r border-border/40 px-3 text-xs transition-colors",
-                    tab.id === activeTabId
-                      ? "bg-background text-foreground"
-                      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                    "flex items-center gap-2 text-xs",
+                    tab.id === activeTabId && "bg-accent font-medium"
                   )}
                 >
                   <TabIcon type={tab.type} />
-                  <span className="truncate">{tab.title}</span>
+                  <span className="flex-1 truncate">{tab.title}</span>
                   {tab.pinned && <PushPinIcon className="size-3 shrink-0 text-primary" />}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       closeTab(tab.id);
                     }}
-                    className="ml-1 shrink-0 rounded-sm p-0.5 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
+                    className="shrink-0 rounded-sm p-0.5 hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
                     aria-label="Close tab"
                   >
                     <XIcon className="size-3" />
                   </button>
-                </button>
+                </DropdownMenuItem>
               ))}
-            </div>
-          </ScrollArea>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Close active tab */}
+          <button
+            onClick={() => closeTab(activeTab!.id)}
+            className="flex h-9 w-9 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+            aria-label="Close active tab"
+          >
+            <XIcon className="size-3.5" />
+          </button>
 
           {/* New tab placeholder */}
           <button

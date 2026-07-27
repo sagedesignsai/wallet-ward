@@ -5,24 +5,24 @@ import { MarketingFooter } from "@/components/marketing/footer"
 export const metadata: Metadata = {
   title: {
     template: "%s | Flowspace",
-    default: "Flowspace — Zero-Knowledge Secrets Management",
+    default: "Flowspace — Autonomous Execution Platform",
   },
   description:
-    "Encrypt, organize, and share credentials across your team with military-grade AES-256 security and a zero-knowledge architecture.",
+    "Deploy autonomous AI agents that execute multi-step tasks across coding, content, ops, and research — secured by an enterprise-grade credential vault.",
   keywords: [
-    "secrets management",
+    "autonomous agents",
+    "AI agents",
     "credential vault",
-    "API keys",
-    "encryption",
-    "security",
-    "2FA",
+    "DevOps automation",
+    "secrets management",
+    "zero-leak proxy",
   ],
   openGraph: {
     type: "website",
     siteName: "Flowspace",
-    title: "Flowspace — Zero-Knowledge Secrets Management",
+    title: "Flowspace — Autonomous Execution Platform",
     description:
-      "Military-grade AES-256 encryption. Zero-knowledge architecture. Store and share your secrets with absolute confidence.",
+      "Autonomous AI agents with zero-leak security. Deploy agents that code, manage ops, and execute tasks independently.",
   },
 }
 

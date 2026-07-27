@@ -1,4 +1,4 @@
-import type { AuditAction, Prisma } from "@/generated/prisma/client"
+import type { AuditAction, Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db"
 import type { AuthContext } from "@/lib/api/auth"
 

@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Logomark } from "@/components/brand/logo"
 import {
-  ShieldCheckIcon,
   UserIcon,
   GearIcon,
   SignOutIcon,
@@ -12,6 +12,7 @@ import {
   LockKeyIcon,
   ListIcon,
   XIcon,
+  ShieldCheckIcon,
 } from "@phosphor-icons/react"
 
 import { useAuth } from "@/hooks/use-auth"
@@ -61,11 +62,11 @@ export function MarketingNavbar() {
 
   const userInitials = user?.name
     ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
     : "NW"
 
   return (
@@ -84,9 +85,7 @@ export function MarketingNavbar() {
           className="group flex items-center gap-2 select-none"
           onClick={() => setMobileOpen(false)}
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-sm font-extrabold text-primary-foreground shadow-xs shadow-primary/30 transition-transform duration-200 group-hover:scale-105">
-            F
-          </div>
+          <Logomark size={22} animated={false} />
           <div className="flex items-center gap-1.5">
             <span className="text-sm font-bold tracking-tight text-foreground">
               Flowspace

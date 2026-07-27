@@ -8,7 +8,7 @@ import type {
   ProposalRiskLevel,
   Project,
   Integration,
-} from "@/generated/prisma/client"
+} from "@prisma/client"
 
 /**
  * ActionProposal DTO — Public interface
@@ -111,7 +111,7 @@ export async function createProposal(input: {
       riskLevel: input.riskLevel,
       actionType: input.actionType,
       targetSystem: input.targetSystem,
-      payload: input.payload ?? {},
+      payload: (input.payload ?? {}) as any,
       status: "awaiting_approval",
     },
   })
@@ -198,7 +198,7 @@ export async function approveProposal(input: {
   const proposal = await prisma.actionProposal.findFirst({
     where: {
       id: input.proposalId,
-      project: { organizationId: input.ctx.organizationId },
+      project: { organizationId: input.ctx.organizationId! },
     },
   })
 
@@ -243,7 +243,7 @@ export async function rejectProposal(input: {
   const proposal = await prisma.actionProposal.findFirst({
     where: {
       id: input.proposalId,
-      project: { organizationId: input.ctx.organizationId },
+      project: { organizationId: input.ctx.organizationId! },
     },
   })
 
@@ -466,8 +466,7 @@ export async function executeProposal(input: {
     await prisma.actionProposal.update({
       where: { id: proposal.id },
       data: {
-        metadata: {
-          ...((proposal.metadata as Record<string, unknown>) ?? {}),
+        payload: {
           executionResult: {
             success: result.success,
             message: result.message,
@@ -476,7 +475,7 @@ export async function executeProposal(input: {
             executedAt: result.executedAt.toISOString(),
           },
         },
-      },
+      } as any,
     })
 
     // 6. Audit log
@@ -502,15 +501,14 @@ export async function executeProposal(input: {
     await prisma.actionProposal.update({
       where: { id: proposal.id },
       data: {
-        metadata: {
-          ...((proposal.metadata as Record<string, unknown>) ?? {}),
+        payload: {
           executionResult: {
             success: false,
             error: errorMessage,
             executedAt: new Date().toISOString(),
           },
         },
-      },
+      } as any,
     })
 
     throw error
@@ -1121,7 +1119,8 @@ async function executeDeleteSecret(
         userId: "system",
         organizationId,
       } as AuthContext,
-      id: secretId,
+      organizationId,
+      secretId,
     })
 
     return {

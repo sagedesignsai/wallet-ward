@@ -20,7 +20,7 @@ import { RiskBadge } from "./risk-badge"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { cn } from "@/lib/utils"
 import type { ActionProposalDto } from "./approval-card"
-import type { ProposalStatus } from "@/generated/prisma/client"
+import type { ProposalStatus } from "@prisma/client"
 
 const STATUS_CONFIG: Record<
   ProposalStatus,

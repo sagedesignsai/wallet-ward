@@ -1,4 +1,4 @@
-import type { Prisma, SecretType } from "@/generated/prisma/client"
+import type { Prisma, SecretType } from "@prisma/client"
 import { decryptString, encryptString } from "@/lib/crypto"
 import { prisma } from "@/lib/db"
 import { conflict, notFound } from "@/lib/api/errors"

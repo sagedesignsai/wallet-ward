@@ -271,6 +271,70 @@ export function AIChatPanel({
               },
             });
           }
+
+          if (toolName === "startDesktop" && result?.desktopUrl) {
+            openComputer();
+            openTab({
+              type: "desktop",
+              title: `Desktop: ${result.sandboxId?.slice(0, 8) || "Sandbox"}`,
+              sandboxId: result.sandboxId,
+              content: {
+                type: "desktop",
+                url: result.desktopUrl,
+                token: result.token,
+                sandboxId: result.sandboxId,
+                sandboxName: `Sandbox ${result.sandboxId?.slice(0, 8) || ""}`,
+              },
+            });
+          }
+
+          if (toolName === "getWebTerminalUrl" && result?.url) {
+            openComputer();
+            openTab({
+              type: "web-terminal",
+              title: `Terminal: ${result.sandboxId?.slice(0, 8) || "Sandbox"}`,
+              sandboxId: result.sandboxId,
+              content: {
+                type: "web-terminal",
+                url: result.url,
+                token: result.token,
+                sandboxId: result.sandboxId,
+                sandboxName: `Sandbox ${result.sandboxId?.slice(0, 8) || ""}`,
+              },
+            });
+          }
+
+          if (toolName === "computerUse" && result?.screenshot) {
+            openComputer();
+            const dataUrl = `data:image/png;base64,${result.screenshot}`
+            openTab({
+              type: "image",
+              title: `Screenshot (${result.sizeBytes ? Math.round(result.sizeBytes / 1024) + "KB" : ""})`,
+              content: {
+                type: "image",
+                url: dataUrl,
+                alt: "Desktop screenshot",
+              },
+            });
+          }
+
+          if (toolName === "listSandboxFiles" && result?.files) {
+            const tree = result.files.map((f: { name: string; isDir: boolean }) => ({
+              name: f.name,
+              path: `${result.path}/${f.name}`,
+              type: f.isDir ? "folder" as const : "file" as const,
+            }))
+            openComputer();
+            openTab({
+              type: "file-tree",
+              title: `Files: ${result.path}`,
+              content: {
+                type: "file-tree",
+                title: result.path,
+                tree,
+              },
+            });
+          }
         }
       });
     },

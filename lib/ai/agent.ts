@@ -1,7 +1,7 @@
 import { ToolLoopAgent, tool, isStepCount } from "ai";
 import { z } from "zod";
 import { getModel, SYSTEM_PROMPTS, type SystemPromptKey } from "./config";
-import type { User } from "@/generated/prisma/client";
+import type { User } from "@prisma/client";
 import { workspaceTools } from "./tools";
 
 // ─── Workspace Context Schema ────────────────────────────────────────────────

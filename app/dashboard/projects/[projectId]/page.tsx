@@ -21,7 +21,7 @@ import {
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
-import { useAgentSessions } from "@/hooks/use-agent-sessions"
+import { useAgentSessions, type AgentSessionDto } from "@/hooks/use-agent-sessions"
 import { useProposals } from "@/hooks/use-proposals"
 import { useProjectIntegrations } from "@/hooks/use-project-integrations"
 import { useSecrets } from "@/hooks/use-secrets"
@@ -66,14 +66,14 @@ export default function ProjectOverviewPage({
 function ProjectOverviewInner({ projectId }: { projectId: string }) {
   const { setConfig } = useDashboardConfig()
   const { project, isLoading, error } = useProject(projectId)
-  const { data: sessions } = useAgentSessions({ projectId, limit: 5 })
+  const { sessions } = useAgentSessions({ projectId, limit: 5 })
   const { proposals } = useProposals({
     projectId,
     status: "awaiting_approval" as any,
     orgWide: false,
   })
   const { integrations } = useProjectIntegrations(projectId)
-  const { secrets } = useSecrets(projectId)
+  const { secrets } = useSecrets(projectId, "")
   const { documents } = useDocuments(projectId)
   const { tasks } = useTasks(projectId)
   const { repositories } = useRepositories(projectId)
@@ -137,7 +137,7 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
   }
 
   const environments = project.environments ?? []
-  const activeSessions = sessions?.filter((s) => s.status === "active") ?? []
+  const activeSessions = sessions?.filter((s: { status: string }) => s.status === "active") ?? []
   const todoTasks = tasks.filter((t) => t.status === "todo")
   const inProgressTasks = tasks.filter((t) => t.status === "in_progress")
   const doneTasks = tasks.filter((t) => t.status === "done")
@@ -280,7 +280,7 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
               </div>
             ) : (
               <div className="space-y-2">
-                {activeSessions.map((session) => (
+                {activeSessions.map((session: AgentSessionDto) => (
                   <AgentSessionRow key={session.id} session={session} />
                 ))}
               </div>

@@ -13,7 +13,7 @@ export const jiraCreateIssueTool = tool({
   
   The tool will automatically use the connected Jira integration for the current project.`,
   
-  parameters: z.object({
+  inputSchema: z.object({
     projectId: z.string().describe("The project ID that has the Jira integration"),
     summary: z.string().min(1).describe("Brief summary of the issue (required)"),
     description: z.string().optional().describe("Detailed description of the issue (supports Jira markdown)"),
@@ -51,8 +51,7 @@ export const jiraCreateIssueTool = tool({
 
       // Get the decrypted access token
       const token = await getDecryptedToken(
-        integration.id,
-        integration.project.organizationId,
+        integration,
         "access"
       )
 
@@ -64,7 +63,7 @@ export const jiraCreateIssueTool = tool({
       }
 
       // Get cloud ID from metadata
-      const cloudId = integration.metadata?.cloudId as string | undefined
+      const cloudId = (integration.metadata as { cloudId?: string })?.cloudId
       if (!cloudId) {
         return {
           success: false,
@@ -73,7 +72,7 @@ export const jiraCreateIssueTool = tool({
       }
 
       // Build issue payload
-      const issuePayload: Record<string, unknown> = {
+      const issuePayload: { fields: Record<string, unknown> } = {
         fields: {
           project: {
             key: input.jiraProjectKey,
@@ -144,7 +143,7 @@ export const jiraCreateIssueTool = tool({
         success: true,
         issueKey: result.key,
         issueId: result.id,
-        issueUrl: `${integration.metadata?.siteUrl}/browse/${result.key}`,
+        issueUrl: `${(integration.metadata as { siteUrl?: string })?.siteUrl}/browse/${result.key}`,
         message: `Successfully created Jira issue ${result.key}`,
       }
     } catch (error) {

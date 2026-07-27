@@ -25,6 +25,12 @@ import { getPendingProposalsTool } from "./get-pending-proposals";
 import { getRepositoriesTool } from "./get-repositories";
 import { getProjectFilesTool } from "./get-project-files";
 import { cloneRepositoryTool } from "./clone-repository";
+import { startDesktopTool } from "./start-desktop";
+import { stopDesktopTool } from "./stop-desktop";
+import { computerUseTool } from "./computer-use";
+import { getWebTerminalUrlTool } from "./get-web-terminal-url";
+import { listSandboxFilesTool } from "./list-sandbox-files";
+import { readSandboxFileTool } from "./read-sandbox-file";
 
 /**
  * All available tools for the Flowspace agent suite
@@ -50,4 +56,10 @@ export const workspaceTools = {
   getRepositories: getRepositoriesTool,
   getProjectFiles: getProjectFilesTool,
   cloneRepository: cloneRepositoryTool,
+  startDesktop: startDesktopTool,
+  stopDesktop: stopDesktopTool,
+  computerUse: computerUseTool,
+  getWebTerminalUrl: getWebTerminalUrlTool,
+  listSandboxFiles: listSandboxFilesTool,
+  readSandboxFile: readSandboxFileTool,
 } as const;

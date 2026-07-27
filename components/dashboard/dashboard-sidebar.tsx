@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Logomark } from "@/components/brand/logo"
 import {
-  HouseIcon,
   FolderIcon,
   KeyIcon,
   UsersIcon,
@@ -15,6 +15,7 @@ import {
   PlugIcon,
   RobotIcon,
   CheckCircleIcon,
+  HouseIcon,
 } from "@phosphor-icons/react"
 
 import { usePendingApprovals } from "@/hooks/use-pending-approvals"
@@ -40,7 +41,7 @@ export function DashboardSidebar() {
   const NAV_GROUPS = [
     {
       label: "Overview",
-      items: [{ label: "Dashboard", href: "/dashboard", icon: HouseIcon }],
+      items: [{ label: "Overview", href: "/dashboard/overview", icon: HouseIcon }],
     },
     {
       label: "⚡ Autonomous",
@@ -103,9 +104,7 @@ export function DashboardSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs shadow-primary/20">
-                  <span className="text-sm font-extrabold">F</span>
-                </div>
+                <Logomark size={28} animated={false} />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold text-sidebar-foreground">
                     Flowspace
@@ -128,8 +127,8 @@ export function DashboardSidebar() {
               <SidebarMenu>
                 {group.items.map((item) => {
                   const isActive =
-                    item.href === "/dashboard"
-                      ? pathname === "/dashboard"
+                    item.href === "/dashboard/overview"
+                      ? pathname === "/dashboard/overview"
                       : pathname.startsWith(item.href)
 
                   return (

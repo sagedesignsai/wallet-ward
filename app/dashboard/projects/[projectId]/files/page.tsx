@@ -113,7 +113,7 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
           </div>
           <Select
             value={typeFilter}
-            onValueChange={(value) => setTypeFilter(value as FileType | "all")}
+            onValueChange={(value: string) => setTypeFilter(value as FileType | "all")}
           >
             <SelectTrigger className="h-9 w-[140px]">
               <FunnelIcon className="mr-2 size-4" />

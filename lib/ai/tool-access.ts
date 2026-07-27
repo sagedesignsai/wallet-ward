@@ -5,7 +5,7 @@
  * Used by the agent runtime to validate tool access.
  */
 
-import type { AgentType } from "@/generated/prisma/client"
+import type { AgentType } from "@prisma/client"
 
 export type ToolAccessLevel = "all" | "coding" | "ops" | "content" | "research"
 
@@ -53,6 +53,14 @@ export const TOOL_ACCESS_MATRIX: Record<string, AgentType[]> = {
 
   // Project Files (All)
   getProjectFiles: ["coding", "ops", "content", "research"],
+
+  // Computer Use & Desktop (Coding Agent)
+  startDesktop: ["coding"],
+  stopDesktop: ["coding"],
+  computerUse: ["coding"],
+  getWebTerminalUrl: ["coding", "ops"],
+  listSandboxFiles: ["coding"],
+  readSandboxFile: ["coding"],
 }
 
 // ─── Service-Level Access Control ────────────────────────────────────────────

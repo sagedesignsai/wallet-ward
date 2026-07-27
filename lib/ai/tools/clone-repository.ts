@@ -59,7 +59,7 @@ export const cloneRepositoryTool = tool({
             url: repository.url,
             branch: repository.branch,
           },
-          error: result.artifacts?.stderr || result.result || "Clone failed",
+          error: result.artifacts?.stdout || result.result || "Clone failed",
           message: `Failed to clone ${repository.name}. The repository may require authentication.`,
         };
       }

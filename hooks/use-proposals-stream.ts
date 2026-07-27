@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import { openSSE, type SSEHandle } from "@/lib/sse-client"
 import type { ActionProposalDto } from "@/components/proposals/approval-card"
-import type { ProposalStatus } from "@/generated/prisma/client"
+import type { ProposalStatus } from "@prisma/client"
 
 const POLL_INTERVAL_MS = 8_000
 const FALLBACK_POLL_INTERVAL_MS = 8_000

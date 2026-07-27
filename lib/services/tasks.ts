@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db"
 import { notFound } from "@/lib/api/errors"
 import type { AuthContext } from "@/lib/api/auth"
 import { writeAuditLog } from "@/lib/services/audit"
-import type { TaskStatus } from "@/generated/prisma/client"
+import type { TaskStatus } from "@prisma/client"
 
 /** Verify that a project belongs to the given organization. */
 async function assertProjectInOrg(projectId: string, organizationId: string) {
