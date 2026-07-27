@@ -5,7 +5,7 @@ import { DashboardAuthGate } from "@/components/dashboard/dashboard-auth-gate"
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { DashboardConfigProvider } from "@/hooks/use-dashboard-config"
-import { WorkspacePanelProvider } from "@/context/workspace-panel"
+import { ProjectInitializer } from "@/stores/project-initializer"
 import { WorkspaceLayout } from "@/components/workspace"
 
 export const metadata: Metadata = {
@@ -24,22 +24,21 @@ export default function DashboardLayout({
   return (
     <DashboardAuthGate>
       <TooltipProvider>
-        <WorkspacePanelProvider>
-          <SidebarProvider defaultOpen={false} className="h-full overflow-hidden">
-            <DashboardSidebar />
-            <SidebarRail />
-            <SidebarInset className="min-h-0">
-              <DashboardConfigProvider>
-                <DashboardHeader />
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <WorkspaceLayout>
-                    {children}
-                  </WorkspaceLayout>
-                </div>
-              </DashboardConfigProvider>
-            </SidebarInset>
-          </SidebarProvider>
-        </WorkspacePanelProvider>
+        <ProjectInitializer />
+        <SidebarProvider defaultOpen={false} className="h-full overflow-hidden">
+          <DashboardSidebar />
+          <SidebarRail />
+          <SidebarInset className="min-h-0">
+            <DashboardConfigProvider>
+              <DashboardHeader />
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <WorkspaceLayout>
+                  {children}
+                </WorkspaceLayout>
+              </div>
+            </DashboardConfigProvider>
+          </SidebarInset>
+        </SidebarProvider>
       </TooltipProvider>
     </DashboardAuthGate>
   )

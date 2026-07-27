@@ -1,5 +1,6 @@
 import { tool } from "ai"
 import { z } from "zod"
+import { canAgentUseService, getServiceAccessDeniedMessage } from "../tool-access"
 
 const SERVICE_BASE_URLS: Record<string, string> = {
   github: "https://api.github.com",
@@ -12,6 +13,7 @@ const SERVICE_BASE_URLS: Record<string, string> = {
   airtable: "https://api.airtable.com",
   trello: "https://api.trello.com",
   vercel: "https://api.vercel.com",
+  ghost: "", // Ghost uses a custom URL from integration metadata
 }
 
 /**
@@ -27,7 +29,7 @@ export const agentProxyTool = tool({
   inputSchema: z.object({
     projectId: z.string().describe("The project ID that owns the integration"),
     service: z
-      .enum(["github", "slack", "vercel"])
+      .enum(["github", "gmail", "slack", "gitlab", "linear", "jira", "notion", "airtable", "trello", "vercel", "ghost"])
       .describe("The external service to call"),
     method: z
       .enum(["GET", "POST", "PUT", "PATCH", "DELETE"])
@@ -46,9 +48,18 @@ export const agentProxyTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    agentType: z.string().optional(),
   }),
   execute: async (input, { context }) => {
     try {
+      // Validate agent-level service access control
+      if (context.agentType && !canAgentUseService(context.agentType, input.service)) {
+        return {
+          error: true,
+          message: getServiceAccessDeniedMessage(context.agentType, input.service),
+        }
+      }
+
       const { prisma } = await import("@/lib/db")
       const { getDecryptedToken } = await import(
         "@/lib/services/integrations"
@@ -83,7 +94,18 @@ export const agentProxyTool = tool({
       )
 
       // Build the URL
-      const baseUrl = SERVICE_BASE_URLS[input.service]
+      // Ghost uses a custom domain stored in integration metadata
+      let baseUrl = SERVICE_BASE_URLS[input.service]
+      if (input.service === "ghost") {
+        const ghostUrl = (integration.metadata as Record<string, unknown>)?.url as string | undefined
+        if (!ghostUrl) {
+          return {
+            error: true,
+            message: "Ghost integration is missing its site URL in metadata",
+          }
+        }
+        baseUrl = ghostUrl.replace(/\/+$/, "")
+      }
       const url = new URL(input.path, baseUrl)
       if (input.query) {
         for (const [k, v] of Object.entries(input.query)) {
@@ -133,6 +155,10 @@ export const agentProxyTool = tool({
           break
         case "vercel":
           headers.Authorization = `Bearer ${token}`
+          break
+        case "ghost":
+          headers.Authorization = `Ghost ${token}`
+          headers["Content-Type"] = "application/json"
           break
       }
 

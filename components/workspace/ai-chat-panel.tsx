@@ -1,7 +1,9 @@
 "use client";
 
-import { useWorkspacePanel, type ChatSession } from "@/context/workspace-panel";
+import { useWorkspacePanelStore, type ChatSession } from "@/stores/workspace-panel-store";
 import { MessageRenderer } from "@/components/ai-elements/message-renderer";
+import { usePendingApprovals } from "@/hooks/use-pending-approvals";
+import { ApprovalCard } from "@/components/proposals/approval-card";
 import {
   Conversation,
   ConversationContent,
@@ -94,13 +96,12 @@ function AttachmentsDisplay() {
 // ─── Session selector ─────────────────────────────────────────────────────────
 
 function SessionSelector() {
-  const {
-    state,
-    newSession,
-    selectSession,
-    deleteSession,
-    activeSession,
-  } = useWorkspacePanel();
+  const sessions = useWorkspacePanelStore((s) => s.sessions);
+  const activeSessionId = useWorkspacePanelStore((s) => s.activeSessionId);
+  const newSession = useWorkspacePanelStore((s) => s.newSession);
+  const selectSession = useWorkspacePanelStore((s) => s.selectSession);
+  const deleteSession = useWorkspacePanelStore((s) => s.deleteSession);
+  const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
 
   return (
     <DropdownMenu>
@@ -123,10 +124,10 @@ function SessionSelector() {
           <PlusIcon className="size-3.5" />
           New conversation
         </DropdownMenuItem>
-        {state.sessions.length > 0 && (
+        {sessions.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            {state.sessions.map((s) => (
+            {sessions.map((s) => (
               <div
                 key={s.id}
                 className="group flex items-center gap-2 rounded-sm px-2 py-1.5 text-xs hover:bg-accent"
@@ -174,8 +175,15 @@ export function AIChatPanel({
   projectId?: string;
   environmentId?: string;
 }) {
-  const { activeSession, openTab, openComputer, state, appendTerminalLines } = useWorkspacePanel();
+  const sessions = useWorkspacePanelStore((s) => s.sessions);
+  const activeSessionId = useWorkspacePanelStore((s) => s.activeSessionId);
+  const tabs = useWorkspacePanelStore((s) => s.tabs);
+  const openTab = useWorkspacePanelStore((s) => s.openTab);
+  const openComputer = useWorkspacePanelStore((s) => s.openComputer);
+  const appendTerminalLines = useWorkspacePanelStore((s) => s.appendTerminalLines);
+  const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
   const [text, setText] = useState("");
+  const { proposals, count: proposalCount, refresh: refreshProposals } = usePendingApprovals();
 
   const agentType = activeSession?.agentType;
   const agentInfo = agentType ? AGENT_TYPE_LABELS[agentType] : null;
@@ -236,7 +244,7 @@ export function AIChatPanel({
           }
 
           if (toolName === "executeCommand" && result) {
-            const terminalTab = state.tabs.findLast(
+            const terminalTab = tabs.findLast(
               (t) => t.type === "terminal" && t.pinned
             );
             if (terminalTab) {
@@ -307,6 +315,38 @@ export function AIChatPanel({
     setText((prev) => (prev ? `${prev} ${t}` : t));
   }, []);
 
+  const handleApprove = useCallback(async (proposalId: string, notes?: string) => {
+    try {
+      const res = await fetch(`/api/v1/projects/${projectId}/proposals/${proposalId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      });
+      if (!res.ok) throw new Error("Failed to approve");
+      toast.success("Proposal approved");
+      refreshProposals();
+    } catch (error) {
+      toast.error("Failed to approve proposal");
+      console.error(error);
+    }
+  }, [projectId, refreshProposals]);
+
+  const handleReject = useCallback(async (proposalId: string, notes?: string) => {
+    try {
+      const res = await fetch(`/api/v1/projects/${projectId}/proposals/${proposalId}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      });
+      if (!res.ok) throw new Error("Failed to reject");
+      toast.success("Proposal rejected");
+      refreshProposals();
+    } catch (error) {
+      toast.error("Failed to reject proposal");
+      console.error(error);
+    }
+  }, [projectId, refreshProposals]);
+
   const isSubmitDisabled = !text.trim() || status === "streaming";
 
   return (
@@ -372,6 +412,37 @@ export function AIChatPanel({
           >
             Retry
           </button>
+        </div>
+      )}
+
+      {/* Pending Approvals */}
+      {proposalCount > 0 && (
+        <div className="border-t border-amber-500/20 bg-amber-500/5 px-3 py-2 space-y-2">
+          <div className="flex items-center gap-2">
+            <WarningCircleIcon className="size-4 text-amber-400 shrink-0" weight="fill" />
+            <span className="text-xs font-semibold text-amber-400">
+              {proposalCount} action{proposalCount > 1 ? "s" : ""} awaiting approval
+            </span>
+          </div>
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            {proposals.slice(0, 3).map((proposal) => (
+              <ApprovalCard
+                key={proposal.id}
+                proposal={proposal}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                className="text-xs"
+              />
+            ))}
+            {proposalCount > 3 && (
+              <p className="text-[10px] text-muted-foreground text-center py-1">
+                +{proposalCount - 3} more in{" "}
+                <a href="/dashboard/proposals" className="underline hover:text-foreground">
+                  proposals page
+                </a>
+              </p>
+            )}
+          </div>
         </div>
       )}
 

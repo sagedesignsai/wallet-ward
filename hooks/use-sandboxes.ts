@@ -115,7 +115,7 @@ export function useSandboxes() {
   )
 
   const activeCount = sandboxes.filter(
-    (s) => s.state === "STARTED" || s.state === "STARTING"
+    (s) => s.state === "started" || s.state === "starting"
   ).length
 
   return {

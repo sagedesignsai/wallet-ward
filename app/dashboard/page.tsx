@@ -17,6 +17,8 @@ import {
 import { useSession } from "@/lib/auth-client"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProjects } from "@/hooks/use-projects"
+import { useProjectStore } from "@/stores/project-store"
+import { useWorkspacePanelStore } from "@/stores/workspace-panel-store"
 import { useGlobalSecrets } from "@/hooks/use-global-secrets"
 import { useGlobalIntegrations } from "@/hooks/use-global-integrations"
 import { useAuditLogs } from "@/hooks/use-audit-logs"
@@ -26,7 +28,6 @@ import { PendingApprovalsWidget } from "@/components/dashboard/pending-approvals
 import { AgentSessionRow } from "@/components/agents/agent-session-row"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { useWorkspacePanel } from "@/context/workspace-panel"
 
 export default function DashboardPage() {
   const { setConfig } = useDashboardConfig()
@@ -39,7 +40,7 @@ export default function DashboardPage() {
     limit: 5,
     polling: true,
   })
-  const { openChat } = useWorkspacePanel()
+  const openChat = useWorkspacePanelStore((s) => s.openChat)
 
   const user = sessionData?.user
   const firstName = user?.name?.split(" ")[0] ?? null

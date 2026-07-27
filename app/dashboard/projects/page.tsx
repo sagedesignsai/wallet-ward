@@ -18,6 +18,7 @@ import { DataTable, type DataTableColumn } from "@/components/dashboard/data-tab
 import { DataTableToolbar } from "@/components/dashboard/data-table-toolbar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { CreateProjectDialog } from "@/components/projects/create-project-dialog"
 import { ProjectRowActions } from "@/components/projects/project-row-actions"
 
@@ -229,31 +230,26 @@ export default function ProjectsPage() {
         />
 
         {!isLoading && filtered.length === 0 && projects.length === 0 ? (
-          /* Rich empty state — no projects exist at all */
-          <div className="overflow-hidden rounded-lg border border-border/60 bg-card">
-            <div className="flex flex-col items-center gap-4 py-12 px-6">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-primary ring-1 ring-primary/10 transition-transform hover:scale-105">
-                <FolderOpenIcon className="size-7" weight="light" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-sm font-semibold text-foreground">
-                  No projects yet
-                </h3>
-                <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
-                  Create your first project to start organizing secrets across
-                  environments.
-                </p>
-              </div>
-              <Button
-                size="default"
-                onClick={() => setCreateOpen(true)}
-                className="shadow-md shadow-primary/10 transition-all hover:shadow-lg hover:shadow-primary/20"
-              >
-                <PlusIcon />
-                Create Project
-              </Button>
-            </div>
-          </div>
+          <Empty className="rounded-lg border border-border/60 bg-card py-16">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <FolderOpenIcon className="size-4" />
+              </EmptyMedia>
+              <EmptyTitle>No projects yet</EmptyTitle>
+              <EmptyDescription>
+                Create your first project to start organizing secrets across
+                environments.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button
+              size="default"
+              onClick={() => setCreateOpen(true)}
+              className="mt-2 shadow-md shadow-primary/10 transition-all hover:shadow-lg hover:shadow-primary/20"
+            >
+              <PlusIcon />
+              Create Project
+            </Button>
+          </Empty>
         ) : (
           <DataTable
             columns={columns}

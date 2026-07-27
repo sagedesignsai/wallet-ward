@@ -1,6 +1,6 @@
 "use client";
 
-import { useWorkspacePanel, type ComputerTab } from "@/context/workspace-panel";
+import { useWorkspacePanelStore, type ComputerTab } from "@/stores/workspace-panel-store";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DesktopIcon } from "@phosphor-icons/react";
@@ -22,7 +22,7 @@ export function OpenInComputer({
   variant?: "ghost" | "outline" | "secondary";
   showLabel?: boolean;
 }) {
-  const { openTab } = useWorkspacePanel();
+  const openTab = useWorkspacePanelStore((s) => s.openTab);
 
   const button = (
     <Button

@@ -14,10 +14,13 @@ import { useSandboxes } from "@/hooks/use-sandboxes"
 
 function SandboxStateBadge({ state }: { state: string }) {
   const map: Record<string, string> = {
-    STARTED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    STARTING: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    STOPPED: "bg-muted text-muted-foreground border-border/40",
-    ERROR: "bg-red-500/10 text-red-400 border-red-500/20",
+    started: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    starting: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    stopped: "bg-muted text-muted-foreground border-border/40",
+    stopping: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    error: "bg-red-500/10 text-red-400 border-red-500/20",
+    destroyed: "bg-red-500/10 text-red-400 border-red-500/20",
+    paused: "bg-muted text-muted-foreground border-border/40",
   }
   return (
     <Badge
@@ -95,7 +98,7 @@ export function SessionSandboxPanel({ session }: { session: AgentSessionDto }) {
                   </a>
                 </Button>
               )}
-              {bound?.state === "STARTED" && (
+              {bound?.state === "started" && (
                 <Button
                   size="sm"
                   variant="ghost"
@@ -105,7 +108,7 @@ export function SessionSandboxPanel({ session }: { session: AgentSessionDto }) {
                   Stop
                 </Button>
               )}
-              {bound?.state === "STOPPED" && (
+              {bound?.state === "stopped" && (
                 <Button
                   size="sm"
                   variant="ghost"

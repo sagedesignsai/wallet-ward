@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
   FileTextIcon,
@@ -10,6 +11,7 @@ import {
 } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useProjectStore } from "@/stores/project-store"
 import {
   useGlobalDocuments,
   type GlobalDocument,
@@ -20,11 +22,14 @@ import { DataTable, type DataTableColumn } from "@/components/dashboard/data-tab
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 
 export default function GlobalDocumentsPage() {
   const { setConfig } = useDashboardConfig()
+  const router = useRouter()
+  const activeProjectId = useProjectStore((s) => s.activeProjectId)
   const {
-    documents,
+    documents: allDocuments,
     filtered,
     isLoading,
     error,
@@ -36,16 +41,29 @@ export default function GlobalDocumentsPage() {
     refetch,
   } = useGlobalDocuments()
 
+  const activeProject = useMemo(
+    () => projects.find((p) => p.id === activeProjectId) ?? null,
+    [projects, activeProjectId],
+  )
+
+  // Filter documents to only show current project
+  const documents = useMemo(() => {
+    if (!activeProjectId) return allDocuments
+    return allDocuments.filter((d) => d.projectId === activeProjectId)
+  }, [allDocuments, activeProjectId])
+
   useEffect(() => {
     setConfig({
       title: "Documents",
-      description: "All documents across your projects",
+      description: activeProject 
+        ? `Documents in ${activeProject.name}`
+        : "Project documents",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Documents" },
       ],
     })
-  }, [setConfig])
+  }, [setConfig, activeProject])
 
   const distinctProjects = useMemo(() => {
     const set = new Set<string>()
@@ -179,30 +197,23 @@ export default function GlobalDocumentsPage() {
         </div>
 
         {!isLoading && documents.length === 0 && !error ? (
-          <div className="overflow-hidden rounded-lg border border-border/60 bg-card">
-            <div className="flex flex-col items-center gap-4 py-12 px-6">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-primary ring-1 ring-primary/10 transition-transform hover:scale-105">
-                <FolderOpenIcon className="size-7" weight="light" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-sm font-semibold text-foreground">
-                  No documents yet
-                </h3>
-                <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
-                  Create your first document within a project to get started.
-                </p>
-              </div>
+          <Empty className="rounded-lg border border-border/60 bg-card py-16">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <FolderOpenIcon className="size-4" />
+              </EmptyMedia>
+              <EmptyTitle>No documents yet</EmptyTitle>
+              <EmptyDescription>
+                Create your first document within a project to get started.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button asChild className="mt-2">
               <Link href="/dashboard/projects">
-                <Button
-                  size="default"
-                  className="shadow-md shadow-primary/10 transition-all hover:shadow-lg hover:shadow-primary/20"
-                >
-                  <FolderIcon />
-                  Go to Projects
-                </Button>
+                <FolderIcon />
+                Go to Projects
               </Link>
-            </div>
-          </div>
+            </Button>
+          </Empty>
         ) : (
           <DataTable
             columns={
@@ -214,7 +225,7 @@ export default function GlobalDocumentsPage() {
             keyExtractor={(d) => String((d as unknown as GlobalDocument).id)}
             onRowClick={(row) => {
               const doc = row as unknown as GlobalDocument
-              window.location.href = `/dashboard/projects/${doc.projectId}/documents`
+              router.push(`/dashboard/projects/${doc.projectId}/documents`)
             }}
             emptyTitle={
               activeFilterCount > 0

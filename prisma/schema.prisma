@@ -221,6 +221,8 @@ model Project {
   documents    Document[]
   tasks        Task[]
   integrations Integration[]
+  repositories Repository[]
+  files        ProjectFile[]
   agentSessions AgentSession[]
   proposals    ActionProposal[]
 
@@ -360,6 +362,142 @@ model Integration {
   @@index([projectId])
   @@index([projectId, provider])
   @@map("integration")
+}
+
+enum RepositoryProvider {
+  github
+  gitlab
+  bitbucket
+  custom
+}
+
+enum RepositoryAccessType {
+  public
+  private
+}
+
+enum RepositorySyncStatus {
+  synced
+  syncing
+  error
+  never_synced
+}
+
+model Repository {
+  id           String               @id @default(cuid())
+  projectId    String               @map("project_id")
+  name         String
+  description  String?
+  provider     RepositoryProvider   @default(github)
+  url          String
+  branch       String               @default("main")
+  accessType   RepositoryAccessType @default(private)
+  credentialId String?              @map("credential_id")
+  lastSyncAt   DateTime?            @map("last_sync_at")
+  syncStatus   RepositorySyncStatus @default(never_synced) @map("sync_status")
+  metadata     Json?
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+  createdById  String?              @map("created_by_id")
+
+  project      Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  webhooks     RepositoryWebhook[]
+
+  @@index([projectId])
+  @@index([provider])
+  @@index([projectId, provider])
+  @@map("repository")
+}
+
+enum WebhookEvent {
+  push
+  pull_request
+  release
+  tag
+  issue
+  commit_comment
+}
+
+model RepositoryWebhook {
+  id           String       @id @default(cuid())
+  repositoryId String       @map("repository_id")
+  event        WebhookEvent
+  url          String
+  secret       String
+  enabled      Boolean      @default(true)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  repository   Repository   @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@index([repositoryId])
+  @@index([repositoryId, event])
+  @@map("repository_webhook")
+}
+
+enum FileType {
+  artifact
+  document
+  config
+  asset
+  code
+  data
+  other
+}
+
+enum FileVisibility {
+  private
+  project
+  public
+}
+
+model ProjectFile {
+  id          String         @id @default(cuid())
+  projectId   String         @map("project_id")
+  name        String
+  path        String
+  type        FileType       @default(other)
+  mimeType    String         @map("mime_type")
+  size        Int
+  storageId   String         @map("storage_id")
+  url         String?
+  version     Int            @default(1)
+  parentId    String?        @map("parent_id")
+  tags        String[]       @default([])
+  metadata    Json?
+  visibility  FileVisibility @default(private)
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  createdById String?        @map("created_by_id")
+
+  project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent      ProjectFile?   @relation("FileVersions", fields: [parentId], references: [id], onDelete: SetNull)
+  versions    ProjectFile[]  @relation("FileVersions")
+  shares      FileShare[]
+
+  @@index([projectId])
+  @@index([projectId, type])
+  @@index([path])
+  @@index([storageId])
+  @@map("project_file")
+}
+
+model FileShare {
+  id           String      @id @default(cuid())
+  fileId       String      @map("file_id")
+  token        String      @unique
+  expiresAt    DateTime?   @map("expires_at")
+  maxDownloads Int?        @map("max_downloads")
+  downloads    Int         @default(0)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  createdById  String?     @map("created_by_id")
+
+  file         ProjectFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("file_share")
 }
 
 // ─── Agent Runtimes ─────────────────────────────────────────────────────────

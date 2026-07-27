@@ -1,8 +1,11 @@
 "use client";
 
-import { useWorkspacePanel } from "@/context/workspace-panel";
+import { useWorkspacePanelStore } from "@/stores/workspace-panel-store";
+import { useProjectStore } from "@/stores/project-store";
 import { AIChatPanel } from "./ai-chat-panel";
 import { ComputerPanel } from "./computer-panel";
+import { usePendingApprovals } from "@/hooks/use-pending-approvals";
+import { Badge } from "@/components/ui/badge";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -19,28 +22,45 @@ import {
 // ─── Floating panel toggle toolbar ────────────────────────────────────────────
 
 function PanelToggleBar() {
-  const { state, toggleChat, toggleComputer } = useWorkspacePanel();
+  const chatOpen = useWorkspacePanelStore((s) => s.chatOpen);
+  const computerOpen = useWorkspacePanelStore((s) => s.computerOpen);
+  const toggleChat = useWorkspacePanelStore((s) => s.toggleChat);
+  const toggleComputer = useWorkspacePanelStore((s) => s.toggleComputer);
+  const { count: proposalCount } = usePendingApprovals();
 
   return (
     <div className="flex items-center gap-1">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant={state.chatOpen ? "secondary" : "ghost"}
-            size="icon-sm"
-            onClick={toggleChat}
-            aria-label="Toggle AI chat"
-          >
-            <ChatTeardropTextIcon className="size-4" />
-          </Button>
+          <div className="relative">
+            <Button
+              variant={chatOpen ? "secondary" : "ghost"}
+              size="icon-sm"
+              onClick={toggleChat}
+              aria-label="Toggle AI chat"
+            >
+              <ChatTeardropTextIcon className="size-4" />
+            </Button>
+            {proposalCount > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[9px] font-bold animate-pulse"
+              >
+                {proposalCount}
+              </Badge>
+            )}
+          </div>
         </TooltipTrigger>
-        <TooltipContent>AI Chat {state.chatOpen ? "(open)" : "(closed)"}</TooltipContent>
+        <TooltipContent>
+          AI Chat {chatOpen ? "(open)" : "(closed)"}
+          {proposalCount > 0 && ` · ${proposalCount} pending approval${proposalCount > 1 ? "s" : ""}`}
+        </TooltipContent>
       </Tooltip>
 
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant={state.computerOpen ? "secondary" : "ghost"}
+            variant={computerOpen ? "secondary" : "ghost"}
             size="icon-sm"
             onClick={toggleComputer}
             aria-label="Toggle computer panel"
@@ -48,7 +68,7 @@ function PanelToggleBar() {
             <DesktopIcon className="size-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Computer {state.computerOpen ? "(open)" : "(closed)"}</TooltipContent>
+        <TooltipContent>Computer {computerOpen ? "(open)" : "(closed)"}</TooltipContent>
       </Tooltip>
     </div>
   );
@@ -64,11 +84,17 @@ export interface WorkspaceLayoutProps {
 
 export function WorkspaceLayout({
   children,
-  projectId,
-  environmentId,
+  projectId: propProjectId,
+  environmentId: propEnvironmentId,
 }: WorkspaceLayoutProps) {
-  const { state, toggleComputer } = useWorkspacePanel();
-  const { chatOpen, computerOpen } = state;
+  const chatOpen = useWorkspacePanelStore((s) => s.chatOpen);
+  const computerOpen = useWorkspacePanelStore((s) => s.computerOpen);
+  const toggleComputer = useWorkspacePanelStore((s) => s.toggleComputer);
+  const activeProjectId = useProjectStore((s) => s.activeProjectId);
+  
+  // Use prop projectId if provided, otherwise use global active project
+  const projectId = propProjectId ?? activeProjectId ?? undefined;
+  const environmentId = propEnvironmentId;
 
   return (
     <div className="flex h-full overflow-hidden">

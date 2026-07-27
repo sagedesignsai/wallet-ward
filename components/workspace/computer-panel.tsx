@@ -1,6 +1,7 @@
 "use client";
 
-import { useWorkspacePanel, type ComputerTab } from "@/context/workspace-panel";
+import { useWorkspacePanelStore, type ComputerTab } from "@/stores/workspace-panel-store";
+import type { FileNode } from "@/stores/workspace-panel-store";
 import {
   Artifact,
   ArtifactAction,
@@ -37,7 +38,6 @@ import {
   CopyIcon,
   DownloadIcon,
 } from "@phosphor-icons/react";
-import type { FileNode } from "@/context/workspace-panel";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -405,8 +405,12 @@ function ComputerEmptyState() {
 // ─── Main Computer Panel ──────────────────────────────────────────────────────
 
 export function ComputerPanel({ className }: { className?: string }) {
-  const { state, closeTab, setActiveTab, pinTab, openTab } = useWorkspacePanel();
-  const { tabs, activeTabId } = state;
+  const tabs = useWorkspacePanelStore((s) => s.tabs);
+  const activeTabId = useWorkspacePanelStore((s) => s.activeTabId);
+  const closeTab = useWorkspacePanelStore((s) => s.closeTab);
+  const setActiveTab = useWorkspacePanelStore((s) => s.setActiveTab);
+  const pinTab = useWorkspacePanelStore((s) => s.pinTab);
+  const openTab = useWorkspacePanelStore((s) => s.openTab);
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? null;
 
   return (

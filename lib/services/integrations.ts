@@ -11,7 +11,7 @@ import type { AuthContext } from "@/lib/api/auth"
 
 export const createIntegrationSchema = z.object({
   name: z.string().min(1).max(100),
-  provider: z.enum(["github", "gmail", "slack", "gitlab", "linear", "jira", "notion", "airtable", "trello"]),
+  provider: z.enum(["github", "gmail", "slack", "gitlab", "linear", "jira", "notion", "airtable", "trello", "ghost"]),
   metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
@@ -424,7 +424,7 @@ export async function injectIntegrationCredentials(
     }
   }
 
-  // Inject into Daytona sandbox
+  // Inject into Daytona sandbox using the SDK's updateEnv method
   if (Object.keys(envVars).length > 0) {
     try {
       const { getDaytonaClient } = await import("@/lib/daytona")
@@ -435,14 +435,7 @@ export async function injectIntegrationCredentials(
       }
 
       const sandbox = await client.get(sandboxId)
-      
-      // Note: This is a placeholder - actual Daytona SDK method may differ
-      // Check Daytona SDK documentation for the correct method
-      if (typeof (sandbox as any).setEnvironmentVariables === "function") {
-        await (sandbox as any).setEnvironmentVariables(envVars)
-      } else {
-        throw new Error("Daytona SDK does not support environment variable injection")
-      }
+      await sandbox.updateEnv(envVars)
     } catch (error) {
       errors.push(
         `Failed to inject credentials into sandbox: ${error instanceof Error ? error.message : "Unknown error"}`
@@ -479,16 +472,13 @@ export async function revokeIntegrationCredentials(
   try {
     const sandbox = await client.get(sandboxId)
     
-    // Remove all integration-related env vars
+    // Remove all integration-related env vars using updateEnv with unset option
     const envVarsToRemove = Object.keys(SERVICE_BASE_URLS).flatMap((provider) => {
       const upper = provider.toUpperCase()
       return [`${upper}_TOKEN`, `${upper}_API_URL`, `${upper}_SCOPES`]
     })
 
-    // Note: Placeholder - check Daytona SDK for actual method
-    if (typeof (sandbox as any).unsetEnvironmentVariables === "function") {
-      await (sandbox as any).unsetEnvironmentVariables(envVarsToRemove)
-    }
+    await sandbox.updateEnv({}, { unset: envVarsToRemove })
 
     await writeAuditLog({
       organizationId,

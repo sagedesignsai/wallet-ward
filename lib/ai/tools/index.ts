@@ -19,8 +19,12 @@ import { agentProxyTool } from "./agent-proxy";
 import { createGithubPullRequestTool } from "./create-github-pr";
 import { triggerVercelDeployTool } from "./trigger-vercel-deploy";
 import { sendSlackNotificationTool } from "./send-slack-notification";
+import { sendEmailTool } from "./send-email";
 import { proposeActionTool } from "./propose-action";
 import { getPendingProposalsTool } from "./get-pending-proposals";
+import { getRepositoriesTool } from "./get-repositories";
+import { getProjectFilesTool } from "./get-project-files";
+import { cloneRepositoryTool } from "./clone-repository";
 
 /**
  * All available tools for the Flowspace agent suite
@@ -40,6 +44,10 @@ export const workspaceTools = {
   createGithubPullRequest: createGithubPullRequestTool,
   triggerVercelDeploy: triggerVercelDeployTool,
   sendSlackNotification: sendSlackNotificationTool,
+  sendEmail: sendEmailTool,
   proposeAction: proposeActionTool,
   getPendingProposals: getPendingProposalsTool,
+  getRepositories: getRepositoriesTool,
+  getProjectFiles: getProjectFilesTool,
+  cloneRepository: cloneRepositoryTool,
 } as const;

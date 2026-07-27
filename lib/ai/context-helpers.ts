@@ -51,29 +51,73 @@ export function buildAgentRuntimeContext(
  * Build tools context for the agent
  * This maps each tool to its required context values
  */
-export function buildToolsContext(organizationId: string, userId: string) {
+export function buildToolsContext(
+  organizationId: string,
+  userId: string,
+  options?: {
+    projectId?: string;
+    environmentId?: string;
+    agentType?: string;
+  }
+) {
   return {
     getSecrets: {
       organizationId,
+      projectId: options?.projectId,
     },
     getDocuments: {
       organizationId,
+      projectId: options?.projectId,
     },
     createDocument: {
       userId,
       organizationId,
+      projectId: options?.projectId,
     },
     getTasks: {
       organizationId,
+      projectId: options?.projectId,
     },
     createTask: {
       organizationId,
+      projectId: options?.projectId,
     },
     getProjects: {
       organizationId,
     },
     searchAuditLogs: {
       organizationId,
+      projectId: options?.projectId,
+    },
+    proposeAction: {
+      organizationId,
+      userId,
+      projectId: options?.projectId,
+    },
+    createSandbox: {
+      organizationId,
+      projectId: options?.projectId,
+    },
+    executeCommand: {
+      organizationId,
+      projectId: options?.projectId,
+    },
+    agentProxy: {
+      organizationId,
+      projectId: options?.projectId,
+      agentType: options?.agentType,
+    },
+    getRepositories: {
+      organizationId,
+      projectId: options?.projectId,
+    },
+    getProjectFiles: {
+      organizationId,
+      projectId: options?.projectId,
+    },
+    cloneRepository: {
+      organizationId,
+      projectId: options?.projectId,
     },
   };
 }

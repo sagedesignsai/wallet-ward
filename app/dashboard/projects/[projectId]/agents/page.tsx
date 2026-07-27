@@ -12,7 +12,7 @@ import {
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useAgentSessions } from "@/hooks/use-agent-sessions"
-import { useWorkspacePanel } from "@/context/workspace-panel"
+import { useWorkspacePanelStore } from "@/stores/workspace-panel-store"
 import { AgentSessionRow } from "@/components/agents/agent-session-row"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,7 +55,7 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
   const { project } = useProject(projectId)
   const { sessions, isLoading, error, createSession, refetch } =
     useAgentSessions({ projectId, polling: true })
-  const { launchAgent } = useWorkspacePanel()
+  const launchAgent = useWorkspacePanelStore((s) => s.launchAgent)
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [name, setName] = useState("")

@@ -234,11 +234,10 @@ function OrgMembersInner({ orgId }: { orgId: string }) {
   }, [organization, orgId, setConfig])
 
   const isOwnerOrAdmin = useMemo(() => {
-    if (!organization) return false
-    // For now we check against org data; the role is typically on the user's membership
-    // The org detail endpoint includes member role info via membership context
-    return true // Default: allow management. The API will enforce permissions.
-  }, [organization])
+    if (!user?.id || members.length === 0) return false
+    const currentMember = members.find((m) => m.userId === user.id)
+    return currentMember?.role === "owner" || currentMember?.role === "admin"
+  }, [members, user?.id])
 
   const handleRoleChange = useCallback(
     async (memberId: string, role: string) => {
@@ -369,27 +368,29 @@ function OrgMembersInner({ orgId }: { orgId: string }) {
       )}
 
       {/* Invite Form */}
-      <div className="flex flex-col gap-3">
-        <SectionHeader icon={<UserPlusIcon />} title="Invite Member">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              document.getElementById("invite-email")?.focus()
-            }}
-            className="hidden sm:flex"
-          >
-            <UserPlusIcon />
-            Invite Member
-          </Button>
-        </SectionHeader>
+      {isOwnerOrAdmin && (
+        <div className="flex flex-col gap-3">
+          <SectionHeader icon={<UserPlusIcon />} title="Invite Member">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                document.getElementById("invite-email")?.focus()
+              }}
+              className="hidden sm:flex"
+            >
+              <UserPlusIcon />
+              Invite Member
+            </Button>
+          </SectionHeader>
 
-        <Card size="sm" className="border-dashed border-primary/20 bg-primary/[0.02]">
-          <CardContent className="pt-0">
-            <InviteMemberForm onInvite={invite} />
-          </CardContent>
-        </Card>
-      </div>
+          <Card size="sm" className="border-dashed border-primary/20 bg-primary/[0.02]">
+            <CardContent className="pt-0">
+              <InviteMemberForm onInvite={invite} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Members Table */}
       <div className="flex flex-col gap-3">

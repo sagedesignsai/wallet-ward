@@ -10,6 +10,8 @@ import {
   RobotIcon,
   CheckCircleIcon,
   PlugIcon,
+  GitBranchIcon,
+  FolderIcon,
 } from "@phosphor-icons/react"
 
 import { SectionNav } from "@/components/dashboard/section-nav"
@@ -46,6 +48,18 @@ const ITEMS = [
     href: "/agents",
     icon: RobotIcon,
     primary: true,
+  },
+  {
+    id: "repositories",
+    label: "Repositories",
+    href: "/repositories",
+    icon: GitBranchIcon,
+  },
+  {
+    id: "files",
+    label: "Files",
+    href: "/files",
+    icon: FolderIcon,
   },
   {
     id: "documents",

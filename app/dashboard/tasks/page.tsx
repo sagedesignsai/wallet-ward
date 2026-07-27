@@ -8,6 +8,7 @@ import {
 } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useProjectStore } from "@/stores/project-store"
 import { useGlobalTasks } from "@/hooks/use-global-tasks"
 import { StatCard } from "@/components/dashboard/stat-card"
 import {
@@ -18,8 +19,9 @@ import {
 
 export default function GlobalTasksPage() {
   const { setConfig } = useDashboardConfig()
+  const activeProjectId = useProjectStore((s) => s.activeProjectId)
   const {
-    tasks,
+    tasks: allTasks,
     filtered,
     isLoading,
     error,
@@ -31,16 +33,29 @@ export default function GlobalTasksPage() {
     refetch,
   } = useGlobalTasks()
 
+  const activeProject = useMemo(
+    () => projects.find((p) => p.id === activeProjectId) ?? null,
+    [projects, activeProjectId],
+  )
+
+  // Filter tasks to only show current project
+  const tasks = useMemo(() => {
+    if (!activeProjectId) return allTasks
+    return allTasks.filter((t) => t.projectId === activeProjectId)
+  }, [allTasks, activeProjectId])
+
   useEffect(() => {
     setConfig({
       title: "Tasks",
-      description: "All tasks across your projects",
+      description: activeProject 
+        ? `Tasks in ${activeProject.name}`
+        : "Project tasks",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Tasks" },
       ],
     })
-  }, [setConfig])
+  }, [setConfig, activeProject])
 
   const distinctProjects = useMemo(() => {
     const set = new Set<string>()

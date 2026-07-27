@@ -40,10 +40,15 @@ export async function POST(request: Request) {
       return Response.json({ error: "No active organization" }, { status: 400 });
     }
 
-    // Build tools context with required credentials
+    // Build tools context with required credentials and project scope
     const toolsContext = buildToolsContext(
       authContext.organizationId,
-      authContext.userId
+      authContext.userId,
+      {
+        projectId,
+        environmentId,
+        agentType,
+      }
     );
 
     // Create agent with type-specific prompt

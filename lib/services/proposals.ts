@@ -737,18 +737,207 @@ async function executePublishToSlack(
 }
 
 /**
- * Publish to Ghost CMS (stub for Phase 1)
+ * Publish to Ghost CMS
+ *
+ * Uses Ghost Admin API with JWT authentication.
+ * The integration stores the Admin API key (format: {id}:{secret}) as the
+ * access token, and the Ghost instance URL in metadata.
+ *
+ * Payload:
+ * - title: post title (required)
+ * - content: markdown body (required)
+ * - status: "published" | "draft" | "scheduled" (optional, default: "published")
+ * - tags: array of tag names (optional)
+ * - featureImage: URL of feature image (optional)
+ * - excerpt: post excerpt (optional)
  */
 async function executePublishToGhost(
   payload: Record<string, unknown>,
   project: Project,
   organizationId: string
 ): Promise<ExecutionResult> {
-  return {
-    success: false,
-    message: "Ghost integration coming in Phase 1",
-    error: "Not implemented",
-    executedAt: new Date(),
+  const title = (payload.title as string) ?? ""
+  const content = (payload.content as string) ?? ""
+
+  if (!title) {
+    return {
+      success: false,
+      message: "Missing required field: title",
+      error: "Invalid payload",
+      executedAt: new Date(),
+    }
+  }
+
+  // 1. Find Ghost integration for this project
+  const ghostIntegration = await prisma.integration.findFirst({
+    where: {
+      projectId: project.id,
+      provider: "ghost",
+      enabled: true,
+    },
+  })
+
+  if (!ghostIntegration) {
+    return {
+      success: false,
+      message: "No Ghost integration found",
+      error: "Ghost not connected. Add a Ghost integration with your Admin API key.",
+      executedAt: new Date(),
+    }
+  }
+
+  // 2. Get Ghost instance URL from integration metadata
+  const ghostUrl = (ghostIntegration.metadata as Record<string, unknown>)
+    ?.url as string
+
+  if (!ghostUrl) {
+    return {
+      success: false,
+      message: "Ghost instance URL not configured",
+      error: "The Ghost integration metadata must include a 'url' field.",
+      executedAt: new Date(),
+    }
+  }
+
+  try {
+    // 3. Decrypt the Admin API key (format: {id}:{secret})
+    const { getDecryptedToken } = await import("@/lib/services/integrations")
+    const apiKey = await getDecryptedToken(
+      {
+        ...ghostIntegration,
+        project: { organizationId },
+      },
+      "access"
+    )
+
+    const [keyId, keySecret] = apiKey.split(":")
+
+    if (!keyId || !keySecret) {
+      return {
+        success: false,
+        message: "Invalid Ghost API key format",
+        error: "Ghost Admin API key must be in format {id}:{secret}",
+        executedAt: new Date(),
+      }
+    }
+
+    // 4. Create a JWT for Ghost Admin API authentication
+    //    Header: alg HS256, typ JWT, kid: {keyId}
+    //    Payload: iat, exp, aud: /admin/
+    const now = Math.floor(Date.now() / 1000)
+    const header = { alg: "HS256", typ: "JWT", kid: keyId }
+    const claims = { iat: now, exp: now + 300, aud: "/admin/" }
+
+    const encodedHeader = Buffer.from(JSON.stringify(header))
+      .toString("base64url")
+    const encodedClaims = Buffer.from(JSON.stringify(claims))
+      .toString("base64url")
+    const signingInput = `${encodedHeader}.${encodedClaims}`
+
+    // Sign with HMAC-SHA256 using the Web Crypto API
+    const encoder = new TextEncoder()
+    const keyData = encoder.encode(keySecret)
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyData,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    )
+    const signature = await crypto.subtle.sign(
+      "HMAC",
+      cryptoKey,
+      encoder.encode(signingInput)
+    )
+    const encodedSignature = Buffer.from(signature).toString("base64url")
+    const jwt = `${signingInput}.${encodedSignature}`
+
+    // 5. Build the Ghost post payload
+    const status = (payload.status as string) ?? "published"
+    const tags = (payload.tags as string[]) ?? []
+    const featureImage = payload.featureImage as string | undefined
+    const excerpt = payload.excerpt as string | undefined
+
+    const ghostPost: Record<string, unknown> = {
+      title,
+      mobiledoc: JSON.stringify({
+        version: "0.3.1",
+        markups: [],
+        atoms: [],
+        cards: [["markdown", { markdown: content }]],
+        sections: [[10, 0]],
+      }),
+      status,
+    }
+
+    if (tags.length > 0) {
+      ghostPost.tags = tags.map((name) => ({ name }))
+    }
+    if (featureImage) {
+      ghostPost.feature_image = featureImage
+    }
+    if (excerpt) {
+      ghostPost.custom_excerpt = excerpt
+    }
+
+    // 6. Call Ghost Admin API to create the post
+    const normalizedUrl = ghostUrl.replace(/\/+$/, "")
+    const ghostRes = await fetch(
+      `${normalizedUrl}/ghost/api/admin/posts/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Ghost ${jwt}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          posts: [ghostPost],
+        }),
+      }
+    )
+
+    if (!ghostRes.ok) {
+      const errorBody = await ghostRes.json().catch(() => ({}))
+      const errorDetail =
+        (errorBody as any)?.errors?.[0]?.message ?? ghostRes.statusText
+      return {
+        success: false,
+        message: `Ghost API error: ${errorDetail}`,
+        error: JSON.stringify(errorBody),
+        executedAt: new Date(),
+      }
+    }
+
+    const ghostData = (await ghostRes.json()) as {
+      posts: Array<{ id: string; slug: string; url: string }>
+    }
+
+    const createdPost = ghostData.posts?.[0]
+    const postUrl = createdPost?.url
+      ? `${normalizedUrl}${createdPost.url}`
+      : undefined
+
+    return {
+      success: true,
+      message: postUrl
+        ? `Published to Ghost: ${postUrl}`
+        : "Published to Ghost successfully",
+      result: {
+        postId: createdPost?.id,
+        slug: createdPost?.slug,
+        url: postUrl,
+        status,
+        title,
+      },
+      executedAt: new Date(),
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: "Ghost publish failed",
+      error: error instanceof Error ? error.message : "Unknown error",
+      executedAt: new Date(),
+    }
   }
 }
 

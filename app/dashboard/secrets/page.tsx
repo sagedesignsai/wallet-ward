@@ -17,6 +17,7 @@ import {
 } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useProjectStore } from "@/stores/project-store"
 import {
   useGlobalSecrets,
   type GlobalSecret,
@@ -28,6 +29,7 @@ import { DataTable, type DataTableColumn } from "@/components/dashboard/data-tab
 import { GlobalSecretsToolbar } from "@/components/secrets/global-secrets-toolbar"
 import { SecretExpandPanel } from "@/components/secrets/secret-expand-panel"
 import { SecretRowActions } from "@/components/projects/secret-row-actions"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
@@ -87,8 +89,9 @@ function typeLabel(type: string): string {
 
 export default function GlobalSecretsPage() {
   const { setConfig } = useDashboardConfig()
+  const activeProjectId = useProjectStore((s) => s.activeProjectId)
   const {
-    secrets,
+    secrets: allSecrets,
     filtered,
     isLoading,
     error,
@@ -104,6 +107,17 @@ export default function GlobalSecretsPage() {
     refetch,
   } = useGlobalSecrets()
 
+  const activeProject = useMemo(
+    () => projects.find((p) => p.id === activeProjectId) ?? null,
+    [projects, activeProjectId],
+  )
+
+  // Filter secrets to only show current project
+  const secrets = useMemo(() => {
+    if (!activeProjectId) return allSecrets
+    return allSecrets.filter((s) => s.projectId === activeProjectId)
+  }, [allSecrets, activeProjectId])
+
   const [revealedSecrets, setRevealedSecrets] = useState<
     Record<string, GlobalSecretWithValue>
   >({})
@@ -111,13 +125,15 @@ export default function GlobalSecretsPage() {
 
   useEffect(() => {
     setConfig({
-      description: "All secrets across your projects",
+      description: activeProject 
+        ? `Secrets in ${activeProject.name}`
+        : "Project secrets and keys",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Secrets" },
+        { label: "Secrets & Keys" },
       ],
     })
-  }, [setConfig])
+  }, [setConfig, activeProject])
 
   const handleReveal = useCallback(
     async (secretId: string): Promise<GlobalSecretWithValue | null> => {
@@ -319,31 +335,23 @@ export default function GlobalSecretsPage() {
         />
 
         {!isLoading && secrets.length === 0 && !error ? (
-          /* Rich empty state — no secrets exist at all */
-          <div className="overflow-hidden rounded-lg border border-border/60 bg-card">
-            <div className="flex flex-col items-center gap-4 py-12 px-6">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-primary ring-1 ring-primary/10 transition-transform hover:scale-105">
-                <FolderOpenIcon className="size-7" weight="light" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-sm font-semibold text-foreground">
-                  No secrets yet
-                </h3>
-                <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
-                  Create your first secret within a project to get started.
-                </p>
-              </div>
+          <Empty className="rounded-lg border border-border/60 bg-card py-16">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <FolderOpenIcon className="size-4" />
+              </EmptyMedia>
+              <EmptyTitle>No secrets yet</EmptyTitle>
+              <EmptyDescription>
+                Create your first secret within a project to get started.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button asChild className="mt-2">
               <Link href="/dashboard/projects">
-                <Button
-                  size="default"
-                  className="shadow-md shadow-primary/10 transition-all hover:shadow-lg hover:shadow-primary/20"
-                >
-                  <FolderIcon />
-                  Go to Projects
-                </Button>
+                <FolderIcon />
+                Go to Projects
               </Link>
-            </div>
-          </div>
+            </Button>
+          </Empty>
         ) : (
           <div className="flex flex-col gap-2">
             <DataTable

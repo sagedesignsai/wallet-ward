@@ -12,6 +12,11 @@ import {
   PlugIcon,
   ListChecksIcon,
   FileTextIcon,
+  KeyIcon,
+  WarningCircleIcon,
+  ShieldCheckIcon,
+  GitBranchIcon,
+  FolderIcon,
 } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
@@ -19,10 +24,18 @@ import { useProject } from "@/hooks/use-project"
 import { useAgentSessions } from "@/hooks/use-agent-sessions"
 import { useProposals } from "@/hooks/use-proposals"
 import { useProjectIntegrations } from "@/hooks/use-project-integrations"
+import { useSecrets } from "@/hooks/use-secrets"
+import { useDocuments } from "@/hooks/use-documents"
+import { useTasks } from "@/hooks/use-tasks"
+import { useRepositories } from "@/hooks/use-repositories"
+import { useProjectFiles } from "@/hooks/use-project-files"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
+import { AgentSessionRow } from "@/components/agents/agent-session-row"
+import { ApprovalCard } from "@/components/proposals/approval-card"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
@@ -53,13 +66,18 @@ export default function ProjectOverviewPage({
 function ProjectOverviewInner({ projectId }: { projectId: string }) {
   const { setConfig } = useDashboardConfig()
   const { project, isLoading, error } = useProject(projectId)
-  const { sessions } = useAgentSessions({ projectId, limit: 50 })
+  const { data: sessions } = useAgentSessions({ projectId, limit: 5 })
   const { proposals } = useProposals({
     projectId,
     status: "awaiting_approval" as any,
     orgWide: false,
   })
   const { integrations } = useProjectIntegrations(projectId)
+  const { secrets } = useSecrets(projectId)
+  const { documents } = useDocuments(projectId)
+  const { tasks } = useTasks(projectId)
+  const { repositories } = useRepositories(projectId)
+  const { files } = useProjectFiles(projectId)
 
   useEffect(() => {
     if (project) {
@@ -83,10 +101,11 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
           <Skeleton className="h-[140px] rounded-lg" />
           <Skeleton className="h-[140px] rounded-lg" />
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="h-[120px] rounded-lg" />
-          <Skeleton className="h-[120px] rounded-lg" />
-          <Skeleton className="h-[120px] rounded-lg" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-[100px] rounded-lg" />
+          <Skeleton className="h-[100px] rounded-lg" />
+          <Skeleton className="h-[100px] rounded-lg" />
+          <Skeleton className="h-[100px] rounded-lg" />
         </div>
       </div>
     )
@@ -118,192 +137,276 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
   }
 
   const environments = project.environments ?? []
+  const activeSessions = sessions?.filter((s) => s.status === "active") ?? []
+  const todoTasks = tasks.filter((t) => t.status === "todo")
+  const inProgressTasks = tasks.filter((t) => t.status === "in_progress")
+  const doneTasks = tasks.filter((t) => t.status === "done")
+  const connectedIntegrations = integrations.filter((i) => i.enabled)
 
   return (
-    <div className="flex flex-col gap-5 animate-in fade-in duration-300">
-      {/* Error banner */}
-      {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-          {error}
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+      {/* Hero Section */}
+      <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-gradient-to-br from-primary/8 via-background to-background p-6">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute -top-12 -left-12 w-48 h-48 bg-primary/8 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-8 w-32 h-32 bg-violet-500/6 rounded-full blur-2xl" />
         </div>
-      )}
-
-      {/* Top info row */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {/* Project Info Card */}
-        <Card className="gap-0">
-          <CardHeader className="border-b border-border/40 pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <StackSimpleIcon className="size-4" />
-                </div>
-                <div className="min-w-0">
-                  <CardTitle className="text-sm">{project.name}</CardTitle>
-                  <span className="font-mono text-[0.625rem] text-muted-foreground">
-                    {project.slug}
+        <div className="relative z-10">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/20">
+                <StackSimpleIcon className="size-6" weight="duotone" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">{project.name}</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {project.description ?? "No description provided"}
+                </p>
+                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <ClockCounterClockwiseIcon className="size-3" />
+                    Created <TimeAgo date={project.createdAt} />
                   </span>
+                  <span>·</span>
+                  <span className="font-mono">{project.slug}</span>
                 </div>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="pt-3">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {project.description ?? "No description provided."}
-            </p>
-            <div className="mt-3 flex items-center gap-4 text-[0.625rem] text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <ClockCounterClockwiseIcon className="size-3" />
-                Created <TimeAgo date={project.createdAt} />
-              </span>
-              <span className="flex items-center gap-1">
-                Updated <TimeAgo date={project.updatedAt} />
-              </span>
+            <Button size="sm" asChild>
+              <Link href={`/dashboard/projects/${projectId}/settings`}>
+                Settings
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Secrets & Keys"
+          value={secrets.length}
+          icon={<KeyIcon className="size-4" />}
+          description={secrets.length === 1 ? "1 secret" : `${secrets.length} secrets`}
+        />
+        <StatCard
+          label="Documents"
+          value={documents.length}
+          icon={<FileTextIcon className="size-4" />}
+          description={documents.length === 1 ? "1 document" : `${documents.length} documents`}
+        />
+        <StatCard
+          label="Tasks"
+          value={tasks.length}
+          icon={<ListChecksIcon className="size-4" />}
+          description={`${todoTasks.length} todo · ${inProgressTasks.length} active`}
+        />
+        <StatCard
+          label="Integrations"
+          value={connectedIntegrations.length}
+          icon={<PlugIcon className="size-4" />}
+          description={`${connectedIntegrations.length} of ${integrations.length} connected`}
+        />
+      </div>
+
+      {/* Pending Approvals Alert */}
+      {proposals.length > 0 && (
+        <Card className="border-amber-500/20 bg-amber-500/5">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <WarningCircleIcon className="size-5 text-amber-400" weight="fill" />
+              <CardTitle className="text-sm text-amber-400">
+                {proposals.length} Pending Approval{proposals.length > 1 ? "s" : ""}
+              </CardTitle>
             </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {proposals.slice(0, 2).map((proposal) => (
+              <ApprovalCard
+                key={proposal.id}
+                proposal={proposal}
+                className="text-xs"
+              />
+            ))}
+            {proposals.length > 2 && (
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link href={`/dashboard/projects/${projectId}/proposals`}>
+                  View all {proposals.length} proposals
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Active Agents */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <RobotIcon className="size-4 text-primary" weight="duotone" />
+                <CardTitle className="text-sm">Active Agents</CardTitle>
+                {activeSessions.length > 0 && (
+                  <Badge variant="secondary">{activeSessions.length}</Badge>
+                )}
+              </div>
+              <Button variant="ghost" size="sm" asChild className="h-7 text-xs">
+                <Link href={`/dashboard/projects/${projectId}/agents`}>
+                  View all
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {activeSessions.length === 0 ? (
+              <div className="text-center py-6">
+                <RobotIcon className="size-10 text-muted-foreground/40 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">
+                  No active agents
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {activeSessions.map((session) => (
+                  <AgentSessionRow key={session.id} session={session} />
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Stats */}
-        <div className="grid gap-3 grid-cols-2">
-          <StatCard
-            label="Environments"
-            value={environments.length}
-            icon={<StackSimpleIcon className="size-4" />}
-            description={
-              environments.length === 1
-                ? "1 environment"
-                : `${environments.length} environments`
-            }
-          />
-          <StatCard
-            label="Agents"
-            value={sessions.length}
-            icon={<RobotIcon className="size-4" />}
-            description={
-              proposals.length > 0
-                ? `${proposals.length} pending approval`
-                : "Sessions in this project"
-            }
-          />
-        </div>
-      </div>
-
-      {/* Quick links */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-        {[
-          {
-            href: `/dashboard/projects/${projectId}/agents`,
-            label: "Agents",
-            icon: RobotIcon,
-            meta: `${sessions.length}`,
-          },
-          {
-            href: `/dashboard/projects/${projectId}/proposals`,
-            label: "Proposals",
-            icon: CheckCircleIcon,
-            meta: proposals.length > 0 ? `${proposals.length} pending` : "All",
-          },
-          {
-            href: `/dashboard/projects/${projectId}/integrations`,
-            label: "Integrations",
-            icon: PlugIcon,
-            meta: `${integrations.length}`,
-          },
-          {
-            href: `/dashboard/projects/${projectId}/tasks`,
-            label: "Tasks",
-            icon: ListChecksIcon,
-            meta: "Open",
-          },
-          {
-            href: `/dashboard/projects/${projectId}/documents`,
-            label: "Documents",
-            icon: FileTextIcon,
-            meta: "Open",
-          },
-        ].map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="group flex flex-col gap-2 rounded-xl border border-border/40 bg-card/50 p-3 hover:bg-card hover:border-border/60 transition-colors"
-          >
-            <item.icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
-            <div>
-              <p className="text-xs font-semibold text-foreground">{item.label}</p>
-              <p className="text-[10px] text-muted-foreground">{item.meta}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Environments Section */}
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-medium text-foreground">Environments</h2>
-          <Link
-            href={`/dashboard/projects/${projectId}/environments`}
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            View all
-            <ArrowRightIcon className="size-3" />
-          </Link>
-        </div>
-
-        {environments.length === 0 ? (
-          <div className="overflow-hidden rounded-lg border border-dashed border-border/60 bg-card">
-            <div className="flex flex-col items-center gap-3 py-10 px-6">
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-primary ring-1 ring-primary/10">
-                <StackSimpleIcon className="size-6" weight="light" />
+        {/* Environments */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <StackSimpleIcon className="size-4 text-blue-400" weight="duotone" />
+                <CardTitle className="text-sm">Environments</CardTitle>
+                <Badge variant="secondary">{environments.length}</Badge>
               </div>
-              <div className="text-center">
-                <h3 className="text-sm font-semibold text-foreground">
+              <Button variant="ghost" size="sm" asChild className="h-7 text-xs">
+                <Link href={`/dashboard/projects/${projectId}/environments`}>
+                  Manage
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {environments.length === 0 ? (
+              <div className="text-center py-6">
+                <StackSimpleIcon className="size-10 text-muted-foreground/40 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">
                   No environments yet
-                </h3>
-                <p className="mt-1 max-w-xs text-xs text-muted-foreground leading-relaxed">
-                  Create your first environment to start organizing secrets.
                 </p>
               </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {environments.map((env) => (
-              <Link
-                key={env.id}
-                href={`/dashboard/projects/${projectId}/environments/${env.id}`}
-                className={cn(
-                  "group relative overflow-hidden rounded-lg border border-l-[3px] bg-gradient-to-r p-4 ring-1 ring-foreground/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5",
-                  envGradient(env.slug)
-                )}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-foreground truncate">
-                        {env.name}
-                      </span>
-                      <Badge
-                        variant={envBadgeVariant(env.slug)}
-                        className="shrink-0"
-                      >
+            ) : (
+              <div className="space-y-2">
+                {environments.map((env) => (
+                  <Link
+                    key={env.id}
+                    href={`/dashboard/projects/${projectId}/environments/${env.id}`}
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-lg border border-l-[3px] bg-gradient-to-r transition-colors hover:bg-accent",
+                      envGradient(env.slug)
+                    )}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-medium truncate">{env.name}</span>
+                      <Badge variant={envBadgeVariant(env.slug)} className="shrink-0">
                         {env.slug}
                       </Badge>
                     </div>
-                    {env.description && (
-                      <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground leading-relaxed">
-                        {env.description}
-                      </p>
-                    )}
-                    <p className="mt-2 text-[0.625rem] text-muted-foreground">
-                      Created <TimeAgo date={env.createdAt} />
-                    </p>
-                  </div>
-                  <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-foreground" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+                    <ArrowRightIcon className="size-3.5 text-muted-foreground shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Actions Grid */}
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+          {[
+            {
+              href: `/dashboard/projects/${projectId}/secrets`,
+              label: "Secrets",
+              icon: KeyIcon,
+              color: "text-cyan-400",
+              bg: "bg-cyan-500/10",
+              count: secrets.length,
+            },
+            {
+              href: `/dashboard/projects/${projectId}/documents`,
+              label: "Documents",
+              icon: FileTextIcon,
+              color: "text-blue-400",
+              bg: "bg-blue-500/10",
+              count: documents.length,
+            },
+            {
+              href: `/dashboard/projects/${projectId}/tasks`,
+              label: "Tasks",
+              icon: ListChecksIcon,
+              color: "text-violet-400",
+              bg: "bg-violet-500/10",
+              count: tasks.length,
+            },
+            {
+              href: `/dashboard/projects/${projectId}/integrations`,
+              label: "Integrations",
+              icon: PlugIcon,
+              color: "text-emerald-400",
+              bg: "bg-emerald-500/10",
+              count: connectedIntegrations.length,
+            },
+            {
+              href: `/dashboard/projects/${projectId}/repositories`,
+              label: "Repositories",
+              icon: GitBranchIcon,
+              color: "text-purple-400",
+              bg: "bg-purple-500/10",
+              count: repositories.length,
+            },
+            {
+              href: `/dashboard/projects/${projectId}/files`,
+              label: "Files",
+              icon: FolderIcon,
+              color: "text-orange-400",
+              bg: "bg-orange-500/10",
+              count: files.length,
+            },
+            {
+              href: `/dashboard/projects/${projectId}/settings`,
+              label: "Settings",
+              icon: ShieldCheckIcon,
+              color: "text-amber-400",
+              bg: "bg-amber-500/10",
+              count: null,
+            },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group flex flex-col gap-3 rounded-xl border border-border/40 bg-card p-4 hover:bg-accent hover:border-border/60 transition-all duration-200"
+            >
+              <div className={cn("flex size-10 items-center justify-center rounded-lg", item.bg)}>
+                <item.icon className={cn("size-5", item.color)} weight="duotone" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                {item.count !== null && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {item.count} {item.count === 1 ? "item" : "items"}
+                  </p>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   )

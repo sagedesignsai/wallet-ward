@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import {
   HouseIcon,
   FolderIcon,
@@ -9,7 +9,6 @@ import {
   UsersIcon,
   ClockCounterClockwiseIcon,
   GearIcon,
-  SignOutIcon,
   ShieldCheckIcon,
   FileTextIcon,
   ListChecksIcon,
@@ -18,7 +17,6 @@ import {
   CheckCircleIcon,
 } from "@phosphor-icons/react"
 
-import { useAuth } from "@/hooks/use-auth"
 import { usePendingApprovals } from "@/hooks/use-pending-approvals"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -37,17 +35,7 @@ import {
 
 export function DashboardSidebar() {
   const pathname = usePathname()
-  const { signOut } = useAuth()
-  const router = useRouter()
   const { count: pendingCount } = usePendingApprovals()
-
-  const handleSignOut = async () => {
-    await signOut({
-      fetchOptions: {
-        onSuccess: () => router.push("/"),
-      },
-    })
-  }
 
   const NAV_GROUPS = [
     {
@@ -170,12 +158,6 @@ export function DashboardSidebar() {
                 <ShieldCheckIcon className="size-4" />
                 <span>2FA Security</span>
               </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleSignOut} tooltip="Sign Out">
-              <SignOutIcon className="size-4" />
-              <span>Sign Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -10,11 +10,15 @@ import {
   CheckIcon,
   BuildingsIcon,
   PlusIcon,
+  FolderIcon,
 } from "@phosphor-icons/react"
 
 import { useAuth } from "@/hooks/use-auth"
 import { useOrganization } from "@/hooks/use-organization"
+import { useProjects } from "@/hooks/use-projects"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useAgentSessions } from "@/hooks/use-agent-sessions"
+import { useProjectStore } from "@/stores/project-store"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -56,6 +60,60 @@ function Breadcrumbs({
         </span>
       ))}
     </nav>
+  )
+}
+
+function ProjectSwitcher() {
+  const activeProjectId = useProjectStore((s) => s.activeProjectId)
+  const setActiveProjectId = useProjectStore((s) => s.setActiveProjectId)
+  const { projects, isLoading } = useProjects()
+
+  if (isLoading || !projects || projects.length === 0) return null
+  const activeProject = projects.find((p) => p.id === activeProjectId) ?? null
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 gap-1.5 px-2 text-xs">
+          <FolderIcon className="size-3.5 shrink-0 text-muted-foreground" />
+          <span className="hidden max-w-[120px] truncate font-medium text-foreground md:inline">
+            {activeProject?.name ?? "Select Project"}
+          </span>
+          <CaretDownIcon className="h-3 w-3 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent className="w-56" align="start">
+        <DropdownMenuLabel className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <FolderIcon className="size-3" />
+            Active Project
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {projects.map((project: any) => (
+          <DropdownMenuItem
+            key={project.id}
+            className={cn("text-xs cursor-pointer", project.id === activeProjectId && "bg-accent")}
+            onClick={() => setActiveProjectId(project.id)}
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-2 truncate">
+              {project.name}
+            </span>
+            {project.id === activeProjectId && (
+              <CheckIcon className="size-3.5 shrink-0 text-primary" weight="bold" />
+            )}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="text-xs cursor-pointer text-muted-foreground">
+          <Link href="/dashboard/projects/new">
+            <PlusIcon className="size-3.5" />
+            New Project
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -125,6 +183,22 @@ function OrgSwitcher() {
   )
 }
 
+function AgentStatusIndicator() {
+  const { data: sessions } = useAgentSessions()
+  const activeSessions = sessions?.filter((s) => s.status === "active") ?? []
+  
+  if (activeSessions.length === 0) return null
+
+  return (
+    <div className="flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/5 px-2.5 py-1">
+      <div className="size-2 rounded-full bg-green-500 animate-pulse" />
+      <span className="text-xs text-green-400 font-medium">
+        {activeSessions.length} agent{activeSessions.length > 1 ? "s" : ""} active
+      </span>
+    </div>
+  )
+}
+
 export function DashboardHeader() {
   const { config } = useDashboardConfig()
   const { user, signOut } = useAuth()
@@ -167,10 +241,13 @@ export function DashboardHeader() {
         <div className="flex items-center gap-2">
           {config.actions}
 
+          <AgentStatusIndicator />
+
           <PanelToggleBar />
 
           <Separator orientation="vertical" className="h-4!" />
 
+          <ProjectSwitcher />
           <OrgSwitcher />
 
           <DropdownMenu>

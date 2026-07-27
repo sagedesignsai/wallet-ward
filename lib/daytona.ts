@@ -60,27 +60,24 @@ function extractSandboxInfo(s: Record<string, unknown>): SandboxInfo {
 export async function createSandbox(
   name: string,
   language?: string,
+  envVars?: Record<string, string>,
 ): Promise<SandboxInfo> {
   const client = requireClient();
   const sandbox = await client.create({
     name,
     language: (language as "javascript" | "python" | "typescript" | undefined) ?? "javascript",
+    envVars,
   } as Parameters<typeof client.create>[0]);
   return extractSandboxInfo(sandbox as unknown as Record<string, unknown>);
 }
 
 export async function listSandboxes(): Promise<SandboxInfo[]> {
   const client = requireClient();
-  const response = await client.list();
-  
-  // client.list() returns an object with a sandboxes array, not an array directly
-  const sandboxesArray = Array.isArray(response)
-    ? response
-    : Array.isArray((response as any).sandboxes)
-      ? (response as any).sandboxes
-      : [];
-  
-  return sandboxesArray.map((s: any) => extractSandboxInfo(s as unknown as Record<string, unknown>));
+  const results: SandboxInfo[] = [];
+  for await (const sandbox of client.list()) {
+    results.push(extractSandboxInfo(sandbox as unknown as Record<string, unknown>));
+  }
+  return results;
 }
 
 export async function getSandbox(id: string): Promise<SandboxInfo> {
