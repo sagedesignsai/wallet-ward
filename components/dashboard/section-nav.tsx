@@ -37,7 +37,11 @@ type SectionNavProps = {
   className?: string
 }
 
-function resolveActiveId(pathname: string, base: string, items: SectionNavItem[]) {
+function resolveActiveId(
+  pathname: string,
+  base: string,
+  items: SectionNavItem[]
+) {
   // Prefer longest matching href so nested routes highlight correctly
   const sorted = [...items].sort((a, b) => b.href.length - a.href.length)
   return (
@@ -57,9 +61,7 @@ export function SectionNav({ base, items, className }: SectionNavProps) {
   const primaryItems = hasExplicitPrimary
     ? items.filter((i) => i.primary)
     : items
-  const moreItems = hasExplicitPrimary
-    ? items.filter((i) => !i.primary)
-    : []
+  const moreItems = hasExplicitPrimary ? items.filter((i) => !i.primary) : []
 
   const activeItem = items.find((i) => i.id === activeId)
   const activeInMore = moreItems.some((i) => i.id === activeId)
@@ -97,7 +99,7 @@ export function SectionNav({ base, items, className }: SectionNavProps) {
       </div>
 
       {/* Desktop: primary links + optional More */}
-      <div className="hidden sm:flex items-center gap-1.5 flex-wrap">
+      <div className="hidden flex-wrap items-center gap-1.5 sm:flex">
         <nav className="flex items-center gap-0.5 rounded-lg bg-muted/60 p-0.5">
           {primaryItems.map((item) => {
             const Icon = item.icon
@@ -128,7 +130,8 @@ export function SectionNav({ base, items, className }: SectionNavProps) {
                 size="sm"
                 className={cn(
                   "h-8 gap-1.5 text-xs font-medium",
-                  activeInMore && "border-primary/30 bg-primary/5 text-foreground"
+                  activeInMore &&
+                    "border-primary/30 bg-primary/5 text-foreground"
                 )}
               >
                 {activeInMore && activeItem ? activeItem.label : "More"}
@@ -143,7 +146,7 @@ export function SectionNav({ base, items, className }: SectionNavProps) {
                   <DropdownMenuItem key={item.id} asChild>
                     <Link
                       href={toHref(item)}
-                      className="flex items-center gap-2 text-xs cursor-pointer"
+                      className="flex cursor-pointer items-center gap-2 text-xs"
                     >
                       <Icon className="size-3.5 shrink-0" />
                       <span className="flex-1">{item.label}</span>

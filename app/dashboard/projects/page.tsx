@@ -14,11 +14,20 @@ import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProjects, type Project } from "@/hooks/use-projects"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
-import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/components/dashboard/data-table"
 import { DataTableToolbar } from "@/components/dashboard/data-table-toolbar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { CreateProjectDialog } from "@/components/projects/create-project-dialog"
 import { ProjectRowActions } from "@/components/projects/project-row-actions"
 
@@ -31,14 +40,8 @@ function envBadgeVariant(slug: string): "default" | "secondary" | "outline" {
 export default function ProjectsPage() {
   const { setConfig } = useDashboardConfig()
   const router = useRouter()
-  const {
-    projects,
-    isLoading,
-    error,
-    refetch,
-    createProject,
-    deleteProject,
-  } = useProjects()
+  const { projects, isLoading, error, refetch, createProject, deleteProject } =
+    useProjects()
 
   const [search, setSearch] = useState("")
   const [createOpen, setCreateOpen] = useState(false)
@@ -51,7 +54,11 @@ export default function ProjectsPage() {
         { label: "Projects" },
       ],
       actions: (
-        <Button size="default" onClick={() => setCreateOpen(true)} className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20">
+        <Button
+          size="default"
+          onClick={() => setCreateOpen(true)}
+          className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
+        >
           <PlusIcon />
           New Project
         </Button>
@@ -103,11 +110,11 @@ export default function ProjectsPage() {
         header: "Project",
         className: "w-[280px]",
         render: (project) => (
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="font-medium text-foreground truncate">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="truncate font-medium text-foreground">
               {project.name}
             </span>
-            <span className="font-mono text-[0.625rem] text-muted-foreground truncate">
+            <span className="truncate font-mono text-[0.625rem] text-muted-foreground">
               {project.slug}
             </span>
           </div>
@@ -119,11 +126,13 @@ export default function ProjectsPage() {
         className: "w-[220px]",
         render: (project) =>
           project.description ? (
-            <span className="text-muted-foreground line-clamp-2">
+            <span className="line-clamp-2 text-muted-foreground">
               {project.description}
             </span>
           ) : (
-            <span className="italic text-muted-foreground/60">No description</span>
+            <span className="text-muted-foreground/60 italic">
+              No description
+            </span>
           ),
       },
       {
@@ -134,7 +143,7 @@ export default function ProjectsPage() {
           const envs = project.environments
           if (envs.length === 0) {
             return (
-              <span className="text-muted-foreground/60 italic text-[0.625rem]">
+              <span className="text-[0.625rem] text-muted-foreground/60 italic">
                 None
               </span>
             )
@@ -180,7 +189,7 @@ export default function ProjectsPage() {
           {error}
           <button
             onClick={refetch}
-            className="ml-2 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors"
+            className="ml-2 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
           >
             Retry
           </button>
@@ -197,7 +206,9 @@ export default function ProjectsPage() {
               <FolderIcon className="size-4" />
             </div>
           }
-          description={projects.length === 1 ? "1 project" : `${projects.length} projects`}
+          description={
+            projects.length === 1 ? "1 project" : `${projects.length} projects`
+          }
         />
         <StatCard
           label="Total Environments"

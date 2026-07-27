@@ -107,14 +107,14 @@ function OrgOverviewInner({ orgId }: { orgId: string }) {
           <h3 className="text-sm font-semibold text-foreground">
             Organization not found
           </h3>
-          <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
+          <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
             {error ??
               "This organization may have been deleted or you may not have access."}
           </p>
         </div>
         <Link
           href="/dashboard/organizations"
-          className="text-xs text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
+          className="text-xs text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
         >
           Back to Organizations
         </Link>
@@ -123,7 +123,7 @@ function OrgOverviewInner({ orgId }: { orgId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-5 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-5 duration-300 fade-in">
       {/* Error banner */}
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
@@ -140,7 +140,7 @@ function OrgOverviewInner({ orgId }: { orgId: string }) {
               <div className="flex items-center gap-2.5">
                 <div
                   className={cn(
-                    "flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white text-xs font-bold",
+                    "flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-bold text-white",
                     getAvatarGradient(organization.name)
                   )}
                 >
@@ -155,9 +155,7 @@ function OrgOverviewInner({ orgId }: { orgId: string }) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <CardTitle className="text-sm">
-                    {organization.name}
-                  </CardTitle>
+                  <CardTitle className="text-sm">{organization.name}</CardTitle>
                   <span className="font-mono text-[0.625rem] text-muted-foreground">
                     {organization.slug}
                   </span>
@@ -231,7 +229,7 @@ function OrgOverviewInner({ orgId }: { orgId: string }) {
                 <h3 className="mt-2.5 text-sm font-medium text-foreground">
                   Manage Members
                 </h3>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   Invite, remove, or change roles
                 </p>
               </div>
@@ -251,7 +249,7 @@ function OrgOverviewInner({ orgId }: { orgId: string }) {
                 <h3 className="mt-2.5 text-sm font-medium text-foreground">
                   Organization Settings
                 </h3>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   Name, logo, and preferences
                 </p>
               </div>
@@ -271,7 +269,7 @@ function OrgOverviewInner({ orgId }: { orgId: string }) {
                 <h3 className="mt-2.5 text-sm font-medium text-foreground">
                   View Audit Logs
                 </h3>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   Track activity and changes
                 </p>
               </div>

@@ -20,7 +20,7 @@ export async function GET(
 
     const { projectId } = await params
     const { searchParams } = new URL(req.url)
-    
+
     const type = searchParams.get("type") as FileType | null
     const path = searchParams.get("path")
     const tags = searchParams.get("tags")?.split(",")
@@ -96,9 +96,19 @@ export async function POST(
     const body = await req.json()
 
     // Validate required fields
-    if (!body.name || !body.path || !body.type || !body.mimeType || !body.size || !body.storageId) {
+    if (
+      !body.name ||
+      !body.path ||
+      !body.type ||
+      !body.mimeType ||
+      !body.size ||
+      !body.storageId
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields: name, path, type, mimeType, size, storageId" },
+        {
+          error:
+            "Missing required fields: name, path, type, mimeType, size, storageId",
+        },
         { status: 400 }
       )
     }

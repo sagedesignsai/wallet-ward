@@ -102,7 +102,7 @@ function ActivityInner({ projectId }: { projectId: string }) {
     return (
       <div className="flex flex-col gap-4">
         <Skeleton className="h-8 w-48 rounded" />
-        <div className="rounded-lg border border-border/40 bg-card overflow-hidden">
+        <div className="overflow-hidden rounded-lg border border-border/40 bg-card">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="border-b border-border/30 last:border-b-0">
               <Skeleton className="h-12 w-full" />
@@ -114,7 +114,7 @@ function ActivityInner({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-4 duration-300 fade-in">
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
           <WarningIcon className="size-3.5 shrink-0" />
@@ -152,7 +152,7 @@ function ActivityInner({ projectId }: { projectId: string }) {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="rounded-lg border border-border/40 bg-card overflow-hidden divide-y divide-border/30">
+        <div className="divide-y divide-border/30 overflow-hidden rounded-lg border border-border/40 bg-card">
           {filtered.map((log) => (
             <ActivityEntry key={log.id} log={log} />
           ))}
@@ -174,7 +174,7 @@ function ActivityEntry({ log }: { log: AuditLog }) {
       <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted/50 text-muted-foreground">
         <Icon className="size-3" />
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-xs text-foreground">
           <span className="font-medium">{actionLabel(log.action)}</span>
           {typeof metaTitle === "string" && metaTitle.length > 0 && (

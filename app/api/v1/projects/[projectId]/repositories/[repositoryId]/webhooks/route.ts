@@ -48,7 +48,10 @@ export async function GET(
     // Verify repository exists and belongs to project
     const repository = await RepositoryService.getById(repositoryId)
     if (!repository || repository.projectId !== projectId) {
-      return NextResponse.json({ error: "Repository not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Repository not found" },
+        { status: 404 }
+      )
     }
 
     const webhooks = await db.repositoryWebhook.findMany({
@@ -108,7 +111,10 @@ export async function POST(
     // Verify repository exists and belongs to project
     const repository = await RepositoryService.getById(repositoryId)
     if (!repository || repository.projectId !== projectId) {
-      return NextResponse.json({ error: "Repository not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Repository not found" },
+        { status: 404 }
+      )
     }
 
     const body = await req.json()
@@ -122,7 +128,14 @@ export async function POST(
     }
 
     // Validate event is a valid WebhookEvent enum value
-    const validEvents = ["push", "pull_request", "release", "tag", "issue", "commit_comment"]
+    const validEvents = [
+      "push",
+      "pull_request",
+      "release",
+      "tag",
+      "issue",
+      "commit_comment",
+    ]
     if (!validEvents.includes(body.event)) {
       return NextResponse.json(
         { error: `Invalid event. Must be one of: ${validEvents.join(", ")}` },

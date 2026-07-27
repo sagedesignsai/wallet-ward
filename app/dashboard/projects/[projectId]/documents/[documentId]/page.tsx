@@ -153,7 +153,7 @@ function DocumentDetailInner({
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl">
+    <div className="flex max-w-3xl flex-col gap-5">
       <div className="space-y-1.5">
         <Label htmlFor="doc-title">Title</Label>
         <Input
@@ -180,12 +180,15 @@ function DocumentDetailInner({
       </div>
 
       <div className="flex items-center gap-2">
-        <Button onClick={handleSave} disabled={!dirty || !title.trim() || isSaving}>
+        <Button
+          onClick={handleSave}
+          disabled={!dirty || !title.trim() || isSaving}
+        >
           {isSaving ? "Saving…" : "Save"}
         </Button>
         <Button
           variant="ghost"
-          className="text-red-400 hover:text-red-300 gap-1.5"
+          className="gap-1.5 text-red-400 hover:text-red-300"
           onClick={handleDelete}
         >
           <TrashIcon className="size-3.5" />

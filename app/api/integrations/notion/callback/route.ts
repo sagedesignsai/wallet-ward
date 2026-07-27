@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
 import type { Prisma } from "@/generated/prisma/client"
-import { consumeOAuthState, storeEncryptedToken } from "@/lib/services/integrations"
+import {
+  consumeOAuthState,
+  storeEncryptedToken,
+} from "@/lib/services/integrations"
 import { prisma } from "@/lib/db"
 
 export async function GET(request: Request) {
@@ -11,7 +14,10 @@ export async function GET(request: Request) {
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL("/?error=missing_oauth_params", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+        new URL(
+          "/?error=missing_oauth_params",
+          process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+        )
       )
     }
 
@@ -22,7 +28,10 @@ export async function GET(request: Request) {
     const clientSecret = process.env.NOTION_CLIENT_SECRET
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
-        new URL("/?error=notion_oauth_not_configured", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+        new URL(
+          "/?error=notion_oauth_not_configured",
+          process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+        )
       )
     }
 
@@ -30,12 +39,14 @@ export async function GET(request: Request) {
     const redirectUri = `${appUrl}/api/integrations/notion/callback`
 
     // Exchange code for access token
-    const authString = Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
-    
+    const authString = Buffer.from(`${clientId}:${clientSecret}`).toString(
+      "base64"
+    )
+
     const tokenRes = await fetch("https://api.notion.com/v1/oauth/token", {
       method: "POST",
       headers: {
-        "Authorization": `Basic ${authString}`,
+        Authorization: `Basic ${authString}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -77,9 +88,7 @@ export async function GET(request: Request) {
     })
 
     if (!project) {
-      return NextResponse.redirect(
-        new URL("/?error=project_not_found", appUrl)
-      )
+      return NextResponse.redirect(new URL("/?error=project_not_found", appUrl))
     }
 
     // Create the integration record
@@ -87,7 +96,9 @@ export async function GET(request: Request) {
       data: {
         projectId,
         provider: "notion",
-        name: tokenData.workspace_name ? `Notion (${tokenData.workspace_name})` : "Notion",
+        name: tokenData.workspace_name
+          ? `Notion (${tokenData.workspace_name})`
+          : "Notion",
         scopes: [], // Notion doesn't use traditional scopes
         metadata: {
           workspaceId: tokenData.workspace_id ?? null,
@@ -100,7 +111,12 @@ export async function GET(request: Request) {
     })
 
     // Store encrypted access token (Notion tokens don't expire)
-    await storeEncryptedToken(integration.id, tokenData.access_token, project.organizationId, "access")
+    await storeEncryptedToken(
+      integration.id,
+      tokenData.access_token,
+      project.organizationId,
+      "access"
+    )
 
     // Redirect to the project page
     return NextResponse.redirect(
@@ -109,8 +125,6 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Notion OAuth callback error:", error)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-    return NextResponse.redirect(
-      new URL("/?error=callback_failed", appUrl)
-    )
+    return NextResponse.redirect(new URL("/?error=callback_failed", appUrl))
   }
 }

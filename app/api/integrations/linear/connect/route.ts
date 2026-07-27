@@ -5,7 +5,10 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { handleRouteError } from "@/lib/api/http"
-import { linearConnectSchema, createOAuthState } from "@/lib/services/integrations"
+import {
+  linearConnectSchema,
+  createOAuthState,
+} from "@/lib/services/integrations"
 import { badRequest } from "@/lib/api/errors"
 
 export async function POST(request: Request) {

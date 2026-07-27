@@ -5,7 +5,10 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { handleRouteError } from "@/lib/api/http"
-import { trelloConnectSchema, createOAuthState } from "@/lib/services/integrations"
+import {
+  trelloConnectSchema,
+  createOAuthState,
+} from "@/lib/services/integrations"
 import { badRequest } from "@/lib/api/errors"
 
 export async function POST(request: Request) {
@@ -33,7 +36,10 @@ export async function POST(request: Request) {
     authorizationUrl.searchParams.set("scope", "read,write")
     authorizationUrl.searchParams.set("expiration", "never")
     authorizationUrl.searchParams.set("response_type", "token")
-    authorizationUrl.searchParams.set("return_url", `${callbackUrl}?state=${state}`)
+    authorizationUrl.searchParams.set(
+      "return_url",
+      `${callbackUrl}?state=${state}`
+    )
 
     return NextResponse.json({
       url: authorizationUrl.toString(),

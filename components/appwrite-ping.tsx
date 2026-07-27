@@ -5,11 +5,14 @@ import { client } from "@/lib/appwrite"
 
 export function AppwritePing() {
   useEffect(() => {
-    client.ping().then((response) => {
-      console.log("Appwrite ping:", response)
-    }).catch((error) => {
-      console.error("Appwrite ping failed:", error)
-    })
+    client
+      .ping()
+      .then((response) => {
+        console.log("Appwrite ping:", response)
+      })
+      .catch((error) => {
+        console.error("Appwrite ping failed:", error)
+      })
   }, [])
 
   return null

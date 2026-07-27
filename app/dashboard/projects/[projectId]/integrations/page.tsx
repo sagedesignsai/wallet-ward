@@ -81,7 +81,8 @@ function ProjectIntegrationsInner({ projectId }: { projectId: string }) {
 
   const handleToggle = async (id: string, enabled: boolean) => {
     const ok = await setEnabled(id, enabled)
-    if (ok) toast.success(enabled ? "Integration enabled" : "Integration disabled")
+    if (ok)
+      toast.success(enabled ? "Integration enabled" : "Integration disabled")
   }
 
   const handleDelete = async (id: string) => {
@@ -130,27 +131,24 @@ function ProjectIntegrationsInner({ projectId }: { projectId: string }) {
           </Button>
         </Empty>
       ) : (
-        <div className="rounded-xl border border-border/40 bg-card divide-y divide-border/30">
+        <div className="divide-y divide-border/30 rounded-xl border border-border/40 bg-card">
           {integrations.map((intg) => (
-            <div
-              key={intg.id}
-              className="flex items-center gap-3 px-4 py-3"
-            >
+            <div key={intg.id} className="flex items-center gap-3 px-4 py-3">
               <div className="flex size-8 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground">
                 <GitBranchIcon className="size-4" />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{intg.name}</p>
-                  <Badge variant="outline" className="text-[10px] h-5">
+                  <p className="truncate text-sm font-medium">{intg.name}</p>
+                  <Badge variant="outline" className="h-5 text-[10px]">
                     {providerLabel(intg.provider)}
                   </Badge>
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-0.5">
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
                   Updated <TimeAgo date={intg.updatedAt} />
                 </p>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex shrink-0 items-center gap-3">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-muted-foreground">
                     {intg.enabled ? "On" : "Off"}

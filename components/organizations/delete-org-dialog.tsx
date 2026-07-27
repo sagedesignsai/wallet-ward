@@ -109,9 +109,7 @@ export function DeleteOrgDialog({
             disabled={isDeleting}
             autoFocus
           />
-          {error && (
-            <p className="text-xs text-destructive">{error}</p>
-          )}
+          {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
 
         <AlertDialogFooter>

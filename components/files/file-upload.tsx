@@ -64,20 +64,59 @@ const FILE_VISIBILITY: { value: FileVisibility; label: string }[] = [
 
 function getFileIconFromMime(mimeType: string) {
   if (mimeType.startsWith("image/")) return FileImageIcon
-  if (mimeType.startsWith("video/") || mimeType.startsWith("audio/")) return FileIcon
+  if (mimeType.startsWith("video/") || mimeType.startsWith("audio/"))
+    return FileIcon
   if (mimeType === "application/pdf") return FilePdfIcon
-  if (mimeType.includes("zip") || mimeType.includes("tar") || mimeType.includes("gz") || mimeType.includes("compressed")) return FileZipIcon
-  if (mimeType.includes("json") || mimeType.includes("javascript") || mimeType.includes("typescript") || mimeType.includes("xml") || mimeType.includes("yaml")) return FileCodeIcon
+  if (
+    mimeType.includes("zip") ||
+    mimeType.includes("tar") ||
+    mimeType.includes("gz") ||
+    mimeType.includes("compressed")
+  )
+    return FileZipIcon
+  if (
+    mimeType.includes("json") ||
+    mimeType.includes("javascript") ||
+    mimeType.includes("typescript") ||
+    mimeType.includes("xml") ||
+    mimeType.includes("yaml")
+  )
+    return FileCodeIcon
   if (mimeType.startsWith("text/")) return FileTextIcon
   return FileIcon
 }
 
 function getFileTypeFromMime(mimeType: string): FileType {
-  if (mimeType.startsWith("image/") || mimeType.startsWith("video/") || mimeType.startsWith("audio/")) return "asset"
+  if (
+    mimeType.startsWith("image/") ||
+    mimeType.startsWith("video/") ||
+    mimeType.startsWith("audio/")
+  )
+    return "asset"
   if (mimeType === "application/pdf") return "document"
-  if (mimeType.includes("json") || mimeType.includes("javascript") || mimeType.includes("typescript") || mimeType.includes("xml") || mimeType.includes("yaml") || mimeType.includes("html") || mimeType.includes("css")) return "code"
-  if (mimeType.includes("zip") || mimeType.includes("tar") || mimeType.includes("gz")) return "artifact"
-  if (mimeType.includes("csv") || mimeType.includes("excel") || mimeType.includes("sheet") || mimeType.includes("sql")) return "data"
+  if (
+    mimeType.includes("json") ||
+    mimeType.includes("javascript") ||
+    mimeType.includes("typescript") ||
+    mimeType.includes("xml") ||
+    mimeType.includes("yaml") ||
+    mimeType.includes("html") ||
+    mimeType.includes("css")
+  )
+    return "code"
+  if (
+    mimeType.includes("zip") ||
+    mimeType.includes("tar") ||
+    mimeType.includes("gz")
+  )
+    return "artifact"
+  if (
+    mimeType.includes("csv") ||
+    mimeType.includes("excel") ||
+    mimeType.includes("sheet") ||
+    mimeType.includes("sql")
+  )
+    return "data"
   if (mimeType.startsWith("text/")) return "document"
   return "other"
 }
@@ -137,17 +176,20 @@ export function FileUpload({
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileSelect = useCallback((selectedFile: File) => {
-    setFile(selectedFile)
-    // Auto-fill name from filename (strip extension)
-    const baseName = selectedFile.name.replace(/\.[^/.]+$/, "")
-    setName((prev) => prev || baseName)
-    // Auto-detect type from MIME
-    setType(getFileTypeFromMime(selectedFile.type))
-    if (errors.file) {
-      setErrors((prev) => ({ ...prev, file: "" }))
-    }
-  }, [errors.file])
+  const handleFileSelect = useCallback(
+    (selectedFile: File) => {
+      setFile(selectedFile)
+      // Auto-fill name from filename (strip extension)
+      const baseName = selectedFile.name.replace(/\.[^/.]+$/, "")
+      setName((prev) => prev || baseName)
+      // Auto-detect type from MIME
+      setType(getFileTypeFromMime(selectedFile.type))
+      if (errors.file) {
+        setErrors((prev) => ({ ...prev, file: "" }))
+      }
+    },
+    [errors.file]
+  )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -279,10 +321,10 @@ export function FileUpload({
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-foreground truncate">
+                <p className="truncate text-xs font-medium text-foreground">
                   {file.name}
                 </p>
-                <div className="flex items-center gap-2 text-[0.625rem] text-muted-foreground mt-0.5">
+                <div className="mt-0.5 flex items-center gap-2 text-[0.625rem] text-muted-foreground">
                   <span>{formatFileSize(file.size)}</span>
                   <span>·</span>
                   <span>{file.type || "Unknown type"}</span>
@@ -320,16 +362,20 @@ export function FileUpload({
             <div
               className={cn(
                 "flex size-10 items-center justify-center rounded-full transition-colors",
-                isDragging ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                isDragging
+                  ? "bg-primary/10 text-primary"
+                  : "bg-muted text-muted-foreground"
               )}
             >
               <UploadSimpleIcon className="size-5" weight="bold" />
             </div>
             <div className="text-center">
               <p className="text-xs font-medium text-foreground">
-                {isDragging ? "Drop file here" : "Click to upload or drag and drop"}
+                {isDragging
+                  ? "Drop file here"
+                  : "Click to upload or drag and drop"}
               </p>
-              <p className="text-[0.625rem] text-muted-foreground mt-0.5">
+              <p className="mt-0.5 text-[0.625rem] text-muted-foreground">
                 Any file type up to 50 MB
               </p>
             </div>
@@ -354,7 +400,7 @@ export function FileUpload({
       <div className="grid gap-2">
         <Label htmlFor="file-name">
           Display Name{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Input
           id="file-name"
@@ -409,20 +455,20 @@ export function FileUpload({
       <div className="grid gap-2">
         <Label htmlFor="file-tags">
           Tags{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-input bg-input/20 px-2 py-1 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30 dark:bg-input/30">
           {tags.map((tag) => (
             <Badge
               key={tag}
               variant="secondary"
-              className="gap-1 text-[0.625rem] h-5 px-1.5"
+              className="h-5 gap-1 px-1.5 text-[0.625rem]"
             >
               <TagIcon className="size-2.5" />
               {tag}
               <button
                 type="button"
-                className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10 transition-colors"
+                className="ml-0.5 rounded-full p-0.5 transition-colors hover:bg-foreground/10"
                 onClick={() => removeTag(tag)}
                 aria-label={`Remove tag ${tag}`}
                 disabled={isSubmitting}
@@ -434,13 +480,15 @@ export function FileUpload({
           <input
             id="file-tags"
             type="text"
-            placeholder={tags.length === 0 ? "Type and press Enter to add tags..." : ""}
+            placeholder={
+              tags.length === 0 ? "Type and press Enter to add tags..." : ""
+            }
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
             onKeyDown={handleTagsKeyDown}
             onBlur={handleTagsBlur}
             disabled={isSubmitting}
-            className="flex-1 min-w-[120px] bg-transparent text-xs/relaxed outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            className="min-w-[120px] flex-1 bg-transparent text-xs/relaxed outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
           />
         </div>
         <p className="text-[0.625rem] text-muted-foreground">
@@ -479,8 +527,10 @@ export function FileUpload({
           <VisIcon className="size-3" />
           <span>
             {visibility === "private" && "Only you can access this file"}
-            {visibility === "project" && "All project members can access this file"}
-            {visibility === "public" && "Anyone with the link can access this file"}
+            {visibility === "project" &&
+              "All project members can access this file"}
+            {visibility === "public" &&
+              "Anyone with the link can access this file"}
           </span>
         </div>
       </div>
@@ -490,7 +540,9 @@ export function FileUpload({
         <div className="grid gap-1.5">
           <div className="flex items-center justify-between text-[0.625rem]">
             <span className="text-muted-foreground">Uploading...</span>
-            <span className="text-muted-foreground font-medium">{uploadProgress}%</span>
+            <span className="font-medium text-muted-foreground">
+              {uploadProgress}%
+            </span>
           </div>
           <div className="h-1 w-full overflow-hidden rounded-full bg-muted/60">
             <div

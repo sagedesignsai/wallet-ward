@@ -81,7 +81,8 @@ export async function POST(request: Request) {
       data: {
         projectId: parsed.projectId,
         name: parsed.name,
-        type: (parsed.type ?? "coding") as "coding" | "content" | "ops" | "research",
+        type: (parsed.type ?? "coding") as
+          "coding" | "content" | "ops" | "research",
         status: "idle",
         prompt: parsed.prompt ?? null,
         metadata: parsed.metadata ?? undefined,

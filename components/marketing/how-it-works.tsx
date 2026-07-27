@@ -13,9 +13,22 @@ const STEPS = [
     bgColor: "bg-cyan-500/10",
     borderColor: "border-cyan-500/30",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
-        <rect x="5" y="11" width="14" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
-        <path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+        <rect
+          x="5"
+          y="11"
+          width="14"
+          height="11"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <path
+          d="M8 11V7a4 4 0 018 0v4"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
         <circle cx="12" cy="16.5" r="1.5" fill="currentColor" opacity="0.7" />
       </svg>
     ),
@@ -29,10 +42,21 @@ const STEPS = [
     bgColor: "bg-violet-500/10",
     borderColor: "border-violet-500/30",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
-        <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
+        <path
+          d="M12 2v4M12 18v4M2 12h4M18 12h4"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity="0.4"
+        />
       </svg>
     ),
   },
@@ -45,10 +69,21 @@ const STEPS = [
     bgColor: "bg-primary/10",
     borderColor: "border-primary/30",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <circle cx="12" cy="9" r="4" stroke="currentColor" strokeWidth="2" />
-        <path d="M5 21c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M19 2l1.5 1.5L17 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M5 21c0-3.866 3.134-7 7-7s7 3.134 7 7"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M19 2l1.5 1.5L17 7"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
         <circle cx="20" cy="3" r="1" fill="currentColor" opacity="0.6" />
       </svg>
     ),
@@ -62,9 +97,23 @@ const STEPS = [
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-500/30",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
-        <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
-        <path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+        <rect
+          x="3"
+          y="3"
+          width="18"
+          height="18"
+          rx="3"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <path
+          d="M8 12l3 3 5-5"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -78,7 +127,9 @@ export function HowItWorksSection({ className }: { className?: string }) {
     const el = sectionRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setIsVisible(true) },
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true)
+      },
       { threshold: 0.25 }
     )
     observer.observe(el)
@@ -86,57 +137,81 @@ export function HowItWorksSection({ className }: { className?: string }) {
   }, [])
 
   return (
-    <section ref={sectionRef} id="how-it-works" className={cn("py-24 relative overflow-hidden", className)}>
+    <section
+      ref={sectionRef}
+      id="how-it-works"
+      className={cn("relative overflow-hidden py-24", className)}
+    >
       <div className="container mx-auto px-6">
-        <div className="text-center mb-20 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/5 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="mb-20 space-y-4 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/5 px-3 py-1.5 text-xs font-semibold tracking-wider text-emerald-400 uppercase">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
             Simple by Design
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+          <h2 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">
             Four steps to autonomous execution.
           </h2>
-          <p className="text-muted-foreground text-base max-w-lg mx-auto">
-            From credential setup to agent-powered delivery — without rebuilding your workflow from scratch.
+          <p className="mx-auto max-w-lg text-base text-muted-foreground">
+            From credential setup to agent-powered delivery — without rebuilding
+            your workflow from scratch.
           </p>
         </div>
 
         {/* Step grid */}
         <div className="relative">
           {/* Connector line (desktop) */}
-          <div className="absolute top-8 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-border/60 to-transparent hidden lg:block" aria-hidden />
+          <div
+            className="absolute top-8 right-[12.5%] left-[12.5%] hidden h-px bg-gradient-to-r from-transparent via-border/60 to-transparent lg:block"
+            aria-hidden
+          />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 relative z-10">
+          <div className="relative z-10 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((step, i) => (
               <div
                 key={i}
                 className={cn(
-                  "flex flex-col items-center text-center gap-5 transition-all duration-700",
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                  "flex flex-col items-center gap-5 text-center transition-all duration-700",
+                  isVisible
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-8 opacity-0"
                 )}
                 style={{ transitionDelay: `${i * 150}ms` }}
               >
                 {/* Icon circle */}
-                <div className={cn(
-                  "relative flex items-center justify-center w-16 h-16 rounded-2xl border-2 shadow-xl",
-                  step.bgColor, step.borderColor, step.color,
-                )}>
+                <div
+                  className={cn(
+                    "relative flex h-16 w-16 items-center justify-center rounded-2xl border-2 shadow-xl",
+                    step.bgColor,
+                    step.borderColor,
+                    step.color
+                  )}
+                >
                   {step.icon}
                   {/* Step number badge */}
-                  <div className={cn(
-                    "absolute -top-3 -right-3 w-7 h-7 rounded-full flex items-center justify-center bg-background border-2 text-[11px] font-black",
-                    step.borderColor, step.color
-                  )}>
+                  <div
+                    className={cn(
+                      "absolute -top-3 -right-3 flex h-7 w-7 items-center justify-center rounded-full border-2 bg-background text-[11px] font-black",
+                      step.borderColor,
+                      step.color
+                    )}
+                  >
                     {i + 1}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <div className={cn("text-[10px] font-bold uppercase tracking-[0.2em]", step.color)}>
+                  <div
+                    className={cn(
+                      "text-[10px] font-bold tracking-[0.2em] uppercase",
+                      step.color
+                    )}
+                  >
                     Step {step.number}
                   </div>
-                  <h3 className="text-base font-bold text-foreground">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+                  <h3 className="text-base font-bold text-foreground">
+                    {step.title}
+                  </h3>
+                  <p className="mx-auto max-w-xs text-sm leading-relaxed text-muted-foreground">
                     {step.description}
                   </p>
                 </div>

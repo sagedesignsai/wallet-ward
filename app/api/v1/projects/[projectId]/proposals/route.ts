@@ -1,5 +1,9 @@
 import { handleRouteError, json } from "@/lib/api/http"
-import { requireAuth, requireOrganization, requirePermission } from "@/lib/api/auth"
+import {
+  requireAuth,
+  requireOrganization,
+  requirePermission,
+} from "@/lib/api/auth"
 import { listProposals } from "@/lib/services/proposals"
 import type { ProposalStatus } from "@/generated/prisma/client"
 

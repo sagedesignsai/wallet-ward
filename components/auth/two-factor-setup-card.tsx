@@ -38,8 +38,12 @@ interface TwoFactorSetupCardProps {
   onCancel?: () => void
 }
 
-export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCardProps) {
-  const { enableTwoFactor, verifyTotp, isLoading, error, setError } = useTwoFactor()
+export function TwoFactorSetupCard({
+  onCompleted,
+  onCancel,
+}: TwoFactorSetupCardProps) {
+  const { enableTwoFactor, verifyTotp, isLoading, error, setError } =
+    useTwoFactor()
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [password, setPassword] = useState("")
@@ -126,23 +130,24 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
   }
 
   return (
-    <Card className="w-full max-w-lg border-border/40 shadow-xl bg-card/80 backdrop-blur-md">
-      <CardContent className="pt-6 space-y-6">
+    <Card className="w-full max-w-lg border-border/40 bg-card/80 shadow-xl backdrop-blur-md">
+      <CardContent className="space-y-6 pt-6">
         {/* Step Indicator Badges */}
         <div className="flex items-center justify-between px-2">
           {[1, 2, 3, 4].map((s) => (
             <div key={s} className="flex items-center gap-1.5">
               <div
-                className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold transition-all ${step === s
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                  step === s
                     ? "bg-primary text-primary-foreground shadow-md ring-2 ring-primary/20"
                     : step > s
                       ? "bg-primary/20 text-primary"
                       : "bg-muted text-muted-foreground"
-                  }`}
+                }`}
               >
-                {step > s ? <CheckIcon className="w-3.5 h-3.5" /> : s}
+                {step > s ? <CheckIcon className="h-3.5 w-3.5" /> : s}
               </div>
-              <span className="text-[11px] font-medium hidden sm:inline text-muted-foreground">
+              <span className="hidden text-[11px] font-medium text-muted-foreground sm:inline">
                 {s === 1 && "Auth"}
                 {s === 2 && "Scan"}
                 {s === 3 && "Verify"}
@@ -153,7 +158,7 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
         </div>
 
         {error && (
-          <Alert variant="destructive" className="py-2.5 px-3 text-xs">
+          <Alert variant="destructive" className="px-3 py-2.5 text-xs">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -170,16 +175,18 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
             <form onSubmit={handleInitiateSetup} className="space-y-4 pt-2">
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="setup-password">Current Password</FieldLabel>
+                  <FieldLabel htmlFor="setup-password">
+                    Current Password
+                  </FieldLabel>
                   <div className="relative flex items-center">
-                    <LockIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                    <LockIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="setup-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-9 pr-9"
+                      className="pr-9 pl-9"
                       disabled={isLoading}
                       required
                     />
@@ -189,25 +196,29 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
                       className="absolute right-3 text-muted-foreground hover:text-foreground"
                     >
                       {showPassword ? (
-                        <EyeSlashIcon className="w-4 h-4" />
+                        <EyeSlashIcon className="h-4 w-4" />
                       ) : (
-                        <EyeIcon className="w-4 h-4" />
+                        <EyeIcon className="h-4 w-4" />
                       )}
                     </button>
                   </div>
                 </Field>
               </FieldGroup>
 
-              <Button type="submit" className="w-full gap-2 font-medium" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full gap-2 font-medium"
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
-                    <Spinner className="w-4 h-4" />
+                    <Spinner className="h-4 w-4" />
                     <span>Generating key...</span>
                   </>
                 ) : (
                   <>
                     <span>Continue to Setup</span>
-                    <ArrowRightIcon className="w-4 h-4" />
+                    <ArrowRightIcon className="h-4 w-4" />
                   </>
                 )}
               </Button>
@@ -224,20 +235,25 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
               icon="shield"
             />
 
-            <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl border shadow-inner">
-              <QRCodeSVG value={totpURI} size={180} level="H" includeMargin={true} />
+            <div className="flex flex-col items-center justify-center rounded-xl border bg-white p-4 shadow-inner">
+              <QRCodeSVG
+                value={totpURI}
+                size={180}
+                level="H"
+                includeMargin={true}
+              />
             </div>
 
             {secretKey && (
               <div className="space-y-1.5">
-                <span className="text-xs text-muted-foreground font-medium">
+                <span className="text-xs font-medium text-muted-foreground">
                   Can&apos;t scan QR code? Enter key manually:
                 </span>
                 <div className="flex items-center gap-2">
                   <Input
                     readOnly
                     value={secretKey}
-                    className="font-mono text-xs tracking-widest bg-muted/30 select-all"
+                    className="bg-muted/30 font-mono text-xs tracking-widest select-all"
                   />
                   <Button
                     type="button"
@@ -247,9 +263,9 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
                     title="Copy Secret Key"
                   >
                     {copiedKey ? (
-                      <CheckIcon className="w-4 h-4 text-emerald-500" />
+                      <CheckIcon className="h-4 w-4 text-emerald-500" />
                     ) : (
-                      <CopyIcon className="w-4 h-4" />
+                      <CopyIcon className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
@@ -261,7 +277,7 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
               className="w-full gap-2 font-medium"
             >
               <span>Next: Verify Code</span>
-              <ArrowRightIcon className="w-4 h-4" />
+              <ArrowRightIcon className="h-4 w-4" />
             </Button>
           </div>
         )}
@@ -288,15 +304,15 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
                 disabled={isLoading}
               >
                 <InputOTPGroup>
-                  <InputOTPSlot index={0} className="w-10 h-12 text-base" />
-                  <InputOTPSlot index={1} className="w-10 h-12 text-base" />
-                  <InputOTPSlot index={2} className="w-10 h-12 text-base" />
+                  <InputOTPSlot index={0} className="h-12 w-10 text-base" />
+                  <InputOTPSlot index={1} className="h-12 w-10 text-base" />
+                  <InputOTPSlot index={2} className="h-12 w-10 text-base" />
                 </InputOTPGroup>
                 <InputOTPSeparator />
                 <InputOTPGroup>
-                  <InputOTPSlot index={3} className="w-10 h-12 text-base" />
-                  <InputOTPSlot index={4} className="w-10 h-12 text-base" />
-                  <InputOTPSlot index={5} className="w-10 h-12 text-base" />
+                  <InputOTPSlot index={3} className="h-12 w-10 text-base" />
+                  <InputOTPSlot index={4} className="h-12 w-10 text-base" />
+                  <InputOTPSlot index={5} className="h-12 w-10 text-base" />
                 </InputOTPGroup>
               </InputOTP>
 
@@ -307,12 +323,12 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
               >
                 {isLoading ? (
                   <>
-                    <Spinner className="w-4 h-4" />
+                    <Spinner className="h-4 w-4" />
                     <span>Activating 2FA...</span>
                   </>
                 ) : (
                   <>
-                    <ShieldCheckIcon className="w-4 h-4" />
+                    <ShieldCheckIcon className="h-4 w-4" />
                     <span>Activate Two-Factor Auth</span>
                   </>
                 )}
@@ -331,17 +347,21 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
               icon="shield"
             />
 
-            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-start gap-2.5 text-xs text-amber-600 dark:text-amber-400">
-              <WarningIcon className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-400">
+              <WarningIcon className="mt-0.5 h-5 w-5 shrink-0" />
               <span>
-                Each recovery code can only be used once. Keep them in a password manager or safe place.
+                Each recovery code can only be used once. Keep them in a
+                password manager or safe place.
               </span>
             </div>
 
             {backupCodes.length > 0 && (
-              <div className="grid grid-cols-2 gap-2 p-3 bg-muted/40 rounded-lg border font-mono text-xs text-center tracking-widest">
+              <div className="grid grid-cols-2 gap-2 rounded-lg border bg-muted/40 p-3 text-center font-mono text-xs tracking-widest">
                 {backupCodes.map((c, i) => (
-                  <div key={i} className="p-1.5 bg-background/80 rounded border shadow-xs select-all">
+                  <div
+                    key={i}
+                    className="rounded border bg-background/80 p-1.5 shadow-xs select-all"
+                  >
                     {c}
                   </div>
                 ))}
@@ -356,9 +376,9 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
                 onClick={handleCopyBackupCodes}
               >
                 {copiedBackupCodes ? (
-                  <CheckIcon className="w-3.5 h-3.5 text-emerald-500" />
+                  <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
                 ) : (
-                  <CopyIcon className="w-3.5 h-3.5" />
+                  <CopyIcon className="h-3.5 w-3.5" />
                 )}
                 <span>Copy Codes</span>
               </Button>
@@ -369,7 +389,7 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
                 className="flex-1 gap-1.5 text-xs"
                 onClick={handleDownloadBackupCodes}
               >
-                <DownloadSimpleIcon className="w-3.5 h-3.5" />
+                <DownloadSimpleIcon className="h-3.5 w-3.5" />
                 <span>Download .txt</span>
               </Button>
             </div>
@@ -382,7 +402,7 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
               />
               <label
                 htmlFor="saved-codes-check"
-                className="text-xs font-medium text-muted-foreground leading-none cursor-pointer"
+                className="cursor-pointer text-xs leading-none font-medium text-muted-foreground"
               >
                 I have saved these recovery backup codes in a safe place
               </label>
@@ -397,22 +417,22 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
                 }
               }}
             >
-              <CheckIcon className="w-4 h-4" />
+              <CheckIcon className="h-4 w-4" />
               <span>Complete Setup</span>
             </Button>
           </div>
         )}
       </CardContent>
 
-      <CardFooter className="flex items-center justify-between border-t border-border/40 py-4 bg-muted/20">
+      <CardFooter className="flex items-center justify-between border-t border-border/40 bg-muted/20 py-4">
         {step > 1 && step < 4 && (
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs gap-1 text-muted-foreground hover:text-foreground"
+            className="gap-1 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => setStep((step - 1) as 1 | 2 | 3)}
           >
-            <ArrowLeftIcon className="w-3.5 h-3.5" />
+            <ArrowLeftIcon className="h-3.5 w-3.5" />
             <span>Back</span>
           </Button>
         )}
@@ -420,7 +440,7 @@ export function TwoFactorSetupCard({ onCompleted, onCancel }: TwoFactorSetupCard
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs text-muted-foreground hover:text-foreground ml-auto"
+            className="ml-auto text-xs text-muted-foreground hover:text-foreground"
             onClick={onCancel}
           >
             Cancel

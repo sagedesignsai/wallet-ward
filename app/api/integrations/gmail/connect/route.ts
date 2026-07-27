@@ -5,7 +5,10 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { handleRouteError } from "@/lib/api/http"
-import { gmailConnectSchema, createOAuthState } from "@/lib/services/integrations"
+import {
+  gmailConnectSchema,
+  createOAuthState,
+} from "@/lib/services/integrations"
 import { badRequest } from "@/lib/api/errors"
 
 export async function POST(request: Request) {
@@ -26,9 +29,14 @@ export async function POST(request: Request) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
     const redirectUri = `${appUrl}/api/integrations/gmail/callback`
 
-    const authorizationUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth")
+    const authorizationUrl = new URL(
+      "https://accounts.google.com/o/oauth2/v2/auth"
+    )
     authorizationUrl.searchParams.set("client_id", clientId)
-    authorizationUrl.searchParams.set("scope", "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/userinfo.email")
+    authorizationUrl.searchParams.set(
+      "scope",
+      "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/userinfo.email"
+    )
     authorizationUrl.searchParams.set("state", state)
     authorizationUrl.searchParams.set("redirect_uri", redirectUri)
     authorizationUrl.searchParams.set("response_type", "code")

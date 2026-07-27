@@ -25,10 +25,7 @@ import type { RepositoryProvider } from "@prisma/client"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
-import {
-  useRepositories,
-  useRepository,
-} from "@/hooks/use-repositories"
+import { useRepositories, useRepository } from "@/hooks/use-repositories"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -75,21 +72,30 @@ function getSyncStatusBadge(status: string) {
   switch (status) {
     case "synced":
       return (
-        <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600">
+        <Badge
+          variant="outline"
+          className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+        >
           <CheckCircleIcon className="size-3" weight="fill" />
           Synced
         </Badge>
       )
     case "syncing":
       return (
-        <Badge variant="outline" className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600">
+        <Badge
+          variant="outline"
+          className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600"
+        >
           <ClockIcon className="size-3" weight="fill" />
           Syncing
         </Badge>
       )
     case "error":
       return (
-        <Badge variant="outline" className="gap-1 border-destructive/30 bg-destructive/10 text-destructive">
+        <Badge
+          variant="outline"
+          className="gap-1 border-destructive/30 bg-destructive/10 text-destructive"
+        >
           <WarningCircleIcon className="size-3" weight="fill" />
           Error
         </Badge>
@@ -227,7 +233,7 @@ function RepositoryDetailInner({
 
   if (isLoading) {
     return (
-      <div className="space-y-4 max-w-3xl">
+      <div className="max-w-3xl space-y-4">
         <Skeleton className="h-10 w-2/3" />
         <Skeleton className="h-40 w-full" />
       </div>
@@ -251,9 +257,7 @@ function RepositoryDetailInner({
           </EmptyDescription>
         </EmptyHeader>
         <Button variant="outline" size="sm" asChild className="mt-4">
-          <Link
-            href={`/dashboard/projects/${projectId}/repositories`}
-          >
+          <Link href={`/dashboard/projects/${projectId}/repositories`}>
             Back to Repositories
           </Link>
         </Button>
@@ -265,7 +269,7 @@ function RepositoryDetailInner({
   const providerColor = getProviderColor(repository.provider)
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl">
+    <div className="flex max-w-3xl flex-col gap-5">
       {/* Header section */}
       <div className="flex items-start gap-3">
         <div
@@ -276,9 +280,9 @@ function RepositoryDetailInner({
         >
           <ProviderIcon className="size-5" weight="fill" />
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-lg font-semibold truncate">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="truncate text-lg font-semibold">
               {repository.name}
             </h1>
             {getSyncStatusBadge(repository.syncStatus)}
@@ -290,22 +294,28 @@ function RepositoryDetailInner({
       </div>
 
       {/* Quick nav links */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2">
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/dashboard/projects/${projectId}/repositories/${repositoryId}/branches`}>
-            <GitBranchIcon className="size-3.5 mr-1.5" />
+          <Link
+            href={`/dashboard/projects/${projectId}/repositories/${repositoryId}/branches`}
+          >
+            <GitBranchIcon className="mr-1.5 size-3.5" />
             Branches
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/dashboard/projects/${projectId}/repositories/${repositoryId}/commits`}>
-            <GitCommitIcon className="size-3.5 mr-1.5" />
+          <Link
+            href={`/dashboard/projects/${projectId}/repositories/${repositoryId}/commits`}
+          >
+            <GitCommitIcon className="mr-1.5 size-3.5" />
             Commits
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/dashboard/projects/${projectId}/repositories/${repositoryId}/settings`}>
-            <GearIcon className="size-3.5 mr-1.5" />
+          <Link
+            href={`/dashboard/projects/${projectId}/repositories/${repositoryId}/settings`}
+          >
+            <GearIcon className="mr-1.5 size-3.5" />
             Settings
           </Link>
         </Button>
@@ -318,7 +328,7 @@ function RepositoryDetailInner({
           href={repository.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline font-mono break-all"
+          className="inline-flex items-center gap-1.5 font-mono text-sm break-all text-primary hover:underline"
         >
           {repository.url}
           <ArrowSquareOutIcon className="size-3.5 shrink-0" />
@@ -410,12 +420,14 @@ function RepositoryDetailInner({
           {isSaving ? "Saving\u2026" : "Save"}
         </Button>
         <Button variant="outline" onClick={handleSync} disabled={isSyncing}>
-          <ArrowClockwiseIcon className={cn("size-3.5 mr-1.5", isSyncing && "animate-spin")} />
+          <ArrowClockwiseIcon
+            className={cn("mr-1.5 size-3.5", isSyncing && "animate-spin")}
+          />
           {isSyncing ? "Syncing\u2026" : "Sync"}
         </Button>
         <Button
           variant="ghost"
-          className="text-red-400 hover:text-red-300 gap-1.5 ml-auto"
+          className="ml-auto gap-1.5 text-red-400 hover:text-red-300"
           onClick={handleDelete}
         >
           <TrashIcon className="size-3.5" />
@@ -424,20 +436,18 @@ function RepositoryDetailInner({
       </div>
 
       {/* Metadata footer */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground border-t border-border/40 pt-4">
+      <div className="flex items-center gap-4 border-t border-border/40 pt-4 text-xs text-muted-foreground">
         <span>
-          Created{" "}
-          {new Date(repository.createdAt).toLocaleDateString()}
+          Created {new Date(repository.createdAt).toLocaleDateString()}
         </span>
         {repository.lastSyncAt && (
           <span className="flex items-center gap-1">
             <ClockIcon className="size-3" />
-            Last synced{" "}
-            {new Date(repository.lastSyncAt).toLocaleDateString()}
+            Last synced {new Date(repository.lastSyncAt).toLocaleDateString()}
           </span>
         )}
         {repository._count && repository._count.webhooks > 0 && (
-          <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+          <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
             {repository._count.webhooks} webhook
             {repository._count.webhooks > 1 ? "s" : ""}
           </Badge>

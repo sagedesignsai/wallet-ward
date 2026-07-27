@@ -65,7 +65,7 @@ export function ProposalModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <span>Action Proposal</span>
@@ -74,7 +74,8 @@ export function ProposalModal({
             </Badge>
           </DialogTitle>
           <DialogDescription>
-            Review the details and decide whether to approve or reject this action.
+            Review the details and decide whether to approve or reject this
+            action.
           </DialogDescription>
         </DialogHeader>
 
@@ -84,7 +85,7 @@ export function ProposalModal({
             <div className="space-y-2">
               <Label className="text-sm font-medium">Action Payload</Label>
               <div className="rounded-lg border bg-muted/50 p-3">
-                <pre className="text-xs overflow-x-auto">
+                <pre className="overflow-x-auto text-xs">
                   {JSON.stringify(proposal.payload, null, 2)}
                 </pre>
               </div>

@@ -73,7 +73,7 @@ export function FilePreview({ file }: FilePreviewProps) {
   /* ---- Image preview ---- */
   if (file.mimeType.startsWith("image/") && file.url) {
     return (
-      <div className="flex items-center justify-center bg-muted/30 p-6 min-h-[300px]">
+      <div className="flex min-h-[300px] items-center justify-center bg-muted/30 p-6">
         <img
           src={file.url}
           alt={file.name}
@@ -86,7 +86,7 @@ export function FilePreview({ file }: FilePreviewProps) {
   /* ---- PDF preview ---- */
   if (file.mimeType === "application/pdf" && file.url) {
     return (
-      <div className="flex flex-col items-center justify-center bg-muted/30 p-8 min-h-[300px] gap-4">
+      <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 bg-muted/30 p-8">
         <div
           className={cn(
             "flex size-16 items-center justify-center rounded-2xl bg-muted/60",
@@ -95,7 +95,7 @@ export function FilePreview({ file }: FilePreviewProps) {
         >
           <FilePdfIcon className="size-8" weight="fill" />
         </div>
-        <div className="text-center space-y-1">
+        <div className="space-y-1 text-center">
           <p className="text-sm font-medium text-foreground">{file.name}</p>
           <p className="text-xs text-muted-foreground">
             PDF Document &middot; {formatFileSize(file.size)}
@@ -103,7 +103,7 @@ export function FilePreview({ file }: FilePreviewProps) {
         </div>
         <Button variant="outline" size="sm" asChild>
           <a href={file.url} target="_blank" rel="noopener noreferrer">
-            <DownloadIcon className="size-3.5 mr-1.5" />
+            <DownloadIcon className="mr-1.5 size-3.5" />
             Open PDF
           </a>
         </Button>
@@ -114,7 +114,7 @@ export function FilePreview({ file }: FilePreviewProps) {
   /* ---- Code preview (placeholder with syntax-highlighting style) ---- */
   if (file.type === "code") {
     return (
-      <div className="bg-muted/30 min-h-[300px]">
+      <div className="min-h-[300px] bg-muted/30">
         <div className="flex items-center justify-between border-b border-border/40 px-4 py-2">
           <div className="flex items-center gap-2">
             <div className={cn("flex items-center gap-1.5", fileTypeColor)}>
@@ -123,7 +123,7 @@ export function FilePreview({ file }: FilePreviewProps) {
                 {file.name}
               </span>
             </div>
-            <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+            <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
               {file.mimeType}
             </Badge>
           </div>
@@ -135,7 +135,7 @@ export function FilePreview({ file }: FilePreviewProps) {
             </Button>
           )}
         </div>
-        <div className="p-4 font-mono text-xs text-muted-foreground leading-relaxed">
+        <div className="p-4 font-mono text-xs leading-relaxed text-muted-foreground">
           {file.url ? (
             <a
               href={file.url}
@@ -155,7 +155,7 @@ export function FilePreview({ file }: FilePreviewProps) {
 
   /* ---- Default fallback (icon + metadata) ---- */
   return (
-    <div className="flex flex-col items-center justify-center bg-muted/30 p-8 min-h-[300px] gap-4">
+    <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 bg-muted/30 p-8">
       <div
         className={cn(
           "flex size-16 items-center justify-center rounded-2xl bg-muted/60",
@@ -164,7 +164,7 @@ export function FilePreview({ file }: FilePreviewProps) {
       >
         <FileIconComponent className="size-8" weight="fill" />
       </div>
-      <div className="text-center space-y-1">
+      <div className="space-y-1 text-center">
         <p className="text-sm font-medium text-foreground">{file.name}</p>
         <p className="text-xs text-muted-foreground">
           {file.type} &middot; {file.mimeType} &middot;{" "}
@@ -174,7 +174,7 @@ export function FilePreview({ file }: FilePreviewProps) {
       {file.url && (
         <Button variant="outline" size="sm" asChild>
           <a href={file.url} target="_blank" rel="noopener noreferrer">
-            <DownloadIcon className="size-3.5 mr-1.5" />
+            <DownloadIcon className="mr-1.5 size-3.5" />
             Download
           </a>
         </Button>

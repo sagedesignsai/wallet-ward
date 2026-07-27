@@ -18,9 +18,18 @@ import {
 } from "@/hooks/use-global-integrations"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
-import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/components/dashboard/data-table"
 import { ConnectIntegrationDialog } from "@/components/dashboard/connect-integration-dialog"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,16 +44,16 @@ import {
 
 function providerIcon(provider: string) {
   switch (provider) {
-    case "github": 
-    case "gitlab": 
+    case "github":
+    case "gitlab":
       return GitBranchIcon
-    case "slack": 
+    case "slack":
       return PlugIcon
-    case "gmail": 
+    case "gmail":
       return PlugIcon
-    case "linear": 
+    case "linear":
       return PlugIcon
-    default: 
+    default:
       return PlugIcon
   }
 }
@@ -70,22 +79,52 @@ type HealthStatus = {
 }
 
 const HEALTH_CONFIG: Record<string, { label: string; className: string }> = {
-  healthy: { label: "Healthy", className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-  expiring_soon: { label: "Expiring", className: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  expired: { label: "Expired", className: "bg-red-500/10 text-red-400 border-red-500/20" },
-  no_token: { label: "No Token", className: "bg-muted/60 text-muted-foreground border-border/40" },
+  healthy: {
+    label: "Healthy",
+    className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  },
+  expiring_soon: {
+    label: "Expiring",
+    className: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  },
+  expired: {
+    label: "Expired",
+    className: "bg-red-500/10 text-red-400 border-red-500/20",
+  },
+  no_token: {
+    label: "No Token",
+    className: "bg-muted/60 text-muted-foreground border-border/40",
+  },
 }
 
 export default function GlobalIntegrationsPage() {
   const { setConfig } = useDashboardConfig()
   const router = useRouter()
   const {
-    integrations, filtered, isLoading, error, filters,
-    activeFilterCount, projects, providers,
-    setFilter, clearFilters, refetch,
+    integrations,
+    filtered,
+    isLoading,
+    error,
+    filters,
+    activeFilterCount,
+    projects,
+    providers,
+    setFilter,
+    clearFilters,
+    refetch,
   } = useGlobalIntegrations()
   const [connectDialogOpen, setConnectDialogOpen] = useState(false)
-  const [selectedProvider, setSelectedProvider] = useState<"github" | "gmail" | "slack" | "gitlab" | "linear" | "jira" | "notion" | "airtable" | "trello">("github")
+  const [selectedProvider, setSelectedProvider] = useState<
+    | "github"
+    | "gmail"
+    | "slack"
+    | "gitlab"
+    | "linear"
+    | "jira"
+    | "notion"
+    | "airtable"
+    | "trello"
+  >("github")
   const [healthMap, setHealthMap] = useState<Record<string, HealthStatus>>({})
   const [healthLoading, setHealthLoading] = useState(false)
 
@@ -113,7 +152,8 @@ export default function GlobalIntegrationsPage() {
             credentials: "include",
           })
           if (!res.ok) throw new Error(`${res.status}`)
-          const body: { status: HealthStatus["status"]; message: string } = await res.json()
+          const body: { status: HealthStatus["status"]; message: string } =
+            await res.json()
           return { id: intg.id, status: body.status, message: body.message }
         })
       )
@@ -128,7 +168,9 @@ export default function GlobalIntegrationsPage() {
       setHealthLoading(false)
     })()
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [integrations])
 
   const distinctProjects = useMemo(() => {
@@ -142,8 +184,10 @@ export default function GlobalIntegrationsPage() {
     [integrations]
   )
 
-  const columns: DataTableColumn<GlobalIntegration & Record<string, unknown>>[] =
-    useMemo(() => [
+  const columns: DataTableColumn<
+    GlobalIntegration & Record<string, unknown>
+  >[] = useMemo(
+    () => [
       {
         key: "provider",
         header: "Provider",
@@ -152,13 +196,15 @@ export default function GlobalIntegrationsPage() {
           const intg = row as unknown as GlobalIntegration
           const Icon = providerIcon(intg.provider)
           return (
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex min-w-0 items-center gap-2">
               <div className="flex size-6 shrink-0 items-center justify-center rounded bg-muted/60 text-muted-foreground">
                 <Icon className="size-3" />
               </div>
               <div className="min-w-0">
-                <span className="font-medium text-foreground truncate block">{intg.name}</span>
-                <span className="text-[0.625rem] text-muted-foreground truncate block">
+                <span className="block truncate font-medium text-foreground">
+                  {intg.name}
+                </span>
+                <span className="block truncate text-[0.625rem] text-muted-foreground">
                   {providerLabel(intg.provider)}
                 </span>
               </div>
@@ -175,7 +221,7 @@ export default function GlobalIntegrationsPage() {
           return (
             <Link
               href={`/dashboard/projects/${intg.projectId}/integrations`}
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
               onClick={(e) => e.stopPropagation()}
             >
               <FolderIcon className="size-3 shrink-0" />
@@ -208,11 +254,22 @@ export default function GlobalIntegrationsPage() {
             return <Skeleton className="h-5 w-16" />
           }
           if (!health) {
-            return <Badge variant="outline" className="bg-muted/60 text-muted-foreground border-border/40">Unknown</Badge>
+            return (
+              <Badge
+                variant="outline"
+                className="border-border/40 bg-muted/60 text-muted-foreground"
+              >
+                Unknown
+              </Badge>
+            )
           }
           const config = HEALTH_CONFIG[health.status] ?? HEALTH_CONFIG.no_token
           return (
-            <Badge variant="outline" className={config.className} title={health.message}>
+            <Badge
+              variant="outline"
+              className={config.className}
+              title={health.message}
+            >
               {config.label}
             </Badge>
           )
@@ -227,67 +284,146 @@ export default function GlobalIntegrationsPage() {
           return <TimeAgo date={intg.updatedAt} />
         },
       },
-    ], [healthMap, healthLoading])
+    ],
+    [healthMap, healthLoading]
+  )
 
   return (
     <div className="flex flex-col gap-5">
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
           {error}
-          <button onClick={refetch} className="ml-2 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors">
+          <button
+            onClick={refetch}
+            className="ml-2 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
+          >
             Retry
           </button>
         </div>
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard label="Total Integrations" value={isLoading ? "—" : integrations.length} icon={<PlugIcon className="size-4" />} description="Across all projects" />
-        <StatCard label="Enabled" value={isLoading ? "—" : enabledCount} icon={<PlugIcon className="size-4" />} description="Currently active" />
-        <StatCard label="Projects" value={isLoading ? "—" : distinctProjects} icon={<FolderIcon className="size-4" />} description={distinctProjects === 1 ? "1 project" : `${distinctProjects} projects`} />
+        <StatCard
+          label="Total Integrations"
+          value={isLoading ? "—" : integrations.length}
+          icon={<PlugIcon className="size-4" />}
+          description="Across all projects"
+        />
+        <StatCard
+          label="Enabled"
+          value={isLoading ? "—" : enabledCount}
+          icon={<PlugIcon className="size-4" />}
+          description="Currently active"
+        />
+        <StatCard
+          label="Projects"
+          value={isLoading ? "—" : distinctProjects}
+          icon={<FolderIcon className="size-4" />}
+          description={
+            distinctProjects === 1
+              ? "1 project"
+              : `${distinctProjects} projects`
+          }
+        />
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <div className="flex items-center gap-2 flex-wrap">
-          <Input placeholder="Search integrations..." value={filters.search} onChange={(e) => setFilter("search", e.target.value)} className="max-w-xs h-8 text-xs" />
-          <Select value={filters.projectId ?? "__all__"} onValueChange={(val: string) => setFilter("projectId", val === "__all__" ? null : val)}>
-            <SelectTrigger size="sm" className="w-[160px] h-8 text-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            placeholder="Search integrations..."
+            value={filters.search}
+            onChange={(e) => setFilter("search", e.target.value)}
+            className="h-8 max-w-xs text-xs"
+          />
+          <Select
+            value={filters.projectId ?? "__all__"}
+            onValueChange={(val: string) =>
+              setFilter("projectId", val === "__all__" ? null : val)
+            }
+          >
+            <SelectTrigger size="sm" className="h-8 w-[160px] text-xs">
               <SelectValue placeholder="All projects" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">All projects</SelectItem>
               {projects.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={filters.provider ?? "__all__"} onValueChange={(val: string) => setFilter("provider", val === "__all__" ? null : val)}>
-            <SelectTrigger size="sm" className="w-[140px] h-8 text-xs">
+          <Select
+            value={filters.provider ?? "__all__"}
+            onValueChange={(val: string) =>
+              setFilter("provider", val === "__all__" ? null : val)
+            }
+          >
+            <SelectTrigger size="sm" className="h-8 w-[140px] text-xs">
               <SelectValue placeholder="All providers" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">All providers</SelectItem>
               {providers.map((p) => (
-                <SelectItem key={p} value={p}>{providerLabel(p)}</SelectItem>
+                <SelectItem key={p} value={p}>
+                  {providerLabel(p)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {activeFilterCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>Clear filters</Button>
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              Clear filters
+            </Button>
           )}
-          <div className="ml-auto flex gap-2 flex-wrap">
-            <Button size="sm" variant="outline" onClick={() => { setSelectedProvider("jira"); setConnectDialogOpen(true); }}>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSelectedProvider("jira")
+                setConnectDialogOpen(true)
+              }}
+            >
               Connect Jira
             </Button>
-            <Button size="sm" variant="outline" onClick={() => { setSelectedProvider("notion"); setConnectDialogOpen(true); }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSelectedProvider("notion")
+                setConnectDialogOpen(true)
+              }}
+            >
               Connect Notion
             </Button>
-            <Button size="sm" variant="outline" onClick={() => { setSelectedProvider("airtable"); setConnectDialogOpen(true); }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSelectedProvider("airtable")
+                setConnectDialogOpen(true)
+              }}
+            >
               Connect Airtable
             </Button>
-            <Button size="sm" variant="outline" onClick={() => { setSelectedProvider("trello"); setConnectDialogOpen(true); }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSelectedProvider("trello")
+                setConnectDialogOpen(true)
+              }}
+            >
               Connect Trello
             </Button>
-            <Button size="sm" onClick={() => { setSelectedProvider("github"); setConnectDialogOpen(true); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setSelectedProvider("github")
+                setConnectDialogOpen(true)
+              }}
+            >
               <GitBranchIcon /> Connect GitHub
             </Button>
           </div>
@@ -304,20 +440,49 @@ export default function GlobalIntegrationsPage() {
                 Connect your first integration to a project to get started.
               </EmptyDescription>
             </EmptyHeader>
-            <div className="flex flex-wrap gap-2 justify-center mt-2">
-              <Button onClick={() => { setSelectedProvider("jira"); setConnectDialogOpen(true); }}>
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              <Button
+                onClick={() => {
+                  setSelectedProvider("jira")
+                  setConnectDialogOpen(true)
+                }}
+              >
                 Jira
               </Button>
-              <Button variant="outline" onClick={() => { setSelectedProvider("notion"); setConnectDialogOpen(true); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedProvider("notion")
+                  setConnectDialogOpen(true)
+                }}
+              >
                 Notion
               </Button>
-              <Button variant="outline" onClick={() => { setSelectedProvider("airtable"); setConnectDialogOpen(true); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedProvider("airtable")
+                  setConnectDialogOpen(true)
+                }}
+              >
                 Airtable
               </Button>
-              <Button variant="outline" onClick={() => { setSelectedProvider("trello"); setConnectDialogOpen(true); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedProvider("trello")
+                  setConnectDialogOpen(true)
+                }}
+              >
                 Trello
               </Button>
-              <Button variant="outline" onClick={() => { setSelectedProvider("github"); setConnectDialogOpen(true); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedProvider("github")
+                  setConnectDialogOpen(true)
+                }}
+              >
                 <GitBranchIcon /> GitHub
               </Button>
             </div>
@@ -333,16 +498,26 @@ export default function GlobalIntegrationsPage() {
               const intg = row as unknown as GlobalIntegration
               router.push(`/dashboard/projects/${intg.projectId}`)
             }}
-            emptyTitle={activeFilterCount > 0 ? "No integrations match your filters" : "No integrations found"}
-            emptyDescription={activeFilterCount > 0 ? "Try adjusting or clearing your filters." : "No integrations are available to display."}
-            emptyIcon={activeFilterCount > 0 ? <WarningCircleIcon /> : <PlugIcon />}
+            emptyTitle={
+              activeFilterCount > 0
+                ? "No integrations match your filters"
+                : "No integrations found"
+            }
+            emptyDescription={
+              activeFilterCount > 0
+                ? "Try adjusting or clearing your filters."
+                : "No integrations are available to display."
+            }
+            emptyIcon={
+              activeFilterCount > 0 ? <WarningCircleIcon /> : <PlugIcon />
+            }
           />
         )}
       </div>
 
-      <ConnectIntegrationDialog 
-        open={connectDialogOpen} 
-        onOpenChange={setConnectDialogOpen} 
+      <ConnectIntegrationDialog
+        open={connectDialogOpen}
+        onOpenChange={setConnectDialogOpen}
         projects={projects}
         provider={selectedProvider}
       />

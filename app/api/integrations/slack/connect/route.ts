@@ -5,7 +5,10 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { handleRouteError } from "@/lib/api/http"
-import { slackConnectSchema, createOAuthState } from "@/lib/services/integrations"
+import {
+  slackConnectSchema,
+  createOAuthState,
+} from "@/lib/services/integrations"
 import { badRequest } from "@/lib/api/errors"
 
 export async function POST(request: Request) {
@@ -28,7 +31,10 @@ export async function POST(request: Request) {
 
     const authorizationUrl = new URL("https://slack.com/oauth/v2/authorize")
     authorizationUrl.searchParams.set("client_id", clientId)
-    authorizationUrl.searchParams.set("scope", "chat:write,channels:read,users:read")
+    authorizationUrl.searchParams.set(
+      "scope",
+      "chat:write,channels:read,users:read"
+    )
     authorizationUrl.searchParams.set("state", state)
     authorizationUrl.searchParams.set("redirect_uri", redirectUri)
 

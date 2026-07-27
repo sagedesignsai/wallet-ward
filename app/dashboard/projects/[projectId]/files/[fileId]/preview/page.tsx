@@ -146,7 +146,7 @@ function FilePreviewInner({
   /* ---- loading ---- */
   if (isLoading) {
     return (
-      <div className="space-y-4 max-w-4xl">
+      <div className="max-w-4xl space-y-4">
         <Skeleton className="h-10 w-2/3" />
         <Skeleton className="h-[400px] rounded-lg" />
         <Skeleton className="h-32 w-full" />
@@ -184,14 +184,9 @@ function FilePreviewInner({
   const fileTypeColor = getFileTypeColor(file.type)
 
   return (
-    <div className="flex flex-col gap-5 max-w-4xl">
+    <div className="flex max-w-4xl flex-col gap-5">
       {/* ---- Back link ---- */}
-      <Button
-        variant="ghost"
-        size="sm"
-        asChild
-        className="w-fit"
-      >
+      <Button variant="ghost" size="sm" asChild className="w-fit">
         <Link href={`/dashboard/projects/${projectId}/files/${fileId}`}>
           <ArrowLeftIcon className="size-3.5" />
           Back to file details
@@ -209,10 +204,10 @@ function FilePreviewInner({
           <FileIconComponent className="size-6" weight="fill" />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg font-semibold text-foreground truncate">
+          <h1 className="truncate text-lg font-semibold text-foreground">
             {file.name}
           </h1>
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="mt-0.5 flex items-center gap-2">
             <Badge variant="secondary" className="text-[10px]">
               {file.type}
             </Badge>
@@ -226,7 +221,7 @@ function FilePreviewInner({
       </div>
 
       {/* ---- Preview area ---- */}
-      <div className="rounded-lg border border-border/40 bg-card overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border/40 bg-card">
         <FilePreview file={file} />
       </div>
 
@@ -246,7 +241,7 @@ function FilePreviewInner({
 
         <div className="space-y-1.5">
           <Label>MIME Type</Label>
-          <div className="text-sm text-foreground font-mono text-xs">
+          <div className="font-mono text-sm text-xs text-foreground">
             {file.mimeType}
           </div>
         </div>
@@ -258,7 +253,7 @@ function FilePreviewInner({
 
         <div className="space-y-1.5">
           <Label>Path</Label>
-          <div className="text-sm text-foreground font-mono text-xs truncate">
+          <div className="truncate font-mono text-sm text-xs text-foreground">
             {file.path}
           </div>
         </div>
@@ -289,11 +284,11 @@ function FilePreviewInner({
       {/* ---- Actions ---- */}
       <div className="flex items-center gap-2">
         <Button onClick={handleDownload} disabled={!file.url}>
-          <DownloadIcon className="size-3.5 mr-1.5" />
+          <DownloadIcon className="mr-1.5 size-3.5" />
           Download
         </Button>
         <Button variant="outline" onClick={() => setShareOpen(true)}>
-          <ShareIcon className="size-3.5 mr-1.5" />
+          <ShareIcon className="mr-1.5 size-3.5" />
           Share
         </Button>
       </div>

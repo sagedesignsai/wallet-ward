@@ -21,7 +21,13 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -41,7 +47,8 @@ export function TwoFactorManageCard({
   isTwoFactorEnabled = false,
   onStatusChanged,
 }: TwoFactorManageCardProps) {
-  const { disableTwoFactor, generateBackupCodes, isLoading, error, setError } = useTwoFactor()
+  const { disableTwoFactor, generateBackupCodes, isLoading, error, setError } =
+    useTwoFactor()
 
   const [isSettingUp, setIsSettingUp] = useState(false)
   const [isDisableOpen, setIsDisableOpen] = useState(false)
@@ -103,7 +110,7 @@ export function TwoFactorManageCard({
 
   return (
     <>
-      <Card className="w-full border-border/40 shadow-sm bg-card">
+      <Card className="w-full border-border/40 bg-card shadow-sm">
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -111,19 +118,23 @@ export function TwoFactorManageCard({
                 Two-Factor Authentication (2FA)
               </CardTitle>
               {isTwoFactorEnabled ? (
-                <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 gap-1">
-                  <ShieldCheckIcon className="w-3.5 h-3.5" />
+                <Badge className="gap-1 border-emerald-500/30 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                  <ShieldCheckIcon className="h-3.5 w-3.5" />
                   <span>Enabled</span>
                 </Badge>
               ) : (
-                <Badge variant="outline" className="text-muted-foreground gap-1">
-                  <ShieldWarningIcon className="w-3.5 h-3.5" />
+                <Badge
+                  variant="outline"
+                  className="gap-1 text-muted-foreground"
+                >
+                  <ShieldWarningIcon className="h-3.5 w-3.5" />
                   <span>Disabled</span>
                 </Badge>
               )}
             </div>
             <CardDescription className="text-xs">
-              Add an extra layer of security to your Flowspace account using TOTP authenticator apps.
+              Add an extra layer of security to your Flowspace account using
+              TOTP authenticator apps.
             </CardDescription>
           </div>
         </CardHeader>
@@ -137,7 +148,7 @@ export function TwoFactorManageCard({
                 className="gap-1.5 text-xs"
                 onClick={() => setIsRegenerateOpen(true)}
               >
-                <KeyIcon className="w-3.5 h-3.5" />
+                <KeyIcon className="h-3.5 w-3.5" />
                 <span>Regenerate Backup Codes</span>
               </Button>
 
@@ -157,7 +168,7 @@ export function TwoFactorManageCard({
                 className="gap-2 text-xs font-medium"
                 onClick={() => setIsSettingUp(true)}
               >
-                <ShieldCheckIcon className="w-4 h-4" />
+                <ShieldCheckIcon className="h-4 w-4" />
                 <span>Enable Two-Factor Auth</span>
               </Button>
             </div>
@@ -171,12 +182,13 @@ export function TwoFactorManageCard({
           <DialogHeader>
             <DialogTitle>Disable Two-Factor Authentication</DialogTitle>
             <DialogDescription className="text-xs">
-              Are you sure you want to disable 2FA? This will make your account significantly less secure.
+              Are you sure you want to disable 2FA? This will make your account
+              significantly less secure.
             </DialogDescription>
           </DialogHeader>
 
           {error && (
-            <Alert variant="destructive" className="py-2 px-3 text-xs">
+            <Alert variant="destructive" className="px-3 py-2 text-xs">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -184,16 +196,18 @@ export function TwoFactorManageCard({
           <form onSubmit={handleDisable} className="space-y-4 py-2">
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="disable-password">Confirm Password</FieldLabel>
+                <FieldLabel htmlFor="disable-password">
+                  Confirm Password
+                </FieldLabel>
                 <div className="relative flex items-center">
-                  <LockIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                  <LockIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="disable-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9 pr-9"
+                    className="pr-9 pl-9"
                     disabled={isLoading}
                     required
                   />
@@ -203,9 +217,9 @@ export function TwoFactorManageCard({
                     className="absolute right-3 text-muted-foreground hover:text-foreground"
                   >
                     {showPassword ? (
-                      <EyeSlashIcon className="w-4 h-4" />
+                      <EyeSlashIcon className="h-4 w-4" />
                     ) : (
-                      <EyeIcon className="w-4 h-4" />
+                      <EyeIcon className="h-4 w-4" />
                     )}
                   </button>
                 </div>
@@ -227,7 +241,7 @@ export function TwoFactorManageCard({
                 size="sm"
                 disabled={isLoading}
               >
-                {isLoading ? <Spinner className="w-4 h-4" /> : "Disable 2FA"}
+                {isLoading ? <Spinner className="h-4 w-4" /> : "Disable 2FA"}
               </Button>
             </DialogFooter>
           </form>
@@ -240,29 +254,35 @@ export function TwoFactorManageCard({
           <DialogHeader>
             <DialogTitle>Regenerate Backup Codes</DialogTitle>
             <DialogDescription className="text-xs">
-              Regenerating backup codes will invalidate all your previous backup codes immediately.
+              Regenerating backup codes will invalidate all your previous backup
+              codes immediately.
             </DialogDescription>
           </DialogHeader>
 
           {error && (
-            <Alert variant="destructive" className="py-2 px-3 text-xs">
+            <Alert variant="destructive" className="px-3 py-2 text-xs">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          <form onSubmit={handleRegenerateBackupCodes} className="space-y-4 py-2">
+          <form
+            onSubmit={handleRegenerateBackupCodes}
+            className="space-y-4 py-2"
+          >
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="regen-password">Confirm Password</FieldLabel>
+                <FieldLabel htmlFor="regen-password">
+                  Confirm Password
+                </FieldLabel>
                 <div className="relative flex items-center">
-                  <LockIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                  <LockIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="regen-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9 pr-9"
+                    className="pr-9 pl-9"
                     disabled={isLoading}
                     required
                   />
@@ -280,7 +300,11 @@ export function TwoFactorManageCard({
                 Cancel
               </Button>
               <Button type="submit" size="sm" disabled={isLoading}>
-                {isLoading ? <Spinner className="w-4 h-4" /> : "Regenerate Codes"}
+                {isLoading ? (
+                  <Spinner className="h-4 w-4" />
+                ) : (
+                  "Regenerate Codes"
+                )}
               </Button>
             </DialogFooter>
           </form>
@@ -293,19 +317,23 @@ export function TwoFactorManageCard({
           <DialogHeader>
             <DialogTitle>Your New Backup Codes</DialogTitle>
             <DialogDescription className="text-xs">
-              Store these new backup codes safely. Old codes will no longer work.
+              Store these new backup codes safely. Old codes will no longer
+              work.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-2 p-3 bg-muted/40 rounded-lg border font-mono text-xs text-center tracking-widest my-2">
+          <div className="my-2 grid grid-cols-2 gap-2 rounded-lg border bg-muted/40 p-3 text-center font-mono text-xs tracking-widest">
             {newBackupCodes.map((c, i) => (
-              <div key={i} className="p-1.5 bg-background/80 rounded border shadow-xs select-all">
+              <div
+                key={i}
+                className="rounded border bg-background/80 p-1.5 shadow-xs select-all"
+              >
                 {c}
               </div>
             ))}
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
             <Button
               type="button"
               variant="outline"
@@ -316,7 +344,7 @@ export function TwoFactorManageCard({
                 toast.success("Copied new codes to clipboard")
               }}
             >
-              <CopyIcon className="w-3.5 h-3.5" />
+              <CopyIcon className="h-3.5 w-3.5" />
               <span>Copy</span>
             </Button>
             <Button

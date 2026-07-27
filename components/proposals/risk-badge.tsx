@@ -61,7 +61,7 @@ export function RiskBadge({ level, size = "sm", className }: RiskBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border font-semibold shrink-0",
+        "inline-flex shrink-0 items-center rounded-full border font-semibold",
         config.text,
         config.bg,
         config.border,
@@ -69,7 +69,9 @@ export function RiskBadge({ level, size = "sm", className }: RiskBadgeProps) {
         className
       )}
     >
-      <span className={cn("rounded-full shrink-0", config.dot, DOT_SIZES[size])} />
+      <span
+        className={cn("shrink-0 rounded-full", config.dot, DOT_SIZES[size])}
+      />
       {config.label}
     </span>
   )

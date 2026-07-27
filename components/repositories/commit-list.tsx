@@ -31,7 +31,7 @@ export function CommitList({ commits, repositoryUrl }: CommitListProps) {
           className="flex items-start gap-3 border-b border-border/40 px-3 py-2.5 last:border-b-0"
         >
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="mb-1 flex items-center gap-2">
               <a
                 href={`${githubUrl}/commit/${commit.sha}`}
                 target="_blank"
@@ -45,7 +45,7 @@ export function CommitList({ commits, repositoryUrl }: CommitListProps) {
                 {commit.author.name}
               </span>
             </div>
-            <p className="text-xs text-foreground line-clamp-1">
+            <p className="line-clamp-1 text-xs text-foreground">
               {commit.message}
             </p>
           </div>

@@ -1,10 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  EyeSlashIcon,
-  EyeIcon,
-} from "@phosphor-icons/react"
+import { EyeSlashIcon, EyeIcon } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 

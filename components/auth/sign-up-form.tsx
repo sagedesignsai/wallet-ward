@@ -106,7 +106,8 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
         router.push("/dashboard")
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "An unexpected error occurred."
+      const msg =
+        err instanceof Error ? err.message : "An unexpected error occurred."
       setError(msg)
     } finally {
       setIsLoading(false)
@@ -114,8 +115,8 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
   }
 
   return (
-    <Card className="w-full border-border/40 shadow-xl bg-card/80 backdrop-blur-md">
-      <CardContent className="pt-6 space-y-6">
+    <Card className="w-full border-border/40 bg-card/80 shadow-xl backdrop-blur-md">
+      <CardContent className="space-y-6 pt-6">
         <AuthCardHeader
           title="Create an Account"
           description="Start managing your secrets securely with Flowspace"
@@ -124,7 +125,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
         />
 
         {error && (
-          <Alert variant="destructive" className="py-2.5 px-3 text-xs">
+          <Alert variant="destructive" className="px-3 py-2.5 text-xs">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -134,7 +135,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
             <Field>
               <FieldLabel htmlFor="name">Full Name</FieldLabel>
               <div className="relative flex items-center">
-                <UserIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                <UserIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="name"
                   type="text"
@@ -151,7 +152,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
             <Field>
               <FieldLabel htmlFor="email">Email Address</FieldLabel>
               <div className="relative flex items-center">
-                <EnvelopeSimpleIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                <EnvelopeSimpleIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -168,32 +169,32 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
               <div className="relative flex items-center">
-                <LockIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                <LockIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9 pr-9"
+                  className="pr-9 pl-9"
                   disabled={isLoading}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {showPassword ? (
-                    <EyeSlashIcon className="w-4 h-4" />
+                    <EyeSlashIcon className="h-4 w-4" />
                   ) : (
-                    <EyeIcon className="w-4 h-4" />
+                    <EyeIcon className="h-4 w-4" />
                   )}
                 </button>
               </div>
 
               {password.length > 0 && (
-                <div className="space-y-2 mt-2">
+                <div className="mt-2 space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Strength:</span>
                     <span
@@ -201,44 +202,44 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
                         strengthScore <= 40
                           ? "text-destructive"
                           : strengthScore <= 80
-                          ? "text-amber-500"
-                          : "text-emerald-500"
+                            ? "text-amber-500"
+                            : "text-emerald-500"
                       }`}
                     >
                       {strengthLabel}
                     </span>
                   </div>
                   <Progress value={strengthScore} className="h-1.5" />
-                  <div className="grid grid-cols-2 gap-1 text-[11px] text-muted-foreground pt-1">
+                  <div className="grid grid-cols-2 gap-1 pt-1 text-[11px] text-muted-foreground">
                     <div className="flex items-center gap-1">
                       {passwordCriteria.minLength ? (
-                        <CheckCircleIcon className="w-3 h-3 text-emerald-500" />
+                        <CheckCircleIcon className="h-3 w-3 text-emerald-500" />
                       ) : (
-                        <XCircleIcon className="w-3 h-3 text-muted-foreground/60" />
+                        <XCircleIcon className="h-3 w-3 text-muted-foreground/60" />
                       )}
                       <span>At least 8 chars</span>
                     </div>
                     <div className="flex items-center gap-1">
                       {passwordCriteria.hasNumber ? (
-                        <CheckCircleIcon className="w-3 h-3 text-emerald-500" />
+                        <CheckCircleIcon className="h-3 w-3 text-emerald-500" />
                       ) : (
-                        <XCircleIcon className="w-3 h-3 text-muted-foreground/60" />
+                        <XCircleIcon className="h-3 w-3 text-muted-foreground/60" />
                       )}
                       <span>Contains number</span>
                     </div>
                     <div className="flex items-center gap-1">
                       {passwordCriteria.hasUpper ? (
-                        <CheckCircleIcon className="w-3 h-3 text-emerald-500" />
+                        <CheckCircleIcon className="h-3 w-3 text-emerald-500" />
                       ) : (
-                        <XCircleIcon className="w-3 h-3 text-muted-foreground/60" />
+                        <XCircleIcon className="h-3 w-3 text-muted-foreground/60" />
                       )}
                       <span>Uppercase letter</span>
                     </div>
                     <div className="flex items-center gap-1">
                       {passwordCriteria.hasSpecial ? (
-                        <CheckCircleIcon className="w-3 h-3 text-emerald-500" />
+                        <CheckCircleIcon className="h-3 w-3 text-emerald-500" />
                       ) : (
-                        <XCircleIcon className="w-3 h-3 text-muted-foreground/60" />
+                        <XCircleIcon className="h-3 w-3 text-muted-foreground/60" />
                       )}
                       <span>Special character</span>
                     </div>
@@ -248,9 +249,11 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+              <FieldLabel htmlFor="confirmPassword">
+                Confirm Password
+              </FieldLabel>
               <div className="relative flex items-center">
-                <LockIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                <LockIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
@@ -265,26 +268,33 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
             </Field>
           </FieldGroup>
 
-          <Button type="submit" className="w-full gap-2 font-medium" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="w-full gap-2 font-medium"
+            disabled={isLoading}
+          >
             {isLoading ? (
               <>
-                <Spinner className="w-4 h-4" />
+                <Spinner className="h-4 w-4" />
                 <span>Creating Account...</span>
               </>
             ) : (
               <>
                 <span>Create Account</span>
-                <ArrowRightIcon className="w-4 h-4" />
+                <ArrowRightIcon className="h-4 w-4" />
               </>
             )}
           </Button>
         </form>
       </CardContent>
 
-      <CardFooter className="flex items-center justify-center border-t border-border/40 py-4 bg-muted/20">
+      <CardFooter className="flex items-center justify-center border-t border-border/40 bg-muted/20 py-4">
         <p className="text-xs text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/sign-in" className="text-primary font-semibold hover:underline">
+          <Link
+            href="/sign-in"
+            className="font-semibold text-primary hover:underline"
+          >
             Sign in
           </Link>
         </p>

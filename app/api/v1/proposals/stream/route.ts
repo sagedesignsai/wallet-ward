@@ -35,7 +35,9 @@ export async function GET(request: Request) {
         function send(event: string, data: string) {
           if (closed) return
           try {
-            controller.enqueue(encoder.encode(sseEncode(event, data, String(++eventId))))
+            controller.enqueue(
+              encoder.encode(sseEncode(event, data, String(++eventId)))
+            )
           } catch {
             // stream closed
           }
@@ -76,12 +78,18 @@ export async function GET(request: Request) {
             // Detect deletions
             for (const [id] of knownStatuses) {
               if (!proposals.find((p) => p.id === id)) {
-                send("status_change", JSON.stringify({ proposalId: id, currentStatus: null }))
+                send(
+                  "status_change",
+                  JSON.stringify({ proposalId: id, currentStatus: null })
+                )
                 knownStatuses.delete(id)
               }
             }
           } catch {
-            send("error", JSON.stringify({ message: "Failed to poll proposals" }))
+            send(
+              "error",
+              JSON.stringify({ message: "Failed to poll proposals" })
+            )
           }
         }
 
@@ -93,7 +101,10 @@ export async function GET(request: Request) {
 
         // Heartbeat every 15s
         heartbeatTimer = setInterval(() => {
-          send("heartbeat", JSON.stringify({ timestamp: new Date().toISOString() }))
+          send(
+            "heartbeat",
+            JSON.stringify({ timestamp: new Date().toISOString() })
+          )
         }, 15000)
 
         // Handle client disconnect via AbortController
@@ -101,7 +112,9 @@ export async function GET(request: Request) {
           closed = true
           if (pollTimer) clearInterval(pollTimer)
           if (heartbeatTimer) clearInterval(heartbeatTimer)
-          try { controller.close() } catch {}
+          try {
+            controller.close()
+          } catch {}
         }
         if ("signal" in request && request.signal) {
           request.signal.addEventListener("abort", abortHandler)
@@ -112,18 +125,25 @@ export async function GET(request: Request) {
             clearInterval(checkClosed)
             if (pollTimer) clearInterval(pollTimer)
             if (heartbeatTimer) clearInterval(heartbeatTimer)
-            try { controller.close() } catch {}
+            try {
+              controller.close()
+            } catch {}
           }
         }, 2000)
 
         // Cleanup after 5 minutes to prevent memory leaks
-        setTimeout(() => {
-          closed = true
-          if (pollTimer) clearInterval(pollTimer)
-          if (heartbeatTimer) clearInterval(heartbeatTimer)
-          clearInterval(checkClosed)
-          try { controller.close() } catch {}
-        }, 5 * 60 * 1000)
+        setTimeout(
+          () => {
+            closed = true
+            if (pollTimer) clearInterval(pollTimer)
+            if (heartbeatTimer) clearInterval(heartbeatTimer)
+            clearInterval(checkClosed)
+            try {
+              controller.close()
+            } catch {}
+          },
+          5 * 60 * 1000
+        )
       },
     })
 
@@ -132,12 +152,13 @@ export async function GET(request: Request) {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache, no-transform",
-        "Connection": "keep-alive",
+        Connection: "keep-alive",
         "X-Accel-Buffering": "no",
       },
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error"
+    const message =
+      error instanceof Error ? error.message : "Internal server error"
     return new Response(JSON.stringify({ error: { message } }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

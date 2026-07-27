@@ -18,8 +18,7 @@ import type { SecretFormProps } from "./types"
 
 function validatePEM(content: string): boolean {
   return (
-    content.includes("BEGIN CERTIFICATE") &&
-    content.includes("END CERTIFICATE")
+    content.includes("BEGIN CERTIFICATE") && content.includes("END CERTIFICATE")
   )
 }
 
@@ -107,11 +106,11 @@ export function CertificateForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
-      <div className="rounded-lg border border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20 px-3 py-2">
+      <div className="rounded-lg border border-green-200 bg-green-50/50 px-3 py-2 dark:border-green-900 dark:bg-green-950/20">
         <p className="text-xs text-green-900 dark:text-green-100">
-          <CertificateIcon className="inline size-3 mr-1" />
-          Store SSL/TLS certificates, private keys, and certificate chains in PEM
-          format. Keep private keys secure.
+          <CertificateIcon className="mr-1 inline size-3" />
+          Store SSL/TLS certificates, private keys, and certificate chains in
+          PEM format. Keep private keys secure.
         </p>
       </div>
 
@@ -171,7 +170,7 @@ export function CertificateForm({
                 setErrors((prev) => ({ ...prev, certificate: "" }))
               }
             }}
-            className="pr-10 font-mono text-[0.625rem] resize-none"
+            className="resize-none pr-10 font-mono text-[0.625rem]"
             rows={8}
             disabled={isSubmitting}
             aria-invalid={!!errors.certificate}
@@ -181,7 +180,7 @@ export function CertificateForm({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
             onClick={() => setShowCert((s) => !s)}
             tabIndex={-1}
             aria-label={showCert ? "Hide certificate" : "Show certificate"}
@@ -201,7 +200,7 @@ export function CertificateForm({
       <div className="grid gap-2">
         <Label htmlFor="cert-key">
           Private Key{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <div className="relative">
           <Textarea
@@ -214,7 +213,7 @@ export function CertificateForm({
                 setErrors((prev) => ({ ...prev, privateKey: "" }))
               }
             }}
-            className="pr-10 font-mono text-[0.625rem] resize-none"
+            className="resize-none pr-10 font-mono text-[0.625rem]"
             rows={6}
             disabled={isSubmitting}
             aria-invalid={!!errors.privateKey}
@@ -224,7 +223,7 @@ export function CertificateForm({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
             onClick={() => setShowKey((s) => !s)}
             tabIndex={-1}
             aria-label={showKey ? "Hide private key" : "Show private key"}
@@ -241,7 +240,7 @@ export function CertificateForm({
         )}
         {!showKey && privateKey && (
           <div className="flex items-start gap-1.5 text-[0.625rem] text-amber-600 dark:text-amber-500">
-            <WarningCircleIcon className="size-3 mt-0.5 shrink-0" />
+            <WarningCircleIcon className="mt-0.5 size-3 shrink-0" />
             <span>
               Private key is hidden for security. Click the eye icon to reveal.
             </span>
@@ -252,14 +251,14 @@ export function CertificateForm({
       <div className="grid gap-2">
         <Label htmlFor="cert-chain">
           Certificate Chain{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="cert-chain"
           placeholder="Intermediate certificates (if required)"
           value={chain}
           onChange={(e) => setChain(e.target.value)}
-          className="font-mono text-[0.625rem] resize-none"
+          className="resize-none font-mono text-[0.625rem]"
           rows={4}
           disabled={isSubmitting}
           spellCheck={false}
@@ -272,7 +271,7 @@ export function CertificateForm({
       <div className="grid gap-2">
         <Label htmlFor="cert-description">
           Description{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="cert-description"

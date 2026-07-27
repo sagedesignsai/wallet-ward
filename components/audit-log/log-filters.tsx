@@ -1,9 +1,6 @@
 "use client"
 
-import {
-  MagnifyingGlassIcon,
-  XIcon,
-} from "@phosphor-icons/react"
+import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -15,12 +12,7 @@ import { Input } from "@/components/ui/input"
 // ---------------------------------------------------------------------------
 
 export type ActionCategory =
-  | "all"
-  | "projects"
-  | "environments"
-  | "secrets"
-  | "proposals"
-  | "organization"
+  "all" | "projects" | "environments" | "secrets" | "proposals" | "organization"
 export type ActorFilter = "all" | "user" | "api_key"
 
 type LogFiltersProps = {
@@ -71,8 +63,8 @@ export function LogFilters({
     <div className="flex flex-col gap-2.5">
       {/* Top row: search + clear */}
       <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-xs">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative max-w-xs flex-1">
+          <MagnifyingGlassIcon className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search metadata…"
             value={search}
@@ -82,7 +74,7 @@ export function LogFilters({
           {search && (
             <button
               onClick={() => onSearchChange("")}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-3" />
             </button>

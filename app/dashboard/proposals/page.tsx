@@ -111,19 +111,21 @@ function ProposalGroup({
         className="flex w-full items-center gap-2 text-left"
       >
         <Icon className={cn("size-3.5 shrink-0", group.color)} />
-        <span className="text-xs font-semibold text-foreground">{group.label}</span>
+        <span className="text-xs font-semibold text-foreground">
+          {group.label}
+        </span>
         <Badge
           variant="outline"
           className={cn(
-            "h-4 px-1.5 text-[9px] font-bold ml-1",
+            "ml-1 h-4 px-1.5 text-[9px] font-bold",
             group.key === "awaiting_approval" &&
-              "bg-amber-500/15 text-amber-400 border-amber-500/25"
+              "border-amber-500/25 bg-amber-500/15 text-amber-400"
           )}
         >
           {proposals.length}
         </Badge>
-        <div className="flex-1 h-px bg-border/40 ml-2" />
-        <span className="text-[10px] text-muted-foreground ml-2">
+        <div className="ml-2 h-px flex-1 bg-border/40" />
+        <span className="ml-2 text-[10px] text-muted-foreground">
           {expanded ? "hide" : "show"}
         </span>
       </button>
@@ -176,8 +178,10 @@ function StatPill({
     >
       <Icon className={cn("size-3.5 shrink-0", color)} />
       <div>
-        <p className="text-sm font-bold text-foreground leading-none">{count}</p>
-        <p className="text-[10px] text-muted-foreground mt-0.5">{label}</p>
+        <p className="text-sm leading-none font-bold text-foreground">
+          {count}
+        </p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{label}</p>
       </div>
     </button>
   )
@@ -192,7 +196,8 @@ export default function ProposalsPage() {
   const initialStatus = searchParams.get("status") ?? "all"
   const highlightId = searchParams.get("highlight")
 
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(initialProjectId)
+  const [selectedProjectId, setSelectedProjectId] =
+    useState<string>(initialProjectId)
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus)
   const [viewMode, setViewMode] = useState<ViewMode>("list")
 
@@ -313,7 +318,7 @@ export default function ProposalsPage() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 text-xs gap-1.5 sm:ml-auto"
+          className="h-8 gap-1.5 text-xs sm:ml-auto"
           onClick={() => fetchProposals()}
           disabled={isLoading}
         >
@@ -324,13 +329,13 @@ export default function ProposalsPage() {
           )}
           Refresh
           {lastFetchedAt && (
-            <span className="text-muted-foreground hidden sm:inline">
+            <span className="hidden text-muted-foreground sm:inline">
               · <TimeAgo date={lastFetchedAt} />
             </span>
           )}
         </Button>
 
-        <div className="flex items-center rounded-md border border-border/40 bg-muted/20 p-0.5 gap-0.5">
+        <div className="flex items-center gap-0.5 rounded-md border border-border/40 bg-muted/20 p-0.5">
           <button
             onClick={() => setViewMode("list")}
             className={cn(
@@ -412,11 +417,13 @@ export default function ProposalsPage() {
           ))}
         </div>
       ) : proposals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/40 py-16 gap-3 text-center">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/40 py-16 text-center">
           <CheckCircleIcon className="size-8 text-muted-foreground/40" />
           <div>
-            <p className="text-sm font-medium text-foreground">No proposals found</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-sm font-medium text-foreground">
+              No proposals found
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
               {statusFilter === "all"
                 ? "No action proposals yet across your organization"
                 : `No ${statusFilter.replace(/_/g, " ")} proposals`}

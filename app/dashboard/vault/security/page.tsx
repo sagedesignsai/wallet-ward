@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useAuditLogs, type AuditLog } from "@/hooks/use-audit-logs";
-import { useOrganization } from "@/hooks/use-organization";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TimeAgo } from "@/components/dashboard/time-ago";
+import { useEffect, useState } from "react"
+import { useAuditLogs, type AuditLog } from "@/hooks/use-audit-logs"
+import { useOrganization } from "@/hooks/use-organization"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { TimeAgo } from "@/components/dashboard/time-ago"
 import {
   ShieldCheckIcon,
   KeyIcon,
@@ -15,19 +15,19 @@ import {
   CheckCircleIcon,
   WarningCircleIcon,
   InfoIcon,
-} from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
+} from "@phosphor-icons/react"
+import { cn } from "@/lib/utils"
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 type EncryptionStatus = {
-  algorithm: string | null;
-  keyVersion: number | null;
-  lastKeyRotation: string | null;
-  totalSecrets: number;
-  encryptedSecrets: number;
-  hasEncryptionKey: boolean;
-};
+  algorithm: string | null
+  keyVersion: number | null
+  lastKeyRotation: string | null
+  totalSecrets: number
+  encryptedSecrets: number
+  hasEncryptionKey: boolean
+}
 
 // ─── Status Row Component ─────────────────────────────────────────────────────
 
@@ -36,21 +36,29 @@ function StatusRow({
   value,
   status,
 }: {
-  label: string;
-  value: string | number;
-  status?: "secure" | "warning" | "info";
+  label: string
+  value: string | number
+  status?: "secure" | "warning" | "info"
 }) {
   const statusConfig = {
-    secure: { icon: CheckCircleIcon, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-    warning: { icon: WarningCircleIcon, color: "text-amber-400", bg: "bg-amber-500/10" },
+    secure: {
+      icon: CheckCircleIcon,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+    },
+    warning: {
+      icon: WarningCircleIcon,
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
+    },
     info: { icon: InfoIcon, color: "text-blue-400", bg: "bg-blue-500/10" },
-  };
+  }
 
-  const config = status ? statusConfig[status] : null;
-  const Icon = config?.icon;
+  const config = status ? statusConfig[status] : null
+  const Icon = config?.icon
 
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border/40 last:border-0">
+    <div className="flex items-center justify-between border-b border-border/40 py-2 last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">{value}</span>
@@ -61,7 +69,7 @@ function StatusRow({
         )}
       </div>
     </div>
-  );
+  )
 }
 
 // ─── Audit Log Row ────────────────────────────────────────────────────────────
@@ -73,20 +81,25 @@ function AuditLogRow({ log }: { log: AuditLog }) {
     update: "text-amber-400",
     delete: "text-red-400",
     rotate: "text-violet-400",
-  };
+  }
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-border/40 last:border-0">
-      <div className="rounded-lg bg-muted/40 p-2 shrink-0">
+    <div className="flex items-start gap-3 border-b border-border/40 py-3 last:border-0">
+      <div className="shrink-0 rounded-lg bg-muted/40 p-2">
         <LockKeyIcon className="size-4 text-muted-foreground" />
       </div>
-      <div className="flex-1 min-w-0 space-y-1">
+      <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2">
-          <span className={cn("text-xs font-semibold uppercase tracking-wide", actionColors[log.action] || "text-muted-foreground")}>
+          <span
+            className={cn(
+              "text-xs font-semibold tracking-wide uppercase",
+              actionColors[log.action] || "text-muted-foreground"
+            )}
+          >
             {log.action}
           </span>
           <span className="text-xs text-muted-foreground">·</span>
-          <span className="text-xs text-muted-foreground truncate">
+          <span className="truncate text-xs text-muted-foreground">
             {log.resourceType}
           </span>
         </div>
@@ -105,58 +118,67 @@ function AuditLogRow({ log }: { log: AuditLog }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function VaultSecurityPage() {
-  const { logs: auditLogs, isLoading: logsLoading } = useAuditLogs();
-  const { activeOrganizationId } = useOrganization();
+  const { logs: auditLogs, isLoading: logsLoading } = useAuditLogs()
+  const { activeOrganizationId } = useOrganization()
 
-  const [encryptionStatus, setEncryptionStatus] = useState<EncryptionStatus | null>(null);
-  const [encLoading, setEncLoading] = useState(true);
+  const [encryptionStatus, setEncryptionStatus] =
+    useState<EncryptionStatus | null>(null)
+  const [encLoading, setEncLoading] = useState(true)
 
   useEffect(() => {
-    if (!activeOrganizationId) return;
-    let cancelled = false;
-    (async () => {
+    if (!activeOrganizationId) return
+    let cancelled = false
+    ;(async () => {
       try {
-        const res = await fetch(`/api/v1/organizations/${activeOrganizationId}/encryption-status`, {
-          credentials: "include",
-        });
-        if (!res.ok) throw new Error(`Failed to load encryption status (${res.status})`);
-        const body: { data: EncryptionStatus } = await res.json();
-        if (!cancelled) setEncryptionStatus(body.data);
+        const res = await fetch(
+          `/api/v1/organizations/${activeOrganizationId}/encryption-status`,
+          {
+            credentials: "include",
+          }
+        )
+        if (!res.ok)
+          throw new Error(`Failed to load encryption status (${res.status})`)
+        const body: { data: EncryptionStatus } = await res.json()
+        if (!cancelled) setEncryptionStatus(body.data)
       } catch {
         // Leave as null — we'll show a fallback
       } finally {
-        if (!cancelled) setEncLoading(false);
+        if (!cancelled) setEncLoading(false)
       }
-    })();
-    return () => { cancelled = true; };
-  }, [activeOrganizationId]);
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [activeOrganizationId])
 
   const lastRotation = encryptionStatus?.lastKeyRotation
     ? new Date(encryptionStatus.lastKeyRotation)
-    : null;
+    : null
   const nextRotation = lastRotation
     ? new Date(lastRotation.getTime() + 90 * 24 * 60 * 60 * 1000)
-    : null;
+    : null
 
   const daysSinceRotation = lastRotation
     ? Math.floor((Date.now() - lastRotation.getTime()) / (1000 * 60 * 60 * 24))
-    : null;
+    : null
   const daysUntilRotation = nextRotation
     ? Math.floor((nextRotation.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : null;
+    : null
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Security Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Security Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Monitor vault encryption status and access logs
         </p>
       </div>
@@ -165,10 +187,20 @@ export default function VaultSecurityPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ShieldCheckIcon className="size-5 text-emerald-400" weight="fill" />
+            <ShieldCheckIcon
+              className="size-5 text-emerald-400"
+              weight="fill"
+            />
             Encryption Status
-            <Badge variant="outline" className="ml-auto bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-              {encLoading ? "Loading" : encryptionStatus?.hasEncryptionKey ? "Secure" : "No Key"}
+            <Badge
+              variant="outline"
+              className="ml-auto border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+            >
+              {encLoading
+                ? "Loading"
+                : encryptionStatus?.hasEncryptionKey
+                  ? "Secure"
+                  : "No Key"}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -188,7 +220,11 @@ export default function VaultSecurityPage() {
               />
               <StatusRow
                 label="Key Version"
-                value={encryptionStatus?.keyVersion != null ? `v${encryptionStatus.keyVersion}` : "—"}
+                value={
+                  encryptionStatus?.keyVersion != null
+                    ? `v${encryptionStatus.keyVersion}`
+                    : "—"
+                }
                 status="info"
               />
               <StatusRow
@@ -197,7 +233,7 @@ export default function VaultSecurityPage() {
               />
               <StatusRow
                 label="Encrypted Secrets"
-                value={`${encryptionStatus?.encryptedSecrets ?? 0}${encryptionStatus?.totalSecrets ? ` (${Math.round(((encryptionStatus.encryptedSecrets) / encryptionStatus.totalSecrets) * 100)}%)` : ""}`}
+                value={`${encryptionStatus?.encryptedSecrets ?? 0}${encryptionStatus?.totalSecrets ? ` (${Math.round((encryptionStatus.encryptedSecrets / encryptionStatus.totalSecrets) * 100)}%)` : ""}`}
                 status="secure"
               />
             </>
@@ -224,18 +260,31 @@ export default function VaultSecurityPage() {
             <>
               <StatusRow
                 label="Last Rotation"
-                value={daysSinceRotation != null ? `${daysSinceRotation} days ago` : "—"}
-                status={daysSinceRotation != null && daysSinceRotation > 60 ? "warning" : "info"}
+                value={
+                  daysSinceRotation != null
+                    ? `${daysSinceRotation} days ago`
+                    : "—"
+                }
+                status={
+                  daysSinceRotation != null && daysSinceRotation > 60
+                    ? "warning"
+                    : "info"
+                }
               />
               <StatusRow
                 label="Next Scheduled Rotation"
-                value={daysUntilRotation != null ? `in ${daysUntilRotation} days` : "—"}
-                status={daysUntilRotation != null && daysUntilRotation < 30 ? "warning" : "info"}
+                value={
+                  daysUntilRotation != null
+                    ? `in ${daysUntilRotation} days`
+                    : "—"
+                }
+                status={
+                  daysUntilRotation != null && daysUntilRotation < 30
+                    ? "warning"
+                    : "info"
+                }
               />
-              <StatusRow
-                label="Rotation Policy"
-                value="Every 90 days"
-              />
+              <StatusRow label="Rotation Policy" value="Every 90 days" />
               <StatusRow
                 label="Auto-Rotation"
                 value="Enabled"
@@ -262,8 +311,8 @@ export default function VaultSecurityPage() {
               ))}
             </div>
           ) : !auditLogs || auditLogs.length === 0 ? (
-            <div className="text-center py-8">
-              <ClockCounterClockwiseIcon className="size-12 text-muted-foreground/40 mx-auto mb-3" />
+            <div className="py-8 text-center">
+              <ClockCounterClockwiseIcon className="mx-auto mb-3 size-12 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">
                 No recent access logs
               </p>
@@ -289,28 +338,32 @@ export default function VaultSecurityPage() {
         <CardContent>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-start gap-2">
-              <CheckCircleIcon className="size-4 text-emerald-400 shrink-0 mt-0.5" />
+              <CheckCircleIcon className="mt-0.5 size-4 shrink-0 text-emerald-400" />
               <span>All secrets are encrypted with AES-256-GCM</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircleIcon className="size-4 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Envelope encryption is active with organization-level DEKs</span>
+              <CheckCircleIcon className="mt-0.5 size-4 shrink-0 text-emerald-400" />
+              <span>
+                Envelope encryption is active with organization-level DEKs
+              </span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircleIcon className="size-4 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Zero-leak proxy prevents credential exposure to agents</span>
+              <CheckCircleIcon className="mt-0.5 size-4 shrink-0 text-emerald-400" />
+              <span>
+                Zero-leak proxy prevents credential exposure to agents
+              </span>
             </li>
             <li className="flex items-start gap-2">
-              <InfoIcon className="size-4 text-blue-400 shrink-0 mt-0.5" />
+              <InfoIcon className="mt-0.5 size-4 shrink-0 text-blue-400" />
               <span>Consider enabling 2FA for all team members</span>
             </li>
             <li className="flex items-start gap-2">
-              <InfoIcon className="size-4 text-blue-400 shrink-0 mt-0.5" />
+              <InfoIcon className="mt-0.5 size-4 shrink-0 text-blue-400" />
               <span>Review audit logs regularly for suspicious activity</span>
             </li>
           </ul>
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

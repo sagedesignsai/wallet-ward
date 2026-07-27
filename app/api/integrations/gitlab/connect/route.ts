@@ -5,7 +5,10 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { handleRouteError } from "@/lib/api/http"
-import { gitlabConnectSchema, createOAuthState } from "@/lib/services/integrations"
+import {
+  gitlabConnectSchema,
+  createOAuthState,
+} from "@/lib/services/integrations"
 import { badRequest } from "@/lib/api/errors"
 
 export async function POST(request: Request) {
@@ -28,7 +31,10 @@ export async function POST(request: Request) {
 
     const authorizationUrl = new URL("https://gitlab.com/oauth/authorize")
     authorizationUrl.searchParams.set("client_id", clientId)
-    authorizationUrl.searchParams.set("scope", "api read_user read_repository write_repository")
+    authorizationUrl.searchParams.set(
+      "scope",
+      "api read_user read_repository write_repository"
+    )
     authorizationUrl.searchParams.set("state", state)
     authorizationUrl.searchParams.set("redirect_uri", redirectUri)
     authorizationUrl.searchParams.set("response_type", "code")

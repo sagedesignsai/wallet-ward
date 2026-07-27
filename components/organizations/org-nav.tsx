@@ -45,10 +45,5 @@ const ITEMS = [
 ]
 
 export function OrgNav({ orgId }: OrgNavProps) {
-  return (
-    <SectionNav
-      base={`/dashboard/organizations/${orgId}`}
-      items={ITEMS}
-    />
-  )
+  return <SectionNav base={`/dashboard/organizations/${orgId}`} items={ITEMS} />
 }

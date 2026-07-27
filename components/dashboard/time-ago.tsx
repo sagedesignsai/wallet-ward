@@ -31,9 +31,8 @@ type TimeAgoProps = {
 }
 
 export function TimeAgo({ date, className }: TimeAgoProps) {
-  const d = typeof date === "string" || typeof date === "number"
-    ? new Date(date)
-    : date
+  const d =
+    typeof date === "string" || typeof date === "number" ? new Date(date) : date
 
   const [, setTick] = useState(0)
 

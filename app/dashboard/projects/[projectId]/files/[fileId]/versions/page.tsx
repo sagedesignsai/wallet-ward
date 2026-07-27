@@ -2,11 +2,7 @@
 
 import { use, useEffect, useState } from "react"
 import Link from "next/link"
-import {
-  WarningIcon,
-  ArrowLeftIcon,
-  ClockIcon,
-} from "@phosphor-icons/react"
+import { WarningIcon, ArrowLeftIcon, ClockIcon } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
@@ -63,7 +59,11 @@ function FileVersionsInner({
 }) {
   const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
-  const { file, isLoading: fileLoading, error: fileError } = useFile(projectId, fileId)
+  const {
+    file,
+    isLoading: fileLoading,
+    error: fileError,
+  } = useFile(projectId, fileId)
 
   const [versions, setVersions] = useState<FileVersion[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -190,7 +190,7 @@ function FileVersionsInner({
   /* ---- loading ---- */
   if (fileLoading || (isLoading && !error)) {
     return (
-      <div className="space-y-4 max-w-3xl">
+      <div className="max-w-3xl space-y-4">
         <Skeleton className="h-10 w-2/3" />
         <Skeleton className="h-[300px] rounded-lg" />
       </div>
@@ -224,7 +224,7 @@ function FileVersionsInner({
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl">
+    <div className="flex max-w-3xl flex-col gap-5">
       {/* ---- Back link ---- */}
       <Button variant="ghost" size="sm" asChild className="w-fit">
         <Link href={`/dashboard/projects/${projectId}/files/${fileId}`}>
@@ -268,15 +268,15 @@ function FileVersionsInner({
       {/* ---- Confirm Restore Dialog ---- */}
       {confirmRestore && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="rounded-xl bg-popover p-4 ring-1 ring-foreground/10 max-w-sm w-full mx-4 space-y-4">
+          <div className="mx-4 w-full max-w-sm space-y-4 rounded-xl bg-popover p-4 ring-1 ring-foreground/10">
             <div className="space-y-1">
               <h3 className="font-heading text-sm font-medium">
                 Restore Version?
               </h3>
               <p className="text-xs text-muted-foreground">
-                Are you sure you want to restore version {confirmRestore.version}
-                ? This will create a new version with the content from this
-                version.
+                Are you sure you want to restore version{" "}
+                {confirmRestore.version}? This will create a new version with
+                the content from this version.
               </p>
             </div>
             <div className="flex justify-end gap-2">

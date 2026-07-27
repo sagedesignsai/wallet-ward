@@ -25,7 +25,10 @@ export async function GET(_request: Request, ctx: Ctx) {
     const authCtx = await requireAuth()
     const orgCtx = await requireOrganization(authCtx)
     requirePermission(orgCtx.memberRole, "project:read")
-    const integration = await getIntegration(integrationId, orgCtx.organizationId)
+    const integration = await getIntegration(
+      integrationId,
+      orgCtx.organizationId
+    )
     return json({ data: toIntegrationDto(integration) })
   } catch (error) {
     return handleRouteError(error)

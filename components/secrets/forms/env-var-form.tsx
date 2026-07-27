@@ -68,9 +68,9 @@ export function EnvVarForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
-      <div className="rounded-lg border border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20 px-3 py-2">
+      <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 dark:border-blue-900 dark:bg-blue-950/20">
         <p className="text-xs text-blue-900 dark:text-blue-100">
-          <SparkleIcon className="inline size-3 mr-1" />
+          <SparkleIcon className="mr-1 inline size-3" />
           Environment variables are typically UPPERCASE with underscores (e.g.,
           DATABASE_URL, API_KEY)
         </p>
@@ -126,7 +126,7 @@ export function EnvVarForm({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="absolute top-1/2 right-1 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             onClick={() => setShowValue((s) => !s)}
             tabIndex={-1}
             aria-label={showValue ? "Hide value" : "Show value"}
@@ -148,7 +148,7 @@ export function EnvVarForm({
       <div className="grid gap-2">
         <Label htmlFor="env-description">
           Description{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="env-description"

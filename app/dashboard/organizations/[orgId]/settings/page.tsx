@@ -28,8 +28,13 @@ export default function SettingsPage({ params }: SettingsPageProps) {
 
 function SettingsInner({ orgId }: { orgId: string }) {
   const { setConfig } = useDashboardConfig()
-  const { organization, isLoading, error, updateOrganization, deleteOrganization } =
-    useOrgDetail(orgId)
+  const {
+    organization,
+    isLoading,
+    error,
+    updateOrganization,
+    deleteOrganization,
+  } = useOrgDetail(orgId)
 
   // Edit form state
   const [name, setName] = useState("")
@@ -123,7 +128,7 @@ function SettingsInner({ orgId }: { orgId: string }) {
           <h3 className="text-sm font-semibold text-foreground">
             Failed to load organization
           </h3>
-          <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
+          <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
             {error ?? "Organization not found."}
           </p>
         </div>
@@ -132,14 +137,14 @@ function SettingsInner({ orgId }: { orgId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-5 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-5 duration-300 fade-in">
       {/* General Settings Card */}
       <Card className="gap-0">
         <CardHeader className="border-b border-border/40 pb-3">
           <CardTitle className="text-sm">Organization Details</CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
-          <form onSubmit={handleSave} className="grid gap-4 max-w-lg">
+          <form onSubmit={handleSave} className="grid max-w-lg gap-4">
             <div className="grid gap-2">
               <Label htmlFor="settings-name">Name</Label>
               <Input
@@ -160,12 +165,12 @@ function SettingsInner({ orgId }: { orgId: string }) {
             <div className="grid gap-2">
               <Label>
                 Slug{" "}
-                <span className="text-muted-foreground font-normal">
+                <span className="font-normal text-muted-foreground">
                   (read-only)
                 </span>
               </Label>
               <div className="flex items-center gap-2">
-                <div className="flex-1 font-mono text-xs bg-muted/50 rounded-md border border-border/60 px-3 py-1.5 text-muted-foreground select-all">
+                <div className="flex-1 rounded-md border border-border/60 bg-muted/50 px-3 py-1.5 font-mono text-xs text-muted-foreground select-all">
                   {organization.slug}
                 </div>
                 <Button
@@ -188,7 +193,7 @@ function SettingsInner({ orgId }: { orgId: string }) {
             <div className="grid gap-2">
               <Label htmlFor="settings-logo">
                 Logo URL{" "}
-                <span className="text-muted-foreground font-normal">
+                <span className="font-normal text-muted-foreground">
                   (optional)
                 </span>
               </Label>
@@ -212,8 +217,7 @@ function SettingsInner({ orgId }: { orgId: string }) {
                   !name.trim() ||
                   isSaving ||
                   (name.trim() === organization.name &&
-                    (logoUrl.trim() || "") ===
-                      (organization.logo ?? ""))
+                    (logoUrl.trim() || "") === (organization.logo ?? ""))
                 }
               >
                 {isSaving ? (
@@ -227,7 +231,7 @@ function SettingsInner({ orgId }: { orgId: string }) {
               </Button>
 
               {saveSuccess && (
-                <span className="text-xs text-green-600 dark:text-green-500 animate-in fade-in">
+                <span className="animate-in text-xs text-green-600 fade-in dark:text-green-500">
                   Changes saved
                 </span>
               )}
@@ -258,7 +262,7 @@ function SettingsInner({ orgId }: { orgId: string }) {
             <h4 className="text-xs font-medium text-foreground">
               Delete Organization
             </h4>
-            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               This will permanently delete &ldquo;{organization.name}&rdquo; and
               all its projects, environments, secrets, and audit logs. This
               action cannot be undone.

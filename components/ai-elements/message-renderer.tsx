@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { memo } from "react";
-import type { UIMessage } from "ai";
+import { memo } from "react"
+import type { UIMessage } from "ai"
 
 // UI message primitives
 import {
@@ -9,14 +9,14 @@ import {
   MessageContent,
   MessageFooter,
   MessageHeader,
-} from "@/components/ui/message";
+} from "@/components/ui/message"
 
 // AI response components
 import {
   MessageActions,
   MessageAction,
   MessageResponse,
-} from "@/components/ai-elements/message";
+} from "@/components/ai-elements/message"
 
 // Tool call / result display
 import {
@@ -26,41 +26,43 @@ import {
   ToolInput,
   ToolOutput,
   type ToolPart,
-} from "@/components/ai-elements/tool";
+} from "@/components/ai-elements/tool"
 
 // Reasoning (chain-of-thought)
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from "@/components/ai-elements/reasoning";
+} from "@/components/ai-elements/reasoning"
 
 // Icons
-import { CopyIcon } from "lucide-react";
+import { CopyIcon } from "lucide-react"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface MessageRendererProps {
-  message: UIMessage;
-  isStreaming?: boolean;
+  message: UIMessage
+  isStreaming?: boolean
 }
 
-const UserMessage = memo(function UserMessage({ message }: { message: UIMessage }) {
+const UserMessage = memo(function UserMessage({
+  message,
+}: {
+  message: UIMessage
+}) {
   const text =
     (message.parts?.find((p: any) => p.type === "text") as any)?.text ??
     (message as any).content ??
-    "";
+    ""
 
   return (
     <Message align="end">
       <MessageContent>
-        <div className="text-xs text-muted-foreground">
-          {text}
-        </div>
+        <div className="text-xs text-muted-foreground">{text}</div>
       </MessageContent>
     </Message>
-  );
-});
+  )
+})
 
 // ─── Assistant Message ────────────────────────────────────────────────────────
 
@@ -68,33 +70,37 @@ const AssistantMessage = memo(function AssistantMessage({
   message,
   isStreaming,
 }: {
-  message: UIMessage;
-  isStreaming?: boolean;
+  message: UIMessage
+  isStreaming?: boolean
 }) {
-  const parts = message.parts ?? [];
+  const parts = message.parts ?? []
 
   // Separate parts by type for ordered rendering
-  const reasoningParts = parts.filter((p: any) => p.type === "reasoning");
+  const reasoningParts = parts.filter((p: any) => p.type === "reasoning")
   const contentParts = parts.filter(
-    (p: any) => p.type === "text" || p.type === "tool-call" || p.type === "tool-result"
-  );
+    (p: any) =>
+      p.type === "text" || p.type === "tool-call" || p.type === "tool-result"
+  )
 
   // Collect text for copy action
   const fullText = parts
     .filter((p: any) => p.type === "text")
     .map((p: any) => p.text)
-    .join("\n");
+    .join("\n")
 
   const handleCopy = () => {
-    if (fullText) navigator.clipboard.writeText(fullText);
-  };
+    if (fullText) navigator.clipboard.writeText(fullText)
+  }
 
   return (
     <Message align="start">
       <MessageContent>
         {/* Reasoning (if any) */}
         {reasoningParts.map((part: any, i: number) => (
-          <Reasoning key={`reasoning-${i}`} isStreaming={isStreaming && i === reasoningParts.length - 1}>
+          <Reasoning
+            key={`reasoning-${i}`}
+            isStreaming={isStreaming && i === reasoningParts.length - 1}
+          >
             <ReasoningTrigger />
             <ReasoningContent>{part.text}</ReasoningContent>
           </Reasoning>
@@ -108,7 +114,7 @@ const AssistantMessage = memo(function AssistantMessage({
               <MessageResponse key={`text-${i}`} isAnimating={isStreaming}>
                 {part.text}
               </MessageResponse>
-            );
+            )
           }
 
           // Tool call in progress
@@ -124,7 +130,7 @@ const AssistantMessage = memo(function AssistantMessage({
                   <ToolInput input={part.args} />
                 </ToolContent>
               </Tool>
-            );
+            )
           }
 
           // Tool result
@@ -138,13 +144,16 @@ const AssistantMessage = memo(function AssistantMessage({
                 />
                 <ToolContent>
                   <ToolInput input={part.args} />
-                  <ToolOutput output={part.result} errorText={part.isError ? String(part.result) : undefined} />
+                  <ToolOutput
+                    output={part.result}
+                    errorText={part.isError ? String(part.result) : undefined}
+                  />
                 </ToolContent>
               </Tool>
-            );
+            )
           }
 
-          return null;
+          return null
         })}
 
         {/* Empty streaming state */}
@@ -168,8 +177,8 @@ const AssistantMessage = memo(function AssistantMessage({
         )}
       </MessageContent>
     </Message>
-  );
-});
+  )
+})
 
 // ─── Main Renderer ────────────────────────────────────────────────────────────
 
@@ -178,8 +187,8 @@ export const MessageRenderer = memo(function MessageRenderer({
   isStreaming,
 }: MessageRendererProps) {
   if (message.role === "user") {
-    return <UserMessage message={message} />;
+    return <UserMessage message={message} />
   }
 
-  return <AssistantMessage message={message} isStreaming={isStreaming} />;
-});
+  return <AssistantMessage message={message} isStreaming={isStreaming} />
+})

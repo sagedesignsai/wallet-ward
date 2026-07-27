@@ -26,7 +26,10 @@ const proxyRequestSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
   service: z.enum(["github", "slack", "vercel"]),
   method: z.enum(ALLOWED_METHODS),
-  path: z.string().min(1, "path is required").startsWith("/", "path must start with /"),
+  path: z
+    .string()
+    .min(1, "path is required")
+    .startsWith("/", "path must start with /"),
   body: z.record(z.string(), z.unknown()).optional(),
   query: z.record(z.string(), z.string()).optional(),
 })

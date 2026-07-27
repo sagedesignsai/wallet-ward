@@ -1,8 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { 
-  GitBranchIcon, 
+import {
+  GitBranchIcon,
   EnvelopeIcon,
   ChatCircleIcon,
   ListChecksIcon,
@@ -25,67 +25,119 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-type Provider = "github" | "gmail" | "slack" | "gitlab" | "linear" | "jira" | "notion" | "airtable" | "trello"
+type Provider =
+  | "github"
+  | "gmail"
+  | "slack"
+  | "gitlab"
+  | "linear"
+  | "jira"
+  | "notion"
+  | "airtable"
+  | "trello"
 
-const PROVIDER_CONFIG: Record<Provider, {
-  name: string
-  icon: React.ComponentType<{ className?: string }>
-  description: string
-  permissions: string[]
-}> = {
+const PROVIDER_CONFIG: Record<
+  Provider,
+  {
+    name: string
+    icon: React.ComponentType<{ className?: string }>
+    description: string
+    permissions: string[]
+  }
+> = {
   github: {
     name: "GitHub",
     icon: GitBranchIcon,
-    description: "Connect your GitHub account to enable repository access and PR creation.",
-    permissions: ["Access repositories", "Create pull requests", "Read organization info"],
+    description:
+      "Connect your GitHub account to enable repository access and PR creation.",
+    permissions: [
+      "Access repositories",
+      "Create pull requests",
+      "Read organization info",
+    ],
   },
   gmail: {
     name: "Gmail",
     icon: EnvelopeIcon,
-    description: "Connect your Gmail account to enable email sending capabilities.",
-    permissions: ["Send emails on your behalf", "Read email messages", "View your email address"],
+    description:
+      "Connect your Gmail account to enable email sending capabilities.",
+    permissions: [
+      "Send emails on your behalf",
+      "Read email messages",
+      "View your email address",
+    ],
   },
   slack: {
     name: "Slack",
     icon: ChatCircleIcon,
-    description: "Connect your Slack workspace to send notifications and messages.",
-    permissions: ["Send messages to channels", "Read channel list", "Read user info"],
+    description:
+      "Connect your Slack workspace to send notifications and messages.",
+    permissions: [
+      "Send messages to channels",
+      "Read channel list",
+      "Read user info",
+    ],
   },
   gitlab: {
     name: "GitLab",
     icon: GitBranchIcon,
-    description: "Connect your GitLab account to enable repository access and MR creation.",
-    permissions: ["Access repositories", "Create merge requests", "Read user info"],
+    description:
+      "Connect your GitLab account to enable repository access and MR creation.",
+    permissions: [
+      "Access repositories",
+      "Create merge requests",
+      "Read user info",
+    ],
   },
   linear: {
     name: "Linear",
     icon: ListChecksIcon,
     description: "Connect your Linear workspace to create and manage issues.",
-    permissions: ["Create and update issues", "Read projects and teams", "Read user info"],
+    permissions: [
+      "Create and update issues",
+      "Read projects and teams",
+      "Read user info",
+    ],
   },
   jira: {
     name: "Jira",
     icon: ListChecksIcon,
-    description: "Connect your Jira workspace to create and manage issues across projects.",
-    permissions: ["Read and write Jira work", "Read user information", "Offline access"],
+    description:
+      "Connect your Jira workspace to create and manage issues across projects.",
+    permissions: [
+      "Read and write Jira work",
+      "Read user information",
+      "Offline access",
+    ],
   },
   notion: {
     name: "Notion",
     icon: ListChecksIcon,
-    description: "Connect your Notion workspace to create and manage pages and databases.",
-    permissions: ["Read and write content", "Access workspace pages", "Read user info"],
+    description:
+      "Connect your Notion workspace to create and manage pages and databases.",
+    permissions: [
+      "Read and write content",
+      "Access workspace pages",
+      "Read user info",
+    ],
   },
   airtable: {
     name: "Airtable",
     icon: ListChecksIcon,
-    description: "Connect your Airtable account to read and write records in bases.",
+    description:
+      "Connect your Airtable account to read and write records in bases.",
     permissions: ["Read records", "Write records", "Read base schema"],
   },
   trello: {
     name: "Trello",
     icon: ListChecksIcon,
-    description: "Connect your Trello account to create and manage cards and boards.",
-    permissions: ["Read and write cards", "Access boards and lists", "Read user info"],
+    description:
+      "Connect your Trello account to create and manage cards and boards.",
+    permissions: [
+      "Read and write cards",
+      "Access boards and lists",
+      "Read user info",
+    ],
   },
 }
 
@@ -127,7 +179,9 @@ export function ConnectIntegrationDialog({
         body: JSON.stringify({ projectId: selectedProjectId }),
       })
       if (!res.ok) {
-        throw new Error(`Failed to initiate ${config.name} connection (${res.status})`)
+        throw new Error(
+          `Failed to initiate ${config.name} connection (${res.status})`
+        )
       }
       const body = await res.json()
       if (body.url) {
@@ -146,14 +200,12 @@ export function ConnectIntegrationDialog({
             <Icon className="size-5" />
             Connect {config.name}
           </DialogTitle>
-          <DialogDescription>
-            {config.description}
-          </DialogDescription>
+          <DialogDescription>{config.description}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3">
           <p className="text-xs text-muted-foreground">
-            Select a project to connect to {config.name}. This will start the OAuth
-            flow to link your account.
+            Select a project to connect to {config.name}. This will start the
+            OAuth flow to link your account.
           </p>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="project-select">Project</Label>
@@ -174,8 +226,8 @@ export function ConnectIntegrationDialog({
             </Select>
           </div>
           <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Permissions requested:</p>
-            <ul className="list-disc list-inside space-y-0.5">
+            <p className="mb-1 font-medium">Permissions requested:</p>
+            <ul className="list-inside list-disc space-y-0.5">
               {config.permissions.map((permission, i) => (
                 <li key={i}>{permission}</li>
               ))}

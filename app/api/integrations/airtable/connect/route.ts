@@ -5,7 +5,10 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { handleRouteError } from "@/lib/api/http"
-import { airtableConnectSchema, createOAuthState } from "@/lib/services/integrations"
+import {
+  airtableConnectSchema,
+  createOAuthState,
+} from "@/lib/services/integrations"
 import { badRequest } from "@/lib/api/errors"
 
 export async function POST(request: Request) {
@@ -32,7 +35,10 @@ export async function POST(request: Request) {
     authorizationUrl.searchParams.set("redirect_uri", redirectUri)
     authorizationUrl.searchParams.set("response_type", "code")
     authorizationUrl.searchParams.set("state", state)
-    authorizationUrl.searchParams.set("scope", "data.records:read data.records:write schema.bases:read")
+    authorizationUrl.searchParams.set(
+      "scope",
+      "data.records:read data.records:write schema.bases:read"
+    )
 
     return NextResponse.json({
       url: authorizationUrl.toString(),

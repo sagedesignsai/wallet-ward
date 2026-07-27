@@ -76,9 +76,7 @@ export function DataTable<T extends Record<string, unknown>>({
       >
         <Empty>
           <EmptyHeader>
-            {emptyIcon && (
-              <EmptyMedia variant="icon">{emptyIcon}</EmptyMedia>
-            )}
+            {emptyIcon && <EmptyMedia variant="icon">{emptyIcon}</EmptyMedia>}
             <EmptyTitle>{emptyTitle}</EmptyTitle>
             <EmptyDescription>{emptyDescription}</EmptyDescription>
           </EmptyHeader>

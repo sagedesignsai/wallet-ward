@@ -1,6 +1,10 @@
 import { z } from "zod"
 import { handleRouteError, json } from "@/lib/api/http"
-import { requireAuth, requireOrganization, requirePermission } from "@/lib/api/auth"
+import {
+  requireAuth,
+  requireOrganization,
+  requirePermission,
+} from "@/lib/api/auth"
 import {
   approveProposal,
   markProposalExecuted,

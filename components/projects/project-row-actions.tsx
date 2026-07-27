@@ -25,7 +25,10 @@ type ProjectRowActionsProps = {
   onDelete: (id: string) => Promise<boolean>
 }
 
-export function ProjectRowActions({ project, onDelete }: ProjectRowActionsProps) {
+export function ProjectRowActions({
+  project,
+  onDelete,
+}: ProjectRowActionsProps) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   const handleDelete = useCallback(async () => {
@@ -56,7 +59,9 @@ export function ProjectRowActions({ project, onDelete }: ProjectRowActionsProps)
             View Details
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+        <DropdownMenuItem
+          onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+        >
           <PencilSimpleIcon />
           Edit
         </DropdownMenuItem>
@@ -65,8 +70,12 @@ export function ProjectRowActions({ project, onDelete }: ProjectRowActionsProps)
           trigger={
             <DropdownMenuItem
               variant="destructive"
-              onSelect={(e: React.MouseEvent<HTMLDivElement>) => e.preventDefault()}
-              onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+              onSelect={(e: React.MouseEvent<HTMLDivElement>) =>
+                e.preventDefault()
+              }
+              onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                e.stopPropagation()
+              }
             >
               <TrashIcon />
               Delete

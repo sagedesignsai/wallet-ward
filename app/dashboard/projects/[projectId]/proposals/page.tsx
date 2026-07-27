@@ -112,12 +112,17 @@ function ProposalGroup({
         className="flex w-full items-center gap-2 text-left"
       >
         <Icon className={cn("size-3.5 shrink-0", group.color)} />
-        <span className="text-xs font-semibold text-foreground">{group.label}</span>
-        <Badge variant="outline" className="h-4 px-1.5 text-[9px] font-bold ml-1">
+        <span className="text-xs font-semibold text-foreground">
+          {group.label}
+        </span>
+        <Badge
+          variant="outline"
+          className="ml-1 h-4 px-1.5 text-[9px] font-bold"
+        >
           {proposals.length}
         </Badge>
-        <div className="flex-1 h-px bg-border/40 ml-2" />
-        <span className="text-[10px] text-muted-foreground ml-2">
+        <div className="ml-2 h-px flex-1 bg-border/40" />
+        <span className="ml-2 text-[10px] text-muted-foreground">
           {expanded ? "hide" : "show"}
         </span>
       </button>
@@ -250,7 +255,7 @@ function ProjectProposalsInner({ projectId }: { projectId: string }) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 text-xs gap-1.5 sm:ml-auto"
+          className="h-8 gap-1.5 text-xs sm:ml-auto"
           onClick={() => fetchProposals()}
           disabled={isLoading}
         >
@@ -261,13 +266,13 @@ function ProjectProposalsInner({ projectId }: { projectId: string }) {
           )}
           Refresh
           {lastFetchedAt && (
-            <span className="text-muted-foreground hidden sm:inline">
+            <span className="hidden text-muted-foreground sm:inline">
               · <TimeAgo date={lastFetchedAt} />
             </span>
           )}
         </Button>
 
-        <div className="flex items-center rounded-md border border-border/40 bg-muted/20 p-0.5 gap-0.5">
+        <div className="flex items-center gap-0.5 rounded-md border border-border/40 bg-muted/20 p-0.5">
           <button
             onClick={() => setViewMode("list")}
             className={cn(
@@ -302,13 +307,16 @@ function ProjectProposalsInner({ projectId }: { projectId: string }) {
           ))}
         </div>
       ) : proposals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/40 py-16 gap-3 text-center">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/40 py-16 text-center">
           <CheckCircleIcon className="size-8 text-muted-foreground/40" />
           <div>
             <p className="text-sm font-medium">No proposals found</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="mt-1 text-xs text-muted-foreground">
               Org-wide view:{" "}
-              <Link href="/dashboard/proposals" className="text-primary hover:underline">
+              <Link
+                href="/dashboard/proposals"
+                className="text-primary hover:underline"
+              >
                 all proposals
               </Link>
             </p>

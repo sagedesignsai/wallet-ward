@@ -26,7 +26,7 @@ export function StatCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <span className="text-xs text-muted-foreground">{label}</span>
-          <span className="text-2xl font-bold leading-none tracking-tight text-foreground">
+          <span className="text-2xl leading-none font-bold tracking-tight text-foreground">
             {value}
           </span>
         </div>
@@ -53,7 +53,7 @@ export function StatCard({
             </Badge>
           )}
           {description && (
-            <span className="text-xs text-muted-foreground truncate">
+            <span className="truncate text-xs text-muted-foreground">
               {description}
             </span>
           )}

@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import {
-  PaperPlaneRightIcon,
-  EnvelopeSimpleIcon,
-} from "@phosphor-icons/react"
+import { PaperPlaneRightIcon, EnvelopeSimpleIcon } from "@phosphor-icons/react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -84,7 +81,7 @@ export function InviteMemberForm({ onInvite }: InviteMemberFormProps) {
         </Label>
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <EnvelopeSimpleIcon className="absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <EnvelopeSimpleIcon className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="invite-email"
               type="email"
@@ -125,9 +122,7 @@ export function InviteMemberForm({ onInvite }: InviteMemberFormProps) {
         </div>
       </div>
 
-      {error && (
-        <p className="text-xs text-destructive">{error}</p>
-      )}
+      {error && <p className="text-xs text-destructive">{error}</p>}
 
       {success && (
         <p className="text-xs text-emerald-600 dark:text-emerald-400">

@@ -45,31 +45,54 @@ export function StatsSection({ className }: { className?: string }) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold: 0.3 })
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setVisible(true)
+      },
+      { threshold: 0.3 }
+    )
     obs.observe(el)
     return () => obs.disconnect()
   }, [])
 
   return (
-    <section ref={ref} className={cn("py-16 border-y border-border/30 relative overflow-hidden", className)}>
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
+    <section
+      ref={ref}
+      className={cn(
+        "relative overflow-hidden border-y border-border/30 py-16",
+        className
+      )}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.02] to-transparent" />
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
           {STATS.map((stat, i) => (
             <div
               key={i}
               className={cn(
-                "flex flex-col items-center text-center gap-2 p-5 rounded-2xl border transition-all duration-700",
-                stat.bg, stat.border,
-                visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                "flex flex-col items-center gap-2 rounded-2xl border p-5 text-center transition-all duration-700",
+                stat.bg,
+                stat.border,
+                visible
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-4 opacity-0"
               )}
               style={{ transitionDelay: `${i * 100}ms` }}
             >
-              <span className={cn("text-3xl sm:text-4xl font-black tracking-tight", stat.color)}>
+              <span
+                className={cn(
+                  "text-3xl font-black tracking-tight sm:text-4xl",
+                  stat.color
+                )}
+              >
                 {stat.value}
               </span>
-              <span className="text-sm font-semibold text-foreground">{stat.label}</span>
-              <span className="text-[11px] text-muted-foreground">{stat.sub}</span>
+              <span className="text-sm font-semibold text-foreground">
+                {stat.label}
+              </span>
+              <span className="text-[11px] text-muted-foreground">
+                {stat.sub}
+              </span>
             </div>
           ))}
         </div>

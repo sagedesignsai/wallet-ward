@@ -15,10 +15,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url)
     const projectId = url.searchParams.get("projectId")
     const status = url.searchParams.get("status") as
-      | "todo"
-      | "in_progress"
-      | "done"
-      | null
+      "todo" | "in_progress" | "done" | null
 
     const validStatuses = ["todo", "in_progress", "done"] as const
     const statusFilter =

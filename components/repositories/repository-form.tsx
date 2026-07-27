@@ -117,9 +117,9 @@ export function RepositoryForm({
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
       {/* Provider Info Banner */}
-      <div className="rounded-lg border border-purple-200 bg-purple-50/50 dark:border-purple-900 dark:bg-purple-950/20 px-3 py-2">
+      <div className="rounded-lg border border-purple-200 bg-purple-50/50 px-3 py-2 dark:border-purple-900 dark:bg-purple-950/20">
         <p className="text-xs text-purple-900 dark:text-purple-100">
-          <LinkIcon className="inline size-3 mr-1" />
+          <LinkIcon className="mr-1 inline size-3" />
           Connect your Git repository to sync code, manage deployments, and
           track changes across your project.
         </p>
@@ -225,7 +225,7 @@ export function RepositoryForm({
       <div className="grid gap-2">
         <Label htmlFor="repo-branch">
           Default Branch{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Input
           id="repo-branch"
@@ -244,7 +244,7 @@ export function RepositoryForm({
       <div className="grid gap-2">
         <Label htmlFor="repo-description">
           Description{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="repo-description"

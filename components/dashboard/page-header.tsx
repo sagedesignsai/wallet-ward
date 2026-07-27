@@ -20,18 +20,18 @@ export function PageHeader({
   return (
     <div className={cn("border-b border-border/40 pb-4", className)}>
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
           {icon && (
             <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted/50 text-muted-foreground [&_svg]:size-4">
               {icon}
             </div>
           )}
           <div className="min-w-0">
-            <h1 className="text-base font-semibold text-foreground leading-none">
+            <h1 className="text-base leading-none font-semibold text-foreground">
               {title}
             </h1>
             {description && (
-              <p className="mt-1 text-xs text-muted-foreground leading-none">
+              <p className="mt-1 text-xs leading-none text-muted-foreground">
                 {description}
               </p>
             )}

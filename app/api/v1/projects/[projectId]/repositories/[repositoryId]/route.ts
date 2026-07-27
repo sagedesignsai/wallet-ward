@@ -41,7 +41,10 @@ export async function GET(
     const repository = await RepositoryService.getByIdWithMetadata(repositoryId)
 
     if (!repository || repository.projectId !== projectId) {
-      return NextResponse.json({ error: "Repository not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Repository not found" },
+        { status: 404 }
+      )
     }
 
     return NextResponse.json({ data: repository })
@@ -91,7 +94,10 @@ export async function PATCH(
     // Verify repository exists and belongs to project
     const existingRepo = await RepositoryService.getById(repositoryId)
     if (!existingRepo || existingRepo.projectId !== projectId) {
-      return NextResponse.json({ error: "Repository not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Repository not found" },
+        { status: 404 }
+      )
     }
 
     const body = await req.json()
@@ -168,7 +174,10 @@ export async function DELETE(
     // Verify repository exists and belongs to project
     const existingRepo = await RepositoryService.getById(repositoryId)
     if (!existingRepo || existingRepo.projectId !== projectId) {
-      return NextResponse.json({ error: "Repository not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Repository not found" },
+        { status: 404 }
+      )
     }
 
     await RepositoryService.delete(repositoryId)

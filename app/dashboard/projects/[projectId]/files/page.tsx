@@ -15,7 +15,13 @@ import { FileCard } from "@/components/files/file-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import {
   Select,
@@ -40,7 +46,7 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [typeFilter, setTypeFilter] = useState<FileType | "all">("all")
   const [deleteTarget, setDeleteTarget] = useState<ProjectFile | null>(null)
-  
+
   const { files, isLoading, error, deleteFile } = useProjectFiles(
     projectId,
     typeFilter !== "all" ? { type: typeFilter } : undefined
@@ -58,10 +64,14 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
     })
   }, [setConfig])
 
-  const filteredFiles = files.filter((file) =>
-    file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    file.path.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (file.tags && file.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+  const filteredFiles = files.filter(
+    (file) =>
+      file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.path.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (file.tags &&
+        file.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase())
+        ))
   )
 
   const handleDelete = async (file: ProjectFile) => {
@@ -91,22 +101,22 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
 
       {/* Header Actions */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-1">
-          <div className="relative flex-1 max-w-md">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <div className="flex flex-1 items-center gap-2">
+          <div className="relative max-w-md flex-1">
+            <MagnifyingGlassIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search files..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9"
+              className="h-9 pl-9"
             />
           </div>
           <Select
             value={typeFilter}
             onValueChange={(value) => setTypeFilter(value as FileType | "all")}
           >
-            <SelectTrigger className="w-[140px] h-9">
-              <FunnelIcon className="size-4 mr-2" />
+            <SelectTrigger className="h-9 w-[140px]">
+              <FunnelIcon className="mr-2 size-4" />
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>
@@ -147,7 +157,8 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
             </EmptyMedia>
             <EmptyTitle>No files yet</EmptyTitle>
             <EmptyDescription>
-              Upload files, artifacts, and documents to organize your project resources.
+              Upload files, artifacts, and documents to organize your project
+              resources.
             </EmptyDescription>
           </EmptyHeader>
           <Button asChild className="mt-2">
@@ -176,7 +187,7 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
 
       {/* No Results */}
       {!isLoading && files.length > 0 && filteredFiles.length === 0 && (
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <p className="text-sm text-muted-foreground">
             No files match your search or filter.
           </p>
@@ -184,7 +195,9 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
       )}
       <ConfirmDialog
         open={deleteTarget !== null}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
         title="Delete file?"
         description={`Are you sure you want to delete "${deleteTarget?.name ?? ""}"? This action cannot be undone.`}
         confirmLabel="Delete File"

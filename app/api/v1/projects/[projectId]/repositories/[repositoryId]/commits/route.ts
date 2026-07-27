@@ -54,7 +54,10 @@ export async function GET(
     // Verify repository exists and belongs to project
     const repository = await RepositoryService.getById(repositoryId)
     if (!repository || repository.projectId !== projectId) {
-      return NextResponse.json({ error: "Repository not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Repository not found" },
+        { status: 404 }
+      )
     }
 
     // Parse query params
@@ -67,7 +70,10 @@ export async function GET(
     const parsed = parseGitHubUrl(repository.url)
     if (!parsed) {
       return NextResponse.json(
-        { error: "Unsupported repository URL. Only GitHub repositories are supported." },
+        {
+          error:
+            "Unsupported repository URL. Only GitHub repositories are supported.",
+        },
         { status: 400 }
       )
     }

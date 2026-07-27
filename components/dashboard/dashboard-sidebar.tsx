@@ -40,14 +40,18 @@ export function DashboardSidebar() {
   const NAV_GROUPS = [
     {
       label: "Overview",
-      items: [
-        { label: "Dashboard", href: "/dashboard", icon: HouseIcon },
-      ],
+      items: [{ label: "Dashboard", href: "/dashboard", icon: HouseIcon }],
     },
     {
       label: "⚡ Autonomous",
       items: [
-        { label: "Agent Hub", href: "/dashboard/agents", icon: RobotIcon, badge: "New", badgeVariant: "primary" as const },
+        {
+          label: "Agent Hub",
+          href: "/dashboard/agents",
+          icon: RobotIcon,
+          badge: "New",
+          badgeVariant: "primary" as const,
+        },
         {
           label: "Proposals",
           href: "/dashboard/proposals",
@@ -63,15 +67,31 @@ export function DashboardSidebar() {
       items: [
         { label: "Projects", href: "/dashboard/projects", icon: FolderIcon },
         { label: "Secrets & Keys", href: "/dashboard/secrets", icon: KeyIcon },
-        { label: "Documents", href: "/dashboard/documents", icon: FileTextIcon },
-        { label: "Audit Logs", href: "/dashboard/audit-logs", icon: ClockCounterClockwiseIcon },
+        {
+          label: "Documents",
+          href: "/dashboard/documents",
+          icon: FileTextIcon,
+        },
+        {
+          label: "Audit Logs",
+          href: "/dashboard/audit-logs",
+          icon: ClockCounterClockwiseIcon,
+        },
       ],
     },
     {
       label: "🔌 Augmentation",
       items: [
-        { label: "Integrations", href: "/dashboard/integrations", icon: PlugIcon },
-        { label: "Organizations", href: "/dashboard/organizations", icon: UsersIcon },
+        {
+          label: "Integrations",
+          href: "/dashboard/integrations",
+          icon: PlugIcon,
+        },
+        {
+          label: "Organizations",
+          href: "/dashboard/organizations",
+          icon: UsersIcon,
+        },
       ],
     },
   ]
@@ -84,7 +104,7 @@ export function DashboardSidebar() {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs shadow-primary/20">
-                  <span className="font-extrabold text-sm">F</span>
+                  <span className="text-sm font-extrabold">F</span>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold text-sidebar-foreground">
@@ -114,18 +134,25 @@ export function DashboardSidebar() {
 
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
-                        <Link href={item.href} className="flex items-center gap-2 w-full">
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.label}
+                      >
+                        <Link
+                          href={item.href}
+                          className="flex w-full items-center gap-2"
+                        >
                           <item.icon className="size-4 shrink-0" />
                           <span className="flex-1 truncate">{item.label}</span>
                           {"badge" in item && item.badge && (
                             <Badge
                               variant="outline"
                               className={cn(
-                                "ml-auto h-4 px-1.5 text-[9px] font-bold shrink-0",
+                                "ml-auto h-4 shrink-0 px-1.5 text-[9px] font-bold",
                                 item.badgeVariant === "urgent"
-                                  ? "bg-amber-500/15 text-amber-400 border-amber-500/25 animate-pulse"
-                                  : "bg-primary/15 text-primary border-primary/20"
+                                  ? "animate-pulse border-amber-500/25 bg-amber-500/15 text-amber-400"
+                                  : "border-primary/20 bg-primary/15 text-primary"
                               )}
                             >
                               {item.badge}

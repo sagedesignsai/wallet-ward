@@ -47,10 +47,7 @@ export async function POST(
     const visibility = formData.get("visibility") as string
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
     // Generate a storage ID (in production, store binary in Appwrite/S3)

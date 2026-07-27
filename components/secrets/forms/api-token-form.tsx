@@ -102,9 +102,9 @@ export function ApiTokenForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
-      <div className="rounded-lg border border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20 px-3 py-2">
+      <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 dark:border-blue-900 dark:bg-blue-950/20">
         <p className="text-xs text-blue-900 dark:text-blue-100">
-          <ShieldCheckIcon className="inline size-3 mr-1" />
+          <ShieldCheckIcon className="mr-1 inline size-3" />
           Store API tokens, access keys, and bearer tokens securely. Add expiry
           dates and scopes for better management.
         </p>
@@ -149,12 +149,12 @@ export function ApiTokenForm({
                 setErrors((prev) => ({ ...prev, value: "" }))
               }
             }}
-            className="pr-20 font-mono text-xs resize-none"
+            className="resize-none pr-20 font-mono text-xs"
             rows={4}
             disabled={isSubmitting}
             aria-invalid={!!errors.value}
           />
-          <div className="absolute right-2 top-2 flex gap-0.5">
+          <div className="absolute top-2 right-2 flex gap-0.5">
             {value && (
               <Button
                 type="button"
@@ -199,11 +199,13 @@ export function ApiTokenForm({
         )}
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="token-expires">
             Expires On{" "}
-            <span className="text-muted-foreground font-normal">(optional)</span>
+            <span className="font-normal text-muted-foreground">
+              (optional)
+            </span>
           </Label>
           <div className="relative">
             <Input
@@ -220,7 +222,7 @@ export function ApiTokenForm({
               aria-invalid={!!errors.expiresAt}
               min={new Date().toISOString().split("T")[0]}
             />
-            <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+            <CalendarIcon className="pointer-events-none absolute top-1/2 right-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
           </div>
           {errors.expiresAt && (
             <p className="text-xs text-destructive">{errors.expiresAt}</p>
@@ -230,7 +232,9 @@ export function ApiTokenForm({
         <div className="grid gap-2">
           <Label htmlFor="token-scopes">
             Scopes{" "}
-            <span className="text-muted-foreground font-normal">(optional)</span>
+            <span className="font-normal text-muted-foreground">
+              (optional)
+            </span>
           </Label>
           <Input
             id="token-scopes"
@@ -249,7 +253,7 @@ export function ApiTokenForm({
       <div className="grid gap-2">
         <Label htmlFor="token-description">
           Description{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="token-description"

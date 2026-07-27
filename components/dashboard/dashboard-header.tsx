@@ -35,11 +35,7 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { PanelToggleBar } from "@/components/workspace"
 
-function Breadcrumbs({
-  items,
-}: {
-  items: { label: string; href?: string }[]
-}) {
+function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
   if (!items || items.length === 0) return null
 
   return (
@@ -50,12 +46,12 @@ function Breadcrumbs({
           {item.href ? (
             <Link
               href={item.href}
-              className="hover:text-foreground transition-colors"
+              className="transition-colors hover:text-foreground"
             >
               {item.label}
             </Link>
           ) : (
-            <span className="text-foreground font-medium">{item.label}</span>
+            <span className="font-medium text-foreground">{item.label}</span>
           )}
         </span>
       ))}
@@ -94,19 +90,28 @@ function ProjectSwitcher() {
         {projects.map((project: any) => (
           <DropdownMenuItem
             key={project.id}
-            className={cn("text-xs cursor-pointer", project.id === activeProjectId && "bg-accent")}
+            className={cn(
+              "cursor-pointer text-xs",
+              project.id === activeProjectId && "bg-accent"
+            )}
             onClick={() => setActiveProjectId(project.id)}
           >
             <span className="flex min-w-0 flex-1 items-center gap-2 truncate">
               {project.name}
             </span>
             {project.id === activeProjectId && (
-              <CheckIcon className="size-3.5 shrink-0 text-primary" weight="bold" />
+              <CheckIcon
+                className="size-3.5 shrink-0 text-primary"
+                weight="bold"
+              />
             )}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="text-xs cursor-pointer text-muted-foreground">
+        <DropdownMenuItem
+          asChild
+          className="cursor-pointer text-xs text-muted-foreground"
+        >
           <Link href="/dashboard/projects/new">
             <PlusIcon className="size-3.5" />
             New Project
@@ -118,20 +123,31 @@ function ProjectSwitcher() {
 }
 
 function OrgSwitcher() {
-  const { organizations, activeOrganizationId, activeOrganization, switchOrganization, isLoading } = useOrganization()
+  const {
+    organizations,
+    activeOrganizationId,
+    activeOrganization,
+    switchOrganization,
+    isLoading,
+  } = useOrganization()
   const router = useRouter()
 
   if (isLoading || organizations.length === 0) return null
 
   const initials = activeOrganization?.name
-    ? activeOrganization.name.split(/\s+/).map((w) => w[0]).join("").toUpperCase().slice(0, 2)
+    ? activeOrganization.name
+        .split(/\s+/)
+        .map((w) => w[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
     : "??"
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 gap-1.5 px-2 text-xs">
-          <div className="flex size-5 shrink-0 items-center justify-center rounded bg-primary/10 text-primary text-[9px] font-bold">
+          <div className="flex size-5 shrink-0 items-center justify-center rounded bg-primary/10 text-[9px] font-bold text-primary">
             {initials}
           </div>
           <span className="hidden max-w-[120px] truncate font-medium text-foreground md:inline">
@@ -152,7 +168,10 @@ function OrgSwitcher() {
         {organizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
-            className={cn("text-xs cursor-pointer", org.id === activeOrganizationId && "bg-accent")}
+            className={cn(
+              "cursor-pointer text-xs",
+              org.id === activeOrganizationId && "bg-accent"
+            )}
             onClick={() => {
               if (org.id !== activeOrganizationId) {
                 switchOrganization(org.id)
@@ -161,18 +180,21 @@ function OrgSwitcher() {
           >
             <span className="flex min-w-0 flex-1 items-center gap-2 truncate">
               {org.name}
-              <span className="shrink-0 rounded bg-muted px-1 py-0.5 text-[9px] font-mono text-muted-foreground uppercase">
+              <span className="shrink-0 rounded bg-muted px-1 py-0.5 font-mono text-[9px] text-muted-foreground uppercase">
                 {org.role}
               </span>
             </span>
             {org.id === activeOrganizationId && (
-              <CheckIcon className="size-3.5 shrink-0 text-primary" weight="bold" />
+              <CheckIcon
+                className="size-3.5 shrink-0 text-primary"
+                weight="bold"
+              />
             )}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-xs cursor-pointer text-muted-foreground"
+          className="cursor-pointer text-xs text-muted-foreground"
           onClick={() => router.push("/dashboard/organizations/new")}
         >
           <PlusIcon className="size-3.5" />
@@ -186,14 +208,15 @@ function OrgSwitcher() {
 function AgentStatusIndicator() {
   const { data: sessions } = useAgentSessions()
   const activeSessions = sessions?.filter((s) => s.status === "active") ?? []
-  
+
   if (activeSessions.length === 0) return null
 
   return (
     <div className="flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/5 px-2.5 py-1">
-      <div className="size-2 rounded-full bg-green-500 animate-pulse" />
-      <span className="text-xs text-green-400 font-medium">
-        {activeSessions.length} agent{activeSessions.length > 1 ? "s" : ""} active
+      <div className="size-2 animate-pulse rounded-full bg-green-500" />
+      <span className="text-xs font-medium text-green-400">
+        {activeSessions.length} agent{activeSessions.length > 1 ? "s" : ""}{" "}
+        active
       </span>
     </div>
   )
@@ -261,7 +284,7 @@ export function DashboardHeader() {
                     src={user?.image ?? undefined}
                     alt={user?.name ?? "User"}
                   />
-                  <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-bold">
+                  <AvatarFallback className="bg-primary/10 text-[9px] font-bold text-primary">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
@@ -275,23 +298,23 @@ export function DashboardHeader() {
             <DropdownMenuContent className="w-48" align="end">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col gap-0.5">
-                  <p className="text-xs font-semibold leading-none text-foreground">
+                  <p className="text-xs leading-none font-semibold text-foreground">
                     {user?.name}
                   </p>
-                  <p className="text-[11px] leading-none text-muted-foreground truncate">
+                  <p className="truncate text-[11px] leading-none text-muted-foreground">
                     {user?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem asChild className="text-xs cursor-pointer">
+                <DropdownMenuItem asChild className="cursor-pointer text-xs">
                   <Link href="/dashboard/settings">
                     <GearIcon className="mr-2 h-3.5 w-3.5" />
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="text-xs cursor-pointer">
+                <DropdownMenuItem asChild className="cursor-pointer text-xs">
                   <Link href="/two-factor/setup">
                     <ShieldCheckIcon className="mr-2 h-3.5 w-3.5 text-primary" />
                     <span>2FA Security</span>
@@ -300,7 +323,7 @@ export function DashboardHeader() {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-xs text-destructive focus:text-destructive cursor-pointer"
+                className="cursor-pointer text-xs text-destructive focus:text-destructive"
                 onClick={handleSignOut}
               >
                 <SignOutIcon className="mr-2 h-3.5 w-3.5" />

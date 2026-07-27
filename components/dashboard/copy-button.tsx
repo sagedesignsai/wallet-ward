@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import {
-  CopyIcon,
-  CheckIcon,
-} from "@phosphor-icons/react"
+import { CopyIcon, CheckIcon } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -41,7 +38,10 @@ export function CopyButton({ value, className, label }: CopyButtonProps) {
     <Button
       variant="ghost"
       size="icon-sm"
-      className={cn("h-6 w-6 text-muted-foreground hover:text-foreground", className)}
+      className={cn(
+        "h-6 w-6 text-muted-foreground hover:text-foreground",
+        className
+      )}
       onClick={handleCopy}
       aria-label={label ?? "Copy to clipboard"}
     >

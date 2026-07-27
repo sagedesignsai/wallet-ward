@@ -18,11 +18,20 @@ import {
 } from "@/hooks/use-global-documents"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
-import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/components/dashboard/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 
 export default function GlobalDocumentsPage() {
   const { setConfig } = useDashboardConfig()
@@ -43,7 +52,7 @@ export default function GlobalDocumentsPage() {
 
   const activeProject = useMemo(
     () => projects.find((p) => p.id === activeProjectId) ?? null,
-    [projects, activeProjectId],
+    [projects, activeProjectId]
   )
 
   // Filter documents to only show current project
@@ -55,7 +64,7 @@ export default function GlobalDocumentsPage() {
   useEffect(() => {
     setConfig({
       title: "Documents",
-      description: activeProject 
+      description: activeProject
         ? `Documents in ${activeProject.name}`
         : "Project documents",
       breadcrumbs: [
@@ -81,19 +90,19 @@ export default function GlobalDocumentsPage() {
           render: (row) => {
             const doc = row as unknown as GlobalDocument
             return (
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
                 <div className="flex size-6 shrink-0 items-center justify-center rounded bg-muted/60 text-muted-foreground">
                   <FileTextIcon className="size-3" />
                 </div>
                 <div className="min-w-0">
                   <Link
                     href={`/dashboard/projects/${doc.projectId}/documents/${doc.id}`}
-                    className="font-medium text-foreground truncate block hover:text-primary transition-colors"
+                    className="block truncate font-medium text-foreground transition-colors hover:text-primary"
                   >
                     {doc.title}
                   </Link>
                   {doc.content && (
-                    <span className="text-[0.625rem] text-muted-foreground truncate block">
+                    <span className="block truncate text-[0.625rem] text-muted-foreground">
                       {doc.content.slice(0, 80).replace(/[#*_`~\[\]]/g, "")}
                     </span>
                   )}
@@ -111,7 +120,7 @@ export default function GlobalDocumentsPage() {
             return (
               <Link
                 href={`/dashboard/projects/${doc.projectId}`}
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
                 onClick={(e) => e.stopPropagation()}
               >
                 <FolderIcon className="size-3 shrink-0" />
@@ -155,7 +164,7 @@ export default function GlobalDocumentsPage() {
           {error}
           <button
             onClick={refetch}
-            className="ml-2 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors"
+            className="ml-2 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
           >
             Retry
           </button>
@@ -175,7 +184,9 @@ export default function GlobalDocumentsPage() {
           value={isLoading ? "—" : distinctProjects}
           icon={<FolderIcon className="size-4" />}
           description={
-            distinctProjects === 1 ? "1 project" : `${distinctProjects} projects`
+            distinctProjects === 1
+              ? "1 project"
+              : `${distinctProjects} projects`
           }
         />
       </div>
@@ -187,7 +198,7 @@ export default function GlobalDocumentsPage() {
             placeholder="Search documents..."
             value={filters.search}
             onChange={(e) => setFilter("search", e.target.value)}
-            className="max-w-xs h-8 text-xs"
+            className="h-8 max-w-xs text-xs"
           />
           {activeFilterCount > 0 && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
@@ -216,9 +227,7 @@ export default function GlobalDocumentsPage() {
           </Empty>
         ) : (
           <DataTable
-            columns={
-              columns as DataTableColumn<Record<string, unknown>>[]
-            }
+            columns={columns as DataTableColumn<Record<string, unknown>>[]}
             data={filtered as (GlobalDocument & Record<string, unknown>)[]}
             isLoading={isLoading}
             loadingRows={5}
@@ -238,11 +247,7 @@ export default function GlobalDocumentsPage() {
                 : "No documents are available to display."
             }
             emptyIcon={
-              activeFilterCount > 0 ? (
-                <WarningCircleIcon />
-              ) : (
-                <FileTextIcon />
-              )
+              activeFilterCount > 0 ? <WarningCircleIcon /> : <FileTextIcon />
             }
           />
         )}

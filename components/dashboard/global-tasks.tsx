@@ -4,10 +4,7 @@ import { useMemo } from "react"
 import Link from "next/link"
 import { FolderIcon } from "@phosphor-icons/react"
 
-import {
-  useGlobalTasks,
-  type GlobalTask,
-} from "@/hooks/use-global-tasks"
+import { useGlobalTasks, type GlobalTask } from "@/hooks/use-global-tasks"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { Badge } from "@/components/ui/badge"
@@ -21,8 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { WarningCircleIcon, ListChecksIcon, FolderOpenIcon } from "@phosphor-icons/react"
-import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
+import {
+  WarningCircleIcon,
+  ListChecksIcon,
+  FolderOpenIcon,
+} from "@phosphor-icons/react"
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/components/dashboard/data-table"
 
 type StatusConfig = {
   label: string
@@ -47,16 +51,19 @@ export function TaskFilters({
   filters: { projectId: string | null; status: string | null; search: string }
   activeFilterCount: number
   projects: { id: string; name: string; slug: string }[]
-  setFilter: (key: "projectId" | "status" | "search", value: string | null) => void
+  setFilter: (
+    key: "projectId" | "status" | "search",
+    value: string | null
+  ) => void
   clearFilters: () => void
 }) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex flex-wrap items-center gap-2">
       <Input
         placeholder="Search tasks..."
         value={filters.search}
         onChange={(e) => setFilter("search", e.target.value)}
-        className="max-w-xs h-8 text-xs"
+        className="h-8 max-w-xs text-xs"
       />
       <Select
         value={filters.projectId ?? "__all__"}
@@ -64,7 +71,7 @@ export function TaskFilters({
           setFilter("projectId", val === "__all__" ? null : val)
         }
       >
-        <SelectTrigger size="sm" className="w-[160px] h-8 text-xs">
+        <SelectTrigger size="sm" className="h-8 w-[160px] text-xs">
           <SelectValue placeholder="All projects" />
         </SelectTrigger>
         <SelectContent>
@@ -82,7 +89,7 @@ export function TaskFilters({
           setFilter("status", val === "__all__" ? null : val)
         }
       >
-        <SelectTrigger size="sm" className="w-[140px] h-8 text-xs">
+        <SelectTrigger size="sm" className="h-8 w-[140px] text-xs">
           <SelectValue placeholder="All statuses" />
         </SelectTrigger>
         <SelectContent>
@@ -103,11 +110,7 @@ export function TaskFilters({
   )
 }
 
-export function TaskKanban({
-  tasks,
-}: {
-  tasks: GlobalTask[]
-}) {
+export function TaskKanban({ tasks }: { tasks: GlobalTask[] }) {
   const grouped = useMemo(() => {
     const groups: Record<GlobalTask["status"], GlobalTask[]> = {
       todo: [],
@@ -164,12 +167,12 @@ function TaskColumn({
 
 function TaskCard({ task }: { task: GlobalTask }) {
   return (
-    <Card className="gap-0 py-3 hover:border-border/60 transition-colors">
+    <Card className="gap-0 py-3 transition-colors hover:border-border/60">
       <CardHeader className="px-3 pb-1.5">
         <CardTitle className="text-sm">
           <Link
             href={`/dashboard/projects/${task.projectId}/tasks/${task.id}`}
-            className="hover:text-primary transition-colors"
+            className="transition-colors hover:text-primary"
           >
             {task.title}
           </Link>
@@ -177,7 +180,7 @@ function TaskCard({ task }: { task: GlobalTask }) {
       </CardHeader>
       <CardContent className="px-3">
         {task.description && (
-          <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
+          <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
             {task.description}
           </p>
         )}
@@ -185,7 +188,7 @@ function TaskCard({ task }: { task: GlobalTask }) {
           <div className="flex items-center gap-2 text-[0.625rem] text-muted-foreground">
             <Link
               href={`/dashboard/projects/${task.projectId}`}
-              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1 transition-colors hover:text-foreground"
               onClick={(e) => e.stopPropagation()}
             >
               <FolderIcon className="size-2.5 shrink-0" />
@@ -205,7 +208,7 @@ function TaskCard({ task }: { task: GlobalTask }) {
 export function TaskEmptyState() {
   return (
     <div className="overflow-hidden rounded-lg border border-border/60 bg-card">
-      <div className="flex flex-col items-center gap-4 py-12 px-6">
+      <div className="flex flex-col items-center gap-4 px-6 py-12">
         <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-primary ring-1 ring-primary/10 transition-transform hover:scale-105">
           <FolderOpenIcon className="size-7" weight="light" />
         </div>
@@ -213,7 +216,7 @@ export function TaskEmptyState() {
           <h3 className="text-sm font-semibold text-foreground">
             No tasks yet
           </h3>
-          <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
+          <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
             Create your first task within a project to start tracking work.
           </p>
         </div>

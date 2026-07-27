@@ -98,7 +98,7 @@ function NewRepositoryInner({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl">
+    <div className="flex max-w-3xl flex-col gap-5">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <GitBranchIcon className="size-4" />
         <span>Connect a Git repository to sync code and track changes.</span>

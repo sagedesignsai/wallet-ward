@@ -1,11 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import {
-  UserIcon,
-  ShieldCheckIcon,
-  KeyIcon,
-} from "@phosphor-icons/react"
+import { UserIcon, ShieldCheckIcon, KeyIcon } from "@phosphor-icons/react"
 import { useSession } from "@/lib/auth-client"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
@@ -48,7 +44,7 @@ export default function SettingsPage() {
 
   if (isPending) {
     return (
-      <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+      <div className="flex animate-in flex-col gap-4 duration-300 fade-in">
         <Skeleton className="h-16 w-full rounded-lg" />
         <Skeleton className="h-10 w-72 rounded-lg" />
         <Skeleton className="h-[300px] w-full rounded-lg" />
@@ -57,7 +53,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-6 duration-300 fade-in">
       <SegmentedControl tabs={TABS} value={activeTab} onChange={setActiveTab} />
 
       <div className="min-w-0">

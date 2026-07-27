@@ -3,12 +3,23 @@
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { EyeIcon, EyeSlashIcon, EnvelopeSimpleIcon, LockIcon, ArrowRightIcon } from "@phosphor-icons/react"
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  EnvelopeSimpleIcon,
+  LockIcon,
+  ArrowRightIcon,
+} from "@phosphor-icons/react"
 
 import { signIn } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
+import {
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldGroup,
+} from "@/components/ui/field"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Spinner } from "@/components/ui/spinner"
 import { AuthCardHeader } from "@/components/auth/auth-card-header"
@@ -19,7 +30,10 @@ interface SignInFormProps {
   onTwoFactorRequired?: () => void
 }
 
-export function SignInForm({ onSuccess, onTwoFactorRequired }: SignInFormProps) {
+export function SignInForm({
+  onSuccess,
+  onTwoFactorRequired,
+}: SignInFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -55,7 +69,10 @@ export function SignInForm({ onSuccess, onTwoFactorRequired }: SignInFormProps) 
           },
           onError: (ctx) => {
             setIsLoading(false)
-            setError(ctx.error.message || "Failed to sign in. Please check your credentials.")
+            setError(
+              ctx.error.message ||
+                "Failed to sign in. Please check your credentials."
+            )
           },
           onTwoFactorRedirect: () => {
             setIsLoading(false)
@@ -73,7 +90,10 @@ export function SignInForm({ onSuccess, onTwoFactorRequired }: SignInFormProps) 
         setError(res.error.message || "Sign in failed")
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "An unexpected error occurred during sign in."
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred during sign in."
       setError(msg)
     } finally {
       setIsLoading(false)
@@ -81,8 +101,8 @@ export function SignInForm({ onSuccess, onTwoFactorRequired }: SignInFormProps) 
   }
 
   return (
-    <Card className="w-full border-border/40 shadow-xl bg-card/80 backdrop-blur-md">
-      <CardContent className="pt-6 space-y-6">
+    <Card className="w-full border-border/40 bg-card/80 shadow-xl backdrop-blur-md">
+      <CardContent className="space-y-6 pt-6">
         <AuthCardHeader
           title="Welcome Back"
           description="Sign in to access your secure encrypted vault"
@@ -90,7 +110,7 @@ export function SignInForm({ onSuccess, onTwoFactorRequired }: SignInFormProps) 
         />
 
         {error && (
-          <Alert variant="destructive" className="py-2.5 px-3 text-xs">
+          <Alert variant="destructive" className="px-3 py-2.5 text-xs">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -100,7 +120,7 @@ export function SignInForm({ onSuccess, onTwoFactorRequired }: SignInFormProps) 
             <Field>
               <FieldLabel htmlFor="email">Email Address</FieldLabel>
               <div className="relative flex items-center">
-                <EnvelopeSimpleIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                <EnvelopeSimpleIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -120,20 +140,20 @@ export function SignInForm({ onSuccess, onTwoFactorRequired }: SignInFormProps) 
                 <FieldLabel htmlFor="password">Password</FieldLabel>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-primary hover:underline font-medium transition-colors"
+                  className="text-xs font-medium text-primary transition-colors hover:underline"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative flex items-center">
-                <LockIcon className="absolute left-3 w-4 h-4 text-muted-foreground" />
+                <LockIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9 pr-9"
+                  className="pr-9 pl-9"
                   disabled={isLoading}
                   required
                   autoComplete="current-password"
@@ -141,39 +161,46 @@ export function SignInForm({ onSuccess, onTwoFactorRequired }: SignInFormProps) 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 text-muted-foreground transition-colors hover:text-foreground"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeSlashIcon className="w-4 h-4" />
+                    <EyeSlashIcon className="h-4 w-4" />
                   ) : (
-                    <EyeIcon className="w-4 h-4" />
+                    <EyeIcon className="h-4 w-4" />
                   )}
                 </button>
               </div>
             </Field>
           </FieldGroup>
 
-          <Button type="submit" className="w-full gap-2 font-medium" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="w-full gap-2 font-medium"
+            disabled={isLoading}
+          >
             {isLoading ? (
               <>
-                <Spinner className="w-4 h-4" />
+                <Spinner className="h-4 w-4" />
                 <span>Signing in...</span>
               </>
             ) : (
               <>
                 <span>Sign In</span>
-                <ArrowRightIcon className="w-4 h-4" />
+                <ArrowRightIcon className="h-4 w-4" />
               </>
             )}
           </Button>
         </form>
       </CardContent>
 
-      <CardFooter className="flex items-center justify-center border-t border-border/40 py-4 bg-muted/20">
+      <CardFooter className="flex items-center justify-center border-t border-border/40 bg-muted/20 py-4">
         <p className="text-xs text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="text-primary font-semibold hover:underline">
+          <Link
+            href="/sign-up"
+            className="font-semibold text-primary hover:underline"
+          >
             Create account
           </Link>
         </p>

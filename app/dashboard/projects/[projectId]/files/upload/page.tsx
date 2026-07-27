@@ -77,14 +77,11 @@ function FileUploadInner({ projectId }: { projectId: string }) {
       formData.append("tags", values.tags.join(","))
       formData.append("visibility", values.visibility)
 
-      const res = await fetch(
-        `/api/v1/projects/${projectId}/files/upload`,
-        {
-          method: "POST",
-          credentials: "include",
-          body: formData,
-        }
-      )
+      const res = await fetch(`/api/v1/projects/${projectId}/files/upload`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      })
 
       if (!res.ok) {
         const body = await res.json().catch(() => null)
@@ -109,7 +106,7 @@ function FileUploadInner({ projectId }: { projectId: string }) {
   /* ---- loading (project still loading) ---- */
   if (projectLoading) {
     return (
-      <div className="space-y-4 max-w-2xl">
+      <div className="max-w-2xl space-y-4">
         <Skeleton className="h-10 w-2/3" />
         <Skeleton className="h-[400px] rounded-lg" />
       </div>
@@ -117,7 +114,7 @@ function FileUploadInner({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-2xl">
+    <div className="flex max-w-2xl flex-col gap-5">
       {/* Error banner */}
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">

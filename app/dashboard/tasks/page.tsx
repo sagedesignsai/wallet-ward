@@ -35,7 +35,7 @@ export default function GlobalTasksPage() {
 
   const activeProject = useMemo(
     () => projects.find((p) => p.id === activeProjectId) ?? null,
-    [projects, activeProjectId],
+    [projects, activeProjectId]
   )
 
   // Filter tasks to only show current project
@@ -47,7 +47,7 @@ export default function GlobalTasksPage() {
   useEffect(() => {
     setConfig({
       title: "Tasks",
-      description: activeProject 
+      description: activeProject
         ? `Tasks in ${activeProject.name}`
         : "Project tasks",
       breadcrumbs: [
@@ -63,9 +63,18 @@ export default function GlobalTasksPage() {
     return set.size
   }, [tasks])
 
-  const todoCount = useMemo(() => tasks.filter((t) => t.status === "todo").length, [tasks])
-  const inProgressCount = useMemo(() => tasks.filter((t) => t.status === "in_progress").length, [tasks])
-  const doneCount = useMemo(() => tasks.filter((t) => t.status === "done").length, [tasks])
+  const todoCount = useMemo(
+    () => tasks.filter((t) => t.status === "todo").length,
+    [tasks]
+  )
+  const inProgressCount = useMemo(
+    () => tasks.filter((t) => t.status === "in_progress").length,
+    [tasks]
+  )
+  const doneCount = useMemo(
+    () => tasks.filter((t) => t.status === "done").length,
+    [tasks]
+  )
 
   return (
     <div className="flex flex-col gap-5">
@@ -74,7 +83,7 @@ export default function GlobalTasksPage() {
           {error}
           <button
             onClick={refetch}
-            className="ml-2 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors"
+            className="ml-2 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
           >
             Retry
           </button>

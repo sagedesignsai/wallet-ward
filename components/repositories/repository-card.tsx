@@ -8,7 +8,11 @@ import {
   WarningCircleIcon,
   ClockIcon,
 } from "@phosphor-icons/react"
-import type { Repository, RepositoryProvider, RepositorySyncStatus } from "@prisma/client"
+import type {
+  Repository,
+  RepositoryProvider,
+  RepositorySyncStatus,
+} from "@prisma/client"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -67,21 +71,30 @@ function getSyncStatusBadge(status: RepositorySyncStatus) {
   switch (status) {
     case "synced":
       return (
-        <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600">
+        <Badge
+          variant="outline"
+          className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+        >
           <CheckCircleIcon className="size-3" weight="fill" />
           Synced
         </Badge>
       )
     case "syncing":
       return (
-        <Badge variant="outline" className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600">
+        <Badge
+          variant="outline"
+          className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600"
+        >
           <ClockIcon className="size-3" weight="fill" />
           Syncing
         </Badge>
       )
     case "error":
       return (
-        <Badge variant="outline" className="gap-1 border-destructive/30 bg-destructive/10 text-destructive">
+        <Badge
+          variant="outline"
+          className="gap-1 border-destructive/30 bg-destructive/10 text-destructive"
+        >
           <WarningCircleIcon className="size-3" weight="fill" />
           Error
         </Badge>
@@ -110,21 +123,23 @@ export function RepositoryCard({
     <Card className="group relative overflow-hidden transition-all hover:shadow-md">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
             {/* Provider Icon */}
-            <div className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted/60",
-              providerColor
-            )}>
+            <div
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted/60",
+                providerColor
+              )}
+            >
               <ProviderIcon className="size-5" weight="fill" />
             </div>
 
             {/* Repository Info */}
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="mb-1 flex items-center gap-2">
                 <Link
                   href={`/dashboard/projects/${projectId}/repositories/${repository.id}`}
-                  className="font-semibold text-sm text-foreground hover:text-primary transition-colors truncate"
+                  className="truncate text-sm font-semibold text-foreground transition-colors hover:text-primary"
                 >
                   {repository.name}
                 </Link>
@@ -132,7 +147,7 @@ export function RepositoryCard({
               </div>
 
               {repository.description && (
-                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                <p className="mb-2 line-clamp-2 text-xs text-muted-foreground">
                   {repository.description}
                 </p>
               )}
@@ -149,8 +164,9 @@ export function RepositoryCard({
                   </span>
                 )}
                 {repository._count && repository._count.webhooks > 0 && (
-                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
-                    {repository._count.webhooks} webhook{repository._count.webhooks > 1 ? "s" : ""}
+                  <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
+                    {repository._count.webhooks} webhook
+                    {repository._count.webhooks > 1 ? "s" : ""}
                   </Badge>
                 )}
               </div>
@@ -160,7 +176,7 @@ export function RepositoryCard({
                   href={repository.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline truncate block"
+                  className="block truncate text-xs text-primary hover:underline"
                 >
                   {repository.url}
                 </a>
@@ -174,14 +190,16 @@ export function RepositoryCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="size-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <DotsThreeVerticalIcon className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/projects/${projectId}/repositories/${repository.id}`}>
+                <Link
+                  href={`/dashboard/projects/${projectId}/repositories/${repository.id}`}
+                >
                   View Details
                 </Link>
               </DropdownMenuItem>

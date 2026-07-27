@@ -46,7 +46,12 @@ function getFileIcon(type: FileType, mimeType: string) {
   if (type === "code") return FileCodeIcon
   if (type === "document" || mimeType.includes("pdf")) return FilePdfIcon
   if (type === "asset" || mimeType.includes("image")) return FileImageIcon
-  if (mimeType.includes("zip") || mimeType.includes("tar") || mimeType.includes("gz")) return FileZipIcon
+  if (
+    mimeType.includes("zip") ||
+    mimeType.includes("tar") ||
+    mimeType.includes("gz")
+  )
+    return FileZipIcon
   if (type === "artifact") return FileZipIcon
   return FileIcon
 }
@@ -106,30 +111,32 @@ export function FileCard({
     <Card className="group relative overflow-hidden transition-all hover:shadow-md">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
             {/* File Icon */}
-            <div className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted/60",
-              fileTypeColor
-            )}>
+            <div
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted/60",
+                fileTypeColor
+              )}
+            >
               <FileIconComponent className="size-5" weight="fill" />
             </div>
 
             {/* File Info */}
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="mb-1 flex items-center gap-2">
                 <Link
                   href={`/dashboard/projects/${projectId}/files/${file.id}`}
-                  className="font-semibold text-sm text-foreground hover:text-primary transition-colors truncate"
+                  className="truncate text-sm font-semibold text-foreground transition-colors hover:text-primary"
                 >
                   {file.name}
                 </Link>
-                <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+                <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
                   {getFileTypeBadge(file.type)}
                 </Badge>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+              <div className="mb-2 flex items-center gap-3 text-xs text-muted-foreground">
                 <span>{formatFileSize(file.size)}</span>
                 <span>·</span>
                 <span className="flex items-center gap-1">
@@ -137,28 +144,32 @@ export function FileCard({
                   <TimeAgo date={file.updatedAt} />
                 </span>
                 {file._count && file._count.versions > 1 && (
-                  <Badge variant="outline" className="text-[10px] h-4 px-1.5">
+                  <Badge variant="outline" className="h-4 px-1.5 text-[10px]">
                     v{file.version}
                   </Badge>
                 )}
               </div>
 
               {file.tags && file.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-2">
+                <div className="mb-2 flex flex-wrap gap-1">
                   {file.tags.slice(0, 3).map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-[10px] h-4 px-1.5">
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="h-4 px-1.5 text-[10px]"
+                    >
                       {tag}
                     </Badge>
                   ))}
                   {file.tags.length > 3 && (
-                    <Badge variant="outline" className="text-[10px] h-4 px-1.5">
+                    <Badge variant="outline" className="h-4 px-1.5 text-[10px]">
                       +{file.tags.length - 3}
                     </Badge>
                   )}
                 </div>
               )}
 
-              <div className="text-xs text-muted-foreground truncate">
+              <div className="truncate text-xs text-muted-foreground">
                 {file.path}
               </div>
             </div>
@@ -170,26 +181,28 @@ export function FileCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="size-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <DotsThreeVerticalIcon className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/projects/${projectId}/files/${file.id}`}>
+                <Link
+                  href={`/dashboard/projects/${projectId}/files/${file.id}`}
+                >
                   View Details
                 </Link>
               </DropdownMenuItem>
               {onDownload && (
                 <DropdownMenuItem onClick={() => onDownload(file)}>
-                  <DownloadIcon className="size-4 mr-2" />
+                  <DownloadIcon className="mr-2 size-4" />
                   Download
                 </DropdownMenuItem>
               )}
               {onShare && (
                 <DropdownMenuItem onClick={() => onShare(file)}>
-                  <ShareIcon className="size-4 mr-2" />
+                  <ShareIcon className="mr-2 size-4" />
                   Share
                 </DropdownMenuItem>
               )}

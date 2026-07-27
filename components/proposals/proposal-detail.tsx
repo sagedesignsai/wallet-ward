@@ -80,15 +80,15 @@ export function ProposalDetail({
         <CardHeader className="space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <h1 className="text-lg font-bold text-foreground leading-snug">
+              <h1 className="text-lg leading-snug font-bold text-foreground">
                 {proposal.title}
               </h1>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex flex-wrap items-center gap-2">
                 <StatusIcon className={cn("size-3.5", statusConfig.color)} />
                 <span className={cn("text-xs font-medium", statusConfig.color)}>
                   {statusConfig.label}
                 </span>
-                <span className="text-muted-foreground/40 text-xs">·</span>
+                <span className="text-xs text-muted-foreground/40">·</span>
                 <TimeAgo
                   date={new Date(proposal.createdAt)}
                   className="text-[11px] text-muted-foreground"
@@ -101,15 +101,15 @@ export function ProposalDetail({
 
         <CardContent className="space-y-5">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">
+            <p className="mb-1.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
               Description
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
               {proposal.description}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               { label: "Action", value: proposal.actionType },
               { label: "Target", value: proposal.targetSystem },
@@ -120,10 +120,10 @@ export function ProposalDetail({
                 key={item.label}
                 className="rounded-lg border border-border/30 bg-muted/20 p-2.5"
               >
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                <p className="text-[10px] tracking-wide text-muted-foreground uppercase">
                   {item.label}
                 </p>
-                <p className="text-xs font-medium mt-0.5 capitalize truncate">
+                <p className="mt-0.5 truncate text-xs font-medium capitalize">
                   {item.value}
                 </p>
               </div>
@@ -131,14 +131,24 @@ export function ProposalDetail({
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 text-xs"
+              asChild
+            >
               <Link href={`/dashboard/projects/${proposal.projectId}`}>
                 <FolderIcon className="size-3.5" />
                 Project
               </Link>
             </Button>
             {proposal.agentSessionId && (
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-xs"
+                asChild
+              >
                 <Link href={`/dashboard/agents/${proposal.agentSessionId}`}>
                   <RobotIcon className="size-3.5" />
                   Agent Session
@@ -148,20 +158,20 @@ export function ProposalDetail({
           </div>
 
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">
+            <p className="mb-1.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
               Payload
             </p>
-            <pre className="overflow-x-auto rounded-lg border border-border/40 bg-muted/30 p-3 text-[11px] text-muted-foreground leading-relaxed max-h-64">
+            <pre className="max-h-64 overflow-x-auto rounded-lg border border-border/40 bg-muted/30 p-3 text-[11px] leading-relaxed text-muted-foreground">
               {JSON.stringify(proposal.payload ?? {}, null, 2)}
             </pre>
           </div>
 
           {(proposal.approvalNotes || proposal.rejectionNotes) && (
             <div className="rounded-lg border border-border/30 bg-muted/20 p-3">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
+              <p className="mb-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                 Notes
               </p>
-              <p className="text-xs text-muted-foreground whitespace-pre-wrap">
+              <p className="text-xs whitespace-pre-wrap text-muted-foreground">
                 {proposal.approvalNotes || proposal.rejectionNotes}
               </p>
             </div>
@@ -188,12 +198,12 @@ export function ProposalDetail({
                 className="min-h-[72px] text-xs"
               />
             </div>
-            <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
+            <div className="flex w-full gap-2 sm:ml-auto sm:w-auto">
               {onReject && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 text-red-400 border-red-500/25 hover:bg-red-500/10"
+                  className="gap-1.5 border-red-500/25 text-red-400 hover:bg-red-500/10"
                   disabled={isActing}
                   onClick={() => onReject(notes || undefined)}
                 >

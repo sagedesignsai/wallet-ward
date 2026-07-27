@@ -1,7 +1,4 @@
-import {
-  ArrowClockwiseIcon,
-  CheckIcon,
-} from "@phosphor-icons/react"
+import { ArrowClockwiseIcon, CheckIcon } from "@phosphor-icons/react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -51,13 +48,13 @@ export function FileVersionList({
   restoringId = null,
 }: FileVersionListProps) {
   return (
-    <div className="rounded-lg border border-border/40 bg-card overflow-hidden">
+    <div className="overflow-hidden rounded-lg border border-border/40 bg-card">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border/40 px-4 py-2.5">
         <span className="text-xs font-medium text-foreground">
           Version History
         </span>
-        <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+        <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
           {versions.length} {versions.length === 1 ? "version" : "versions"}
         </Badge>
       </div>
@@ -74,26 +71,26 @@ export function FileVersionList({
               className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/30"
             >
               {/* Version number */}
-              <div className="flex items-center gap-2 min-w-[80px]">
+              <div className="flex min-w-[80px] items-center gap-2">
                 {isCurrent ? (
                   <Badge
                     variant="default"
-                    className="text-[10px] h-4 px-1.5 gap-1"
+                    className="h-4 gap-1 px-1.5 text-[10px]"
                   >
                     <CheckIcon className="size-2.5" />
                     Current
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-[10px] h-4 px-1.5">
+                  <Badge variant="outline" className="h-4 px-1.5 text-[10px]">
                     v{version.version}
                   </Badge>
                 )}
               </div>
 
               {/* Version info */}
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-foreground truncate">
+                  <span className="truncate text-xs font-medium text-foreground">
                     v{version.version}
                   </span>
                   <span className="text-xs text-muted-foreground">
@@ -103,7 +100,7 @@ export function FileVersionList({
                     {formatFileSize(version.size)}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 mt-0.5">
+                <div className="mt-0.5 flex items-center gap-1">
                   <TimeAgo date={version.createdAt} className="text-[10px]" />
                 </div>
               </div>
@@ -124,7 +121,7 @@ export function FileVersionList({
                     </>
                   ) : (
                     <>
-                      <ArrowClockwiseIcon className="size-3.5 mr-1" />
+                      <ArrowClockwiseIcon className="mr-1 size-3.5" />
                       Restore
                     </>
                   )}

@@ -134,7 +134,8 @@ export function CreateProjectDialog({
             />
             {slug && (
               <p className="text-[0.625rem] text-muted-foreground">
-                Slug: <span className="font-mono text-foreground/70">{slug}</span>
+                Slug:{" "}
+                <span className="font-mono text-foreground/70">{slug}</span>
               </p>
             )}
           </div>
@@ -142,7 +143,9 @@ export function CreateProjectDialog({
           <div className="grid gap-2">
             <Label htmlFor="project-description">
               Description{" "}
-              <span className="text-muted-foreground font-normal">(optional)</span>
+              <span className="font-normal text-muted-foreground">
+                (optional)
+              </span>
             </Label>
             <Textarea
               id="project-description"
@@ -155,9 +158,7 @@ export function CreateProjectDialog({
             />
           </div>
 
-          {error && (
-            <p className="text-xs text-destructive">{error}</p>
-          )}
+          {error && <p className="text-xs text-destructive">{error}</p>}
 
           <DialogFooter>
             <Button

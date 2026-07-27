@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
 import type { Prisma } from "@/generated/prisma/client"
-import { consumeOAuthState, storeEncryptedToken } from "@/lib/services/integrations"
+import {
+  consumeOAuthState,
+  storeEncryptedToken,
+} from "@/lib/services/integrations"
 import { prisma } from "@/lib/db"
 
 export async function GET(request: Request) {
@@ -11,7 +14,10 @@ export async function GET(request: Request) {
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL("/?error=missing_oauth_params", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+        new URL(
+          "/?error=missing_oauth_params",
+          process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+        )
       )
     }
 
@@ -22,7 +28,10 @@ export async function GET(request: Request) {
     const clientSecret = process.env.JIRA_CLIENT_SECRET
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
-        new URL("/?error=jira_oauth_not_configured", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+        new URL(
+          "/?error=jira_oauth_not_configured",
+          process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+        )
       )
     }
 
@@ -69,17 +78,24 @@ export async function GET(request: Request) {
     }
 
     // Fetch accessible resources (Jira sites)
-    const resourcesRes = await fetch("https://api.atlassian.com/oauth/token/accessible-resources", {
-      headers: {
-        Authorization: `Bearer ${tokenData.access_token}`,
-        Accept: "application/json",
-      },
-    })
-    
+    const resourcesRes = await fetch(
+      "https://api.atlassian.com/oauth/token/accessible-resources",
+      {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+          Accept: "application/json",
+        },
+      }
+    )
+
     const resources = resourcesRes.ok
-      ? ((await resourcesRes.json()) as Array<{ id: string; name: string; url: string }>)
+      ? ((await resourcesRes.json()) as Array<{
+          id: string
+          name: string
+          url: string
+        }>)
       : []
-    
+
     const primaryResource = resources[0]
 
     // Look up the project to get the organizationId for encryption
@@ -89,9 +105,7 @@ export async function GET(request: Request) {
     })
 
     if (!project) {
-      return NextResponse.redirect(
-        new URL("/?error=project_not_found", appUrl)
-      )
+      return NextResponse.redirect(new URL("/?error=project_not_found", appUrl))
     }
 
     // Parse scopes
@@ -120,11 +134,21 @@ export async function GET(request: Request) {
     })
 
     // Store encrypted access token
-    await storeEncryptedToken(integration.id, tokenData.access_token, project.organizationId, "access")
+    await storeEncryptedToken(
+      integration.id,
+      tokenData.access_token,
+      project.organizationId,
+      "access"
+    )
 
     // Store encrypted refresh token if provided
     if (tokenData.refresh_token) {
-      await storeEncryptedToken(integration.id, tokenData.refresh_token, project.organizationId, "refresh")
+      await storeEncryptedToken(
+        integration.id,
+        tokenData.refresh_token,
+        project.organizationId,
+        "refresh"
+      )
     }
 
     // Redirect to the project page
@@ -134,8 +158,6 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Jira OAuth callback error:", error)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-    return NextResponse.redirect(
-      new URL("/?error=callback_failed", appUrl)
-    )
+    return NextResponse.redirect(new URL("/?error=callback_failed", appUrl))
   }
 }

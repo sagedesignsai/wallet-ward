@@ -20,7 +20,10 @@ import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useSecrets, type SecretWithValue } from "@/hooks/use-secrets"
 import { TimeAgo } from "@/components/dashboard/time-ago"
-import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/components/dashboard/data-table"
 import { DataTableToolbar } from "@/components/dashboard/data-table-toolbar"
 import { SensitiveValue } from "@/components/dashboard/sensitive-value"
 import {
@@ -108,9 +111,7 @@ function typeLabel(type: string): string {
 export default function SecretsPage({ params }: SecretsPageProps) {
   const { projectId, environmentId } = use(params)
 
-  return (
-    <SecretsInner projectId={projectId} environmentId={environmentId} />
-  )
+  return <SecretsInner projectId={projectId} environmentId={environmentId} />
 }
 
 function SecretsInner({
@@ -153,9 +154,7 @@ function SecretsInner({
     }
   }, [])
 
-  const environment = project?.environments?.find(
-    (e) => e.id === environmentId
-  )
+  const environment = project?.environments?.find((e) => e.id === environmentId)
 
   useEffect(() => {
     if (project && environment) {
@@ -179,11 +178,9 @@ function SecretsInner({
                 </p>
               </div>
               <DropdownMenuSeparator />
-              
-              <DropdownMenuItem
-                onSelect={() => handleSelectType("env_var")}
-              >
-                <KeyIcon className="size-3.5 mr-2" />
+
+              <DropdownMenuItem onSelect={() => handleSelectType("env_var")}>
+                <KeyIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">Environment Variable</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -192,10 +189,8 @@ function SecretsInner({
                 </div>
               </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onSelect={() => handleSelectType("password")}
-              >
-                <LockKeyIcon className="size-3.5 mr-2" />
+              <DropdownMenuItem onSelect={() => handleSelectType("password")}>
+                <LockKeyIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">Password</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -204,10 +199,8 @@ function SecretsInner({
                 </div>
               </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onSelect={() => handleSelectType("api_token")}
-              >
-                <ShieldCheckIcon className="size-3.5 mr-2" />
+              <DropdownMenuItem onSelect={() => handleSelectType("api_token")}>
+                <ShieldCheckIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">API Token</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -219,7 +212,7 @@ function SecretsInner({
               <DropdownMenuItem
                 onSelect={() => handleSelectType("ssh_keypair")}
               >
-                <KeyIcon className="size-3.5 mr-2" />
+                <KeyIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">SSH Key</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -231,7 +224,7 @@ function SecretsInner({
               <DropdownMenuItem
                 onSelect={() => handleSelectType("certificate")}
               >
-                <CertificateIcon className="size-3.5 mr-2" />
+                <CertificateIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">Certificate</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -240,10 +233,8 @@ function SecretsInner({
                 </div>
               </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onSelect={() => handleSelectType("json")}
-              >
-                <FileJsIcon className="size-3.5 mr-2" />
+              <DropdownMenuItem onSelect={() => handleSelectType("json")}>
+                <FileJsIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">JSON</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -252,10 +243,8 @@ function SecretsInner({
                 </div>
               </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onSelect={() => handleSelectType("file")}
-              >
-                <FileIcon className="size-3.5 mr-2" />
+              <DropdownMenuItem onSelect={() => handleSelectType("file")}>
+                <FileIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">File</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -264,10 +253,8 @@ function SecretsInner({
                 </div>
               </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onSelect={() => handleSelectType("note")}
-              >
-                <NoteIcon className="size-3.5 mr-2" />
+              <DropdownMenuItem onSelect={() => handleSelectType("note")}>
+                <NoteIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">Note</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -279,7 +266,7 @@ function SecretsInner({
               <DropdownMenuSeparator />
 
               <DropdownMenuItem onSelect={() => setBulkImportOpen(true)}>
-                <UploadSimpleIcon className="size-3.5 mr-2" />
+                <UploadSimpleIcon className="mr-2 size-3.5" />
                 <div className="flex flex-col">
                   <span className="font-medium">Bulk Import</span>
                   <span className="text-[0.625rem] text-muted-foreground">
@@ -338,16 +325,16 @@ function SecretsInner({
         render: (secret) => {
           const Icon = typeIcon(secret.type)
           return (
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex min-w-0 items-center gap-2">
               <div className="flex size-6 shrink-0 items-center justify-center rounded bg-muted/60 text-muted-foreground">
                 <Icon className="size-3" />
               </div>
               <div className="min-w-0">
-                <span className="font-medium text-foreground truncate block">
+                <span className="block truncate font-medium text-foreground">
                   {secret.name}
                 </span>
                 {secret.description && (
-                  <span className="text-[0.625rem] text-muted-foreground truncate block">
+                  <span className="block truncate text-[0.625rem] text-muted-foreground">
                     {secret.description}
                   </span>
                 )}
@@ -411,14 +398,14 @@ function SecretsInner({
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-4 duration-300 fade-in">
       {/* Error banner */}
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
           {error}
           <button
             onClick={refetch}
-            className="ml-2 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors"
+            className="ml-2 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
           >
             Retry
           </button>
@@ -438,9 +425,7 @@ function SecretsInner({
           isLoading={isLoading}
           loadingRows={5}
           keyExtractor={(s) => s.id}
-          emptyTitle={
-            search ? "No matching secrets" : "No secrets yet"
-          }
+          emptyTitle={search ? "No matching secrets" : "No secrets yet"}
           emptyDescription={
             search
               ? `No secrets found for "${search}". Try a different search term.`
@@ -466,7 +451,7 @@ function SecretsInner({
                   </span>
                   <SensitiveValue
                     value={svw.value}
-                    className="flex-1 min-w-0"
+                    className="min-w-0 flex-1"
                   />
                 </div>
               ))}

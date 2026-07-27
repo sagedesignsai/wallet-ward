@@ -5,7 +5,10 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { handleRouteError } from "@/lib/api/http"
-import { jiraConnectSchema, createOAuthState } from "@/lib/services/integrations"
+import {
+  jiraConnectSchema,
+  createOAuthState,
+} from "@/lib/services/integrations"
 import { badRequest } from "@/lib/api/errors"
 
 export async function POST(request: Request) {
@@ -30,7 +33,10 @@ export async function POST(request: Request) {
     const authorizationUrl = new URL("https://auth.atlassian.com/authorize")
     authorizationUrl.searchParams.set("audience", "api.atlassian.com")
     authorizationUrl.searchParams.set("client_id", clientId)
-    authorizationUrl.searchParams.set("scope", "read:jira-work write:jira-work read:jira-user offline_access")
+    authorizationUrl.searchParams.set(
+      "scope",
+      "read:jira-work write:jira-work read:jira-user offline_access"
+    )
     authorizationUrl.searchParams.set("state", state)
     authorizationUrl.searchParams.set("redirect_uri", redirectUri)
     authorizationUrl.searchParams.set("response_type", "code")

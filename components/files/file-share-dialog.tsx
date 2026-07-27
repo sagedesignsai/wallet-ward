@@ -1,11 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  LinkIcon,
-  CopyIcon,
-  CheckIcon,
-} from "@phosphor-icons/react"
+import { LinkIcon, CopyIcon, CheckIcon } from "@phosphor-icons/react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -137,11 +133,7 @@ export function FileShareDialog({
           /* ---- Share URL display ---- */
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Input
-                value={shareUrl}
-                readOnly
-                className="font-mono text-xs"
-              />
+              <Input value={shareUrl} readOnly className="font-mono text-xs" />
               <Button
                 type="button"
                 variant="outline"
@@ -173,7 +165,7 @@ export function FileShareDialog({
             <div className="space-y-2">
               <Label htmlFor="share-expiration">
                 Expiration{" "}
-                <span className="text-muted-foreground font-normal">
+                <span className="font-normal text-muted-foreground">
                   (optional)
                 </span>
               </Label>
@@ -192,7 +184,7 @@ export function FileShareDialog({
             <div className="space-y-2">
               <Label htmlFor="share-max-downloads">
                 Max Downloads{" "}
-                <span className="text-muted-foreground font-normal">
+                <span className="font-normal text-muted-foreground">
                   (optional)
                 </span>
               </Label>

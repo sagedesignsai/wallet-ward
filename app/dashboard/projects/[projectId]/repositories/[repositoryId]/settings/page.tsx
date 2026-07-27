@@ -115,7 +115,7 @@ function RepositorySettingsInner({
 
   if (isLoading) {
     return (
-      <div className="space-y-4 max-w-3xl">
+      <div className="max-w-3xl space-y-4">
         <Skeleton className="h-10 w-2/3" />
         <Skeleton className="h-[300px] rounded-lg" />
         <Skeleton className="h-[100px] rounded-lg" />
@@ -140,9 +140,7 @@ function RepositorySettingsInner({
           </EmptyDescription>
         </EmptyHeader>
         <Button variant="outline" size="sm" asChild className="mt-4">
-          <Link
-            href={`/dashboard/projects/${projectId}/repositories`}
-          >
+          <Link href={`/dashboard/projects/${projectId}/repositories`}>
             Back to Repositories
           </Link>
         </Button>
@@ -151,7 +149,7 @@ function RepositorySettingsInner({
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
+    <div className="flex max-w-3xl flex-col gap-6">
       {/* Error banner */}
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
@@ -161,9 +159,9 @@ function RepositorySettingsInner({
 
       {/* Repository Form */}
       <div className="rounded-lg border border-border/40 bg-card p-4">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-4 flex items-center gap-2">
           <h2 className="text-sm font-semibold">Repository Details</h2>
-          <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+          <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
             Edit
           </Badge>
         </div>
@@ -188,7 +186,7 @@ function RepositorySettingsInner({
 
       {/* Sync Status */}
       <div className="rounded-lg border border-border/40 bg-card p-4">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="mb-3 flex items-center gap-2">
           <h2 className="text-sm font-semibold">Sync Status</h2>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -200,10 +198,7 @@ function RepositorySettingsInner({
               />
             )}
             {repository.syncStatus === "syncing" && (
-              <ClockIcon
-                className="size-3.5 text-blue-500"
-                weight="fill"
-              />
+              <ClockIcon className="size-3.5 text-blue-500" weight="fill" />
             )}
             {repository.syncStatus === "error" && (
               <WarningCircleIcon
@@ -245,14 +240,14 @@ function RepositorySettingsInner({
 
       {/* Danger Zone */}
       <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="mb-2 flex items-center gap-2">
           <h2 className="text-sm font-semibold text-destructive">
             Danger Zone
           </h2>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">
-          Permanently delete this repository and all associated data. This action
-          cannot be undone.
+        <p className="mb-3 text-xs text-muted-foreground">
+          Permanently delete this repository and all associated data. This
+          action cannot be undone.
         </p>
         {!showDeleteConfirm ? (
           <Button
@@ -265,11 +260,7 @@ function RepositorySettingsInner({
           </Button>
         ) : (
           <div className="flex items-center gap-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDelete}
-            >
+            <Button variant="destructive" size="sm" onClick={handleDelete}>
               <TrashIcon className="size-3.5" />
               Confirm Delete
             </Button>
@@ -285,7 +276,7 @@ function RepositorySettingsInner({
       </div>
 
       {/* Metadata */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground border-t border-border/40 pt-4">
+      <div className="flex items-center gap-4 border-t border-border/40 pt-4 text-xs text-muted-foreground">
         <span>
           Created{" "}
           {new Date(repository.createdAt).toLocaleDateString("en-US", {
@@ -295,7 +286,7 @@ function RepositorySettingsInner({
           })}
         </span>
         {repository._count && repository._count.webhooks > 0 && (
-          <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+          <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
             {repository._count.webhooks} webhook
             {repository._count.webhooks > 1 ? "s" : ""}
           </Badge>

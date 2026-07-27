@@ -112,7 +112,11 @@ function getResourceName(log: AuditLog): string {
   )
 }
 
-function describeAction(log: AuditLog): { verb: string; resource: string; detail?: string } {
+function describeAction(log: AuditLog): {
+  verb: string
+  resource: string
+  detail?: string
+} {
   const name = getResourceName(log)
   const meta = log.metadata ?? {}
 
@@ -198,7 +202,11 @@ type LogEntryProps = {
   isLast?: boolean
 }
 
-export function LogEntry({ log, isFirst = false, isLast = false }: LogEntryProps) {
+export function LogEntry({
+  log,
+  isFirst = false,
+  isLast = false,
+}: LogEntryProps) {
   const [expanded, setExpanded] = useState(false)
   const style = getActionStyle(log.action)
   const Icon = style.icon
@@ -206,7 +214,14 @@ export function LogEntry({ log, isFirst = false, isLast = false }: LogEntryProps
 
   const metaEntries = log.metadata
     ? Object.entries(log.metadata).filter(
-        ([key]) => !["name", "projectName", "environmentName", "secretName", "resourceName"].includes(key)
+        ([key]) =>
+          ![
+            "name",
+            "projectName",
+            "environmentName",
+            "secretName",
+            "resourceName",
+          ].includes(key)
       )
     : []
 
@@ -216,7 +231,7 @@ export function LogEntry({ log, isFirst = false, isLast = false }: LogEntryProps
         "group relative flex items-stretch border-l-2 transition-colors hover:bg-muted/30",
         style.border,
         isFirst && "rounded-t-lg",
-        isLast && "rounded-b-lg",
+        isLast && "rounded-b-lg"
       )}
     >
       {/* Icon column */}
@@ -235,9 +250,11 @@ export function LogEntry({ log, isFirst = false, isLast = false }: LogEntryProps
 
       {/* Content */}
       <div className="flex min-w-0 flex-1 flex-col justify-center py-2.5 pr-3">
-        <div className="flex items-baseline gap-2 flex-wrap">
+        <div className="flex flex-wrap items-baseline gap-2">
           <span className="text-xs text-muted-foreground">{verb}</span>
-          <span className="text-xs font-semibold text-foreground">{resource}</span>
+          <span className="text-xs font-semibold text-foreground">
+            {resource}
+          </span>
           {detail && (
             <span className="text-xs text-muted-foreground">{detail}</span>
           )}
@@ -268,7 +285,9 @@ export function LogEntry({ log, isFirst = false, isLast = false }: LogEntryProps
           {log.ipAddress && (
             <>
               <span className="text-border">·</span>
-              <span className="font-mono text-muted-foreground/60">{log.ipAddress}</span>
+              <span className="font-mono text-muted-foreground/60">
+                {log.ipAddress}
+              </span>
             </>
           )}
         </div>
@@ -279,7 +298,7 @@ export function LogEntry({ log, isFirst = false, isLast = false }: LogEntryProps
         <button
           onClick={() => setExpanded(!expanded)}
           className={cn(
-            "flex shrink-0 items-center justify-center w-8 text-muted-foreground hover:text-foreground transition-colors",
+            "flex w-8 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-foreground",
             expanded && "text-foreground"
           )}
           aria-label={expanded ? "Collapse details" : "Expand details"}
@@ -295,16 +314,18 @@ export function LogEntry({ log, isFirst = false, isLast = false }: LogEntryProps
 
       {/* Expanded metadata */}
       {expanded && metaEntries.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-10 border-l-2 bg-card/95 backdrop-blur-sm shadow-lg rounded-b-lg border-l-current/10 overflow-hidden">
+        <div className="absolute top-full right-0 left-0 z-10 overflow-hidden rounded-b-lg border-l-2 border-l-current/10 bg-card/95 shadow-lg backdrop-blur-sm">
           <div className="px-4 py-3 pl-14">
-            <dl className="grid gap-px grid-cols-[auto_1fr] text-xs">
+            <dl className="grid grid-cols-[auto_1fr] gap-px text-xs">
               {metaEntries.map(([key, value]) => (
                 <Fragment key={key}>
-                  <dt className="py-1 pr-3 text-muted-foreground font-medium whitespace-nowrap">
+                  <dt className="py-1 pr-3 font-medium whitespace-nowrap text-muted-foreground">
                     {formatKey(key)}
                   </dt>
-                  <dd className="py-1 text-foreground font-mono text-[0.625rem]">
-                    {typeof value === "object" ? JSON.stringify(value, null, 2) : String(value ?? "—")}
+                  <dd className="py-1 font-mono text-[0.625rem] text-foreground">
+                    {typeof value === "object"
+                      ? JSON.stringify(value, null, 2)
+                      : String(value ?? "—")}
                   </dd>
                 </Fragment>
               ))}
@@ -326,7 +347,7 @@ export function LogEntrySkeleton() {
       <div className="flex w-10 shrink-0 items-center justify-center">
         <Skeleton className="size-7 rounded-full" />
       </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-center py-3 pr-3 gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 py-3 pr-3">
         <div className="flex items-center gap-2">
           <Skeleton className="h-3 w-16 rounded-sm" />
           <Skeleton className="h-3 w-24 rounded-sm" />
@@ -336,7 +357,7 @@ export function LogEntrySkeleton() {
           <Skeleton className="h-2.5 w-10 rounded-sm" />
         </div>
       </div>
-      <div className="flex shrink-0 items-center justify-center w-8">
+      <div className="flex w-8 shrink-0 items-center justify-center">
         <Skeleton className="size-3.5 rounded-sm" />
       </div>
     </div>

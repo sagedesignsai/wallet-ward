@@ -1,11 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import {
-  CloudIcon,
-  TrashIcon,
-  ArrowSquareOutIcon,
-} from "@phosphor-icons/react"
+import { CloudIcon, TrashIcon, ArrowSquareOutIcon } from "@phosphor-icons/react"
 import { AgentAvatar } from "@/components/agents/agent-avatar"
 import { AgentStatusBadge } from "@/components/agents/agent-session-row"
 import { Button } from "@/components/ui/button"
@@ -24,14 +20,10 @@ export function SessionHeader({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex items-start gap-4">
-        <AgentAvatar
-          type={session.type}
-          status={session.status}
-          size="lg"
-        />
+        <AgentAvatar type={session.type} status={session.status} size="lg" />
         <div className="min-w-0 space-y-1.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-lg font-bold text-foreground truncate">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="truncate text-lg font-bold text-foreground">
               {session.name}
             </h1>
             <AgentStatusBadge status={session.status} />
@@ -41,7 +33,7 @@ export function SessionHeader({
             {" · "}
             Created <TimeAgo date={session.createdAt} />
           </p>
-          <div className="flex items-center gap-3 flex-wrap pt-1">
+          <div className="flex flex-wrap items-center gap-3 pt-1">
             <Link
               href={`/dashboard/projects/${session.projectId}`}
               className="text-xs text-primary hover:underline"
@@ -63,9 +55,14 @@ export function SessionHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex shrink-0 items-center gap-2">
         {session.daytonaSandboxId && (
-          <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            asChild
+          >
             <Link href={`/dashboard/agents/${session.id}#sandbox`}>
               <CloudIcon className="size-3.5" />
               Sandbox
@@ -76,7 +73,7 @@ export function SessionHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 text-xs gap-1.5 text-red-400 hover:text-red-300"
+            className="h-8 gap-1.5 text-xs text-red-400 hover:text-red-300"
             onClick={onDelete}
             disabled={deleting}
           >

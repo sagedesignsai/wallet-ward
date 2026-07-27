@@ -32,9 +32,13 @@ interface TwoFactorVerifyCardProps {
   onCancel?: () => void
 }
 
-export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCardProps) {
+export function TwoFactorVerifyCard({
+  onSuccess,
+  onCancel,
+}: TwoFactorVerifyCardProps) {
   const router = useRouter()
-  const { verifyTotp, verifyBackupCode, isLoading, error, setError } = useTwoFactor()
+  const { verifyTotp, verifyBackupCode, isLoading, error, setError } =
+    useTwoFactor()
 
   const [activeTab, setActiveTab] = useState<"totp" | "backup">("totp")
   const [code, setCode] = useState("")
@@ -74,8 +78,8 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
   }
 
   return (
-    <Card className="w-full border-border/40 shadow-xl bg-card/80 backdrop-blur-md">
-      <CardContent className="pt-6 space-y-6">
+    <Card className="w-full border-border/40 bg-card/80 shadow-xl backdrop-blur-md">
+      <CardContent className="space-y-6 pt-6">
         <AuthCardHeader
           title="Two-Factor Challenge"
           description="Enter your verification code to complete sign in"
@@ -84,7 +88,7 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
         />
 
         {error && (
-          <Alert variant="destructive" className="py-2.5 px-3 text-xs">
+          <Alert variant="destructive" className="px-3 py-2.5 text-xs">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -97,21 +101,22 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
           }}
           className="w-full"
         >
-          <TabsList className="grid grid-cols-2 w-full mb-4">
-            <TabsTrigger value="totp" className="text-xs gap-1.5">
-              <DeviceMobileIcon className="w-3.5 h-3.5" />
+          <TabsList className="mb-4 grid w-full grid-cols-2">
+            <TabsTrigger value="totp" className="gap-1.5 text-xs">
+              <DeviceMobileIcon className="h-3.5 w-3.5" />
               <span>Authenticator</span>
             </TabsTrigger>
-            <TabsTrigger value="backup" className="text-xs gap-1.5">
-              <KeyIcon className="w-3.5 h-3.5" />
+            <TabsTrigger value="backup" className="gap-1.5 text-xs">
+              <KeyIcon className="h-3.5 w-3.5" />
               <span>Backup Code</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="totp" className="space-y-5">
             <div className="flex flex-col items-center space-y-3 py-2">
-              <span className="text-xs text-muted-foreground text-center">
-                Enter the 6-digit code from your authenticator app (e.g. Google Authenticator, 1Password)
+              <span className="text-center text-xs text-muted-foreground">
+                Enter the 6-digit code from your authenticator app (e.g. Google
+                Authenticator, 1Password)
               </span>
 
               <div className="pt-2">
@@ -127,15 +132,15 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
                   disabled={isLoading}
                 >
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} className="w-10 h-12 text-base" />
-                    <InputOTPSlot index={1} className="w-10 h-12 text-base" />
-                    <InputOTPSlot index={2} className="w-10 h-12 text-base" />
+                    <InputOTPSlot index={0} className="h-12 w-10 text-base" />
+                    <InputOTPSlot index={1} className="h-12 w-10 text-base" />
+                    <InputOTPSlot index={2} className="h-12 w-10 text-base" />
                   </InputOTPGroup>
                   <InputOTPSeparator />
                   <InputOTPGroup>
-                    <InputOTPSlot index={3} className="w-10 h-12 text-base" />
-                    <InputOTPSlot index={4} className="w-10 h-12 text-base" />
-                    <InputOTPSlot index={5} className="w-10 h-12 text-base" />
+                    <InputOTPSlot index={3} className="h-12 w-10 text-base" />
+                    <InputOTPSlot index={4} className="h-12 w-10 text-base" />
+                    <InputOTPSlot index={5} className="h-12 w-10 text-base" />
                   </InputOTPGroup>
                 </InputOTP>
               </div>
@@ -145,11 +150,13 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
               <Checkbox
                 id="trust-device-totp"
                 checked={trustDevice}
-                onCheckedChange={(chk: boolean | "indeterminate") => setTrustDevice(!!chk)}
+                onCheckedChange={(chk: boolean | "indeterminate") =>
+                  setTrustDevice(!!chk)
+                }
               />
               <label
                 htmlFor="trust-device-totp"
-                className="text-xs font-medium text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                className="cursor-pointer text-xs leading-none font-medium text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Trust this device for 30 days
               </label>
@@ -162,12 +169,12 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
             >
               {isLoading ? (
                 <>
-                  <Spinner className="w-4 h-4" />
+                  <Spinner className="h-4 w-4" />
                   <span>Verifying...</span>
                 </>
               ) : (
                 <>
-                  <ShieldCheckIcon className="w-4 h-4" />
+                  <ShieldCheckIcon className="h-4 w-4" />
                   <span>Verify Code</span>
                 </>
               )}
@@ -178,14 +185,16 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
             <form onSubmit={handleVerifyBackup} className="space-y-4">
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="backup-code">Backup Recovery Code</FieldLabel>
+                  <FieldLabel htmlFor="backup-code">
+                    Backup Recovery Code
+                  </FieldLabel>
                   <Input
                     id="backup-code"
                     type="text"
                     placeholder="xxxx-xxxx-xxxx"
                     value={backupCode}
                     onChange={(e) => setBackupCode(e.target.value)}
-                    className="font-mono text-center tracking-wider"
+                    className="text-center font-mono tracking-wider"
                     disabled={isLoading}
                   />
                 </Field>
@@ -195,11 +204,13 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
                 <Checkbox
                   id="trust-device-backup"
                   checked={trustDevice}
-                  onCheckedChange={(chk: boolean | "indeterminate") => setTrustDevice(!!chk)}
+                  onCheckedChange={(chk: boolean | "indeterminate") =>
+                    setTrustDevice(!!chk)
+                  }
                 />
                 <label
                   htmlFor="trust-device-backup"
-                  className="text-xs font-medium text-muted-foreground leading-none cursor-pointer"
+                  className="cursor-pointer text-xs leading-none font-medium text-muted-foreground"
                 >
                   Trust this device for 30 days
                 </label>
@@ -212,12 +223,12 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
               >
                 {isLoading ? (
                   <>
-                    <Spinner className="w-4 h-4" />
+                    <Spinner className="h-4 w-4" />
                     <span>Verifying Code...</span>
                   </>
                 ) : (
                   <>
-                    <CheckIcon className="w-4 h-4" />
+                    <CheckIcon className="h-4 w-4" />
                     <span>Use Recovery Code</span>
                   </>
                 )}
@@ -227,11 +238,11 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
         </Tabs>
       </CardContent>
 
-      <CardFooter className="flex items-center justify-between border-t border-border/40 py-4 bg-muted/20">
+      <CardFooter className="flex items-center justify-between border-t border-border/40 bg-muted/20 py-4">
         <Button
           variant="ghost"
           size="sm"
-          className="text-xs gap-1 text-muted-foreground hover:text-foreground"
+          className="gap-1 text-xs text-muted-foreground hover:text-foreground"
           onClick={() => {
             if (onCancel) {
               onCancel()
@@ -240,7 +251,7 @@ export function TwoFactorVerifyCard({ onSuccess, onCancel }: TwoFactorVerifyCard
             }
           }}
         >
-          <ArrowLeftIcon className="w-3.5 h-3.5" />
+          <ArrowLeftIcon className="h-3.5 w-3.5" />
           <span>Back to Sign In</span>
         </Button>
       </CardFooter>

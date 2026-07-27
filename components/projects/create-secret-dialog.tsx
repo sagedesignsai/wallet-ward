@@ -100,7 +100,9 @@ export function CreateSecretDialog({
       }
 
       if (!/^[A-Za-z0-9._/-]+$/.test(trimmedName)) {
-        setError("Secret name can only contain letters, numbers, dots, underscores, slashes, and hyphens.")
+        setError(
+          "Secret name can only contain letters, numbers, dots, underscores, slashes, and hyphens."
+        )
         return
       }
 
@@ -186,7 +188,7 @@ export function CreateSecretDialog({
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                className="absolute right-0 top-0 h-7 w-7 text-muted-foreground hover:text-foreground"
+                className="absolute top-0 right-0 h-7 w-7 text-muted-foreground hover:text-foreground"
                 onClick={() => setShowValue((s) => !s)}
                 tabIndex={-1}
               >
@@ -201,7 +203,11 @@ export function CreateSecretDialog({
 
           <div className="grid gap-2">
             <Label>Type</Label>
-            <Select value={type} onValueChange={setType} disabled={isSubmitting}>
+            <Select
+              value={type}
+              onValueChange={setType}
+              disabled={isSubmitting}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -221,7 +227,9 @@ export function CreateSecretDialog({
           <div className="grid gap-2">
             <Label htmlFor="secret-description">
               Description{" "}
-              <span className="text-muted-foreground font-normal">(optional)</span>
+              <span className="font-normal text-muted-foreground">
+                (optional)
+              </span>
             </Label>
             <Textarea
               id="secret-description"
@@ -234,9 +242,7 @@ export function CreateSecretDialog({
             />
           </div>
 
-          {error && (
-            <p className="text-xs text-destructive">{error}</p>
-          )}
+          {error && <p className="text-xs text-destructive">{error}</p>}
 
           <DialogFooter>
             <Button

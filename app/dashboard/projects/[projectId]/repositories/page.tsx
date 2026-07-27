@@ -14,7 +14,13 @@ import { RepositoryCard } from "@/components/repositories/repository-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import type { Repository } from "@prisma/client"
 
@@ -29,7 +35,8 @@ export default function ProjectRepositoriesPage({
 
 function ProjectRepositoriesInner({ projectId }: { projectId: string }) {
   const { setConfig } = useDashboardConfig()
-  const { repositories, isLoading, error, deleteRepository } = useRepositories(projectId)
+  const { repositories, isLoading, error, deleteRepository } =
+    useRepositories(projectId)
   const [searchQuery, setSearchQuery] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<Repository | null>(null)
 
@@ -45,10 +52,12 @@ function ProjectRepositoriesInner({ projectId }: { projectId: string }) {
     })
   }, [setConfig])
 
-  const filteredRepositories = repositories.filter((repo) =>
-    repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    repo.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (repo.description && repo.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredRepositories = repositories.filter(
+    (repo) =>
+      repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      repo.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (repo.description &&
+        repo.description.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   const handleDelete = async (repository: Repository) => {
@@ -72,14 +81,14 @@ function ProjectRepositoriesInner({ projectId }: { projectId: string }) {
 
       {/* Header Actions */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex-1 max-w-md">
+        <div className="max-w-md flex-1">
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <MagnifyingGlassIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search repositories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9"
+              className="h-9 pl-9"
             />
           </div>
         </div>
@@ -109,7 +118,8 @@ function ProjectRepositoriesInner({ projectId }: { projectId: string }) {
             </EmptyMedia>
             <EmptyTitle>No repositories yet</EmptyTitle>
             <EmptyDescription>
-              Connect your Git repositories to give agents access to your codebase.
+              Connect your Git repositories to give agents access to your
+              codebase.
             </EmptyDescription>
           </EmptyHeader>
           <Button asChild className="mt-2">
@@ -136,16 +146,20 @@ function ProjectRepositoriesInner({ projectId }: { projectId: string }) {
       )}
 
       {/* No Results */}
-      {!isLoading && repositories.length > 0 && filteredRepositories.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-sm text-muted-foreground">
-            No repositories match your search.
-          </p>
-        </div>
-      )}
+      {!isLoading &&
+        repositories.length > 0 &&
+        filteredRepositories.length === 0 && (
+          <div className="py-12 text-center">
+            <p className="text-sm text-muted-foreground">
+              No repositories match your search.
+            </p>
+          </div>
+        )}
       <ConfirmDialog
         open={deleteTarget !== null}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
         title="Delete repository?"
         description={`Are you sure you want to delete "${deleteTarget?.name ?? ""}"? This action cannot be undone.`}
         confirmLabel="Delete Repository"

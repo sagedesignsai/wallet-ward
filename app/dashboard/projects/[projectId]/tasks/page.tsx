@@ -3,11 +3,7 @@
 import React, { useEffect, useState, useCallback, useMemo, use } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import {
-  ListChecksIcon,
-  PlusIcon,
-  WarningIcon,
-} from "@phosphor-icons/react"
+import { ListChecksIcon, PlusIcon, WarningIcon } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
@@ -142,7 +138,7 @@ function TasksInner({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-4 duration-300 fade-in">
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
           <WarningIcon className="size-3.5 shrink-0" />
@@ -269,13 +265,13 @@ function TaskCard({
   onStatusChange: (taskId: string, status: Task["status"]) => Promise<unknown>
 }) {
   return (
-    <Card className="gap-0 py-3 hover:border-border/60 transition-colors">
+    <Card className="gap-0 py-3 transition-colors hover:border-border/60">
       <CardHeader className="px-3 pb-1.5">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-sm">
             <Link
               href={`/dashboard/projects/${task.projectId}/tasks/${task.id}`}
-              className="hover:text-primary transition-colors"
+              className="transition-colors hover:text-primary"
             >
               {task.title}
             </Link>
@@ -298,7 +294,7 @@ function TaskCard({
       </CardHeader>
       <CardContent className="px-3">
         {task.description && (
-          <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
+          <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
             {task.description}
           </p>
         )}

@@ -92,7 +92,7 @@ export function BranchSelector({
         )}
         {!error && branches.length > 0 && (
           <>
-            <div className="px-2 pb-1 pt-1">
+            <div className="px-2 pt-1 pb-1">
               <Input
                 placeholder="Search branches\u2026"
                 value={search}

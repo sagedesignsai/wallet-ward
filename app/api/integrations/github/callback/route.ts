@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
 import type { Prisma } from "@/generated/prisma/client"
-import { consumeOAuthState, storeEncryptedToken } from "@/lib/services/integrations"
+import {
+  consumeOAuthState,
+  storeEncryptedToken,
+} from "@/lib/services/integrations"
 import { prisma } from "@/lib/db"
 
 export async function GET(request: Request) {
@@ -11,7 +14,10 @@ export async function GET(request: Request) {
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL("/?error=missing_oauth_params", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+        new URL(
+          "/?error=missing_oauth_params",
+          process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+        )
       )
     }
 
@@ -22,27 +28,36 @@ export async function GET(request: Request) {
     const clientSecret = process.env.GITHUB_CLIENT_SECRET
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
-        new URL("/?error=github_oauth_not_configured", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+        new URL(
+          "/?error=github_oauth_not_configured",
+          process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+        )
       )
     }
 
     // Exchange code for access token
-    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-      }),
-    })
+    const tokenRes = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+        }),
+      }
+    )
 
     if (!tokenRes.ok) {
       return NextResponse.redirect(
-        new URL("/?error=token_exchange_failed", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+        new URL(
+          "/?error=token_exchange_failed",
+          process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+        )
       )
     }
 
@@ -82,7 +97,10 @@ export async function GET(request: Request) {
 
     if (!project) {
       return NextResponse.redirect(
-        new URL("/?error=project_not_found", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+        new URL(
+          "/?error=project_not_found",
+          process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+        )
       )
     }
 
@@ -100,7 +118,12 @@ export async function GET(request: Request) {
     })
 
     // Store encrypted access token
-    await storeEncryptedToken(integration.id, tokenData.access_token, project.organizationId, "access")
+    await storeEncryptedToken(
+      integration.id,
+      tokenData.access_token,
+      project.organizationId,
+      "access"
+    )
 
     // Redirect to the project page
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
@@ -110,8 +133,6 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("GitHub OAuth callback error:", error)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-    return NextResponse.redirect(
-      new URL("/?error=callback_failed", appUrl)
-    )
+    return NextResponse.redirect(new URL("/?error=callback_failed", appUrl))
   }
 }

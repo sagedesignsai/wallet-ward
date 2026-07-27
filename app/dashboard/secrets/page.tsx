@@ -25,11 +25,20 @@ import {
 } from "@/hooks/use-global-secrets"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
-import { DataTable, type DataTableColumn } from "@/components/dashboard/data-table"
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/components/dashboard/data-table"
 import { GlobalSecretsToolbar } from "@/components/secrets/global-secrets-toolbar"
 import { SecretExpandPanel } from "@/components/secrets/secret-expand-panel"
 import { SecretRowActions } from "@/components/projects/secret-row-actions"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
@@ -109,7 +118,7 @@ export default function GlobalSecretsPage() {
 
   const activeProject = useMemo(
     () => projects.find((p) => p.id === activeProjectId) ?? null,
-    [projects, activeProjectId],
+    [projects, activeProjectId]
   )
 
   // Filter secrets to only show current project
@@ -125,7 +134,7 @@ export default function GlobalSecretsPage() {
 
   useEffect(() => {
     setConfig({
-      description: activeProject 
+      description: activeProject
         ? `Secrets in ${activeProject.name}`
         : "Project secrets and keys",
       breadcrumbs: [
@@ -181,13 +190,13 @@ export default function GlobalSecretsPage() {
             const secret = row as unknown as GlobalSecret
             const Icon = typeIcon(secret.type)
             return (
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
                 <div className="flex size-6 shrink-0 items-center justify-center rounded bg-muted/60 text-muted-foreground">
                   <Icon className="size-3" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-medium text-foreground truncate">
+                    <span className="truncate font-medium text-foreground">
                       {secret.name}
                     </span>
                     <Badge variant={typeBadgeVariant(secret.type)}>
@@ -195,7 +204,7 @@ export default function GlobalSecretsPage() {
                     </Badge>
                   </div>
                   {secret.description && (
-                    <span className="text-[0.625rem] text-muted-foreground truncate block">
+                    <span className="block truncate text-[0.625rem] text-muted-foreground">
                       {secret.description}
                     </span>
                   )}
@@ -213,7 +222,7 @@ export default function GlobalSecretsPage() {
             return (
               <Link
                 href={`/dashboard/projects/${secret.projectId}`}
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
                 onClick={(e) => e.stopPropagation()}
               >
                 <FolderIcon className="size-3 shrink-0" />
@@ -231,7 +240,7 @@ export default function GlobalSecretsPage() {
             return (
               <Link
                 href={`/dashboard/projects/${secret.projectId}/environments/${secret.environmentId}`}
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
                 onClick={(e) => e.stopPropagation()}
               >
                 <StackSimpleIcon className="size-3 shrink-0" />
@@ -277,7 +286,7 @@ export default function GlobalSecretsPage() {
           {error}
           <button
             onClick={refetch}
-            className="ml-2 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors"
+            className="ml-2 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
           >
             Retry
           </button>
@@ -299,7 +308,9 @@ export default function GlobalSecretsPage() {
           value={isLoading ? "—" : distinctProjects}
           icon={<FolderIcon className="size-4" />}
           description={
-            distinctProjects === 1 ? "1 project" : `${distinctProjects} projects`
+            distinctProjects === 1
+              ? "1 project"
+              : `${distinctProjects} projects`
           }
         />
         <StatCard
@@ -317,7 +328,9 @@ export default function GlobalSecretsPage() {
           value={isLoading ? "—" : distinctTypes}
           icon={<KeyIcon className="size-4" />}
           description={
-            distinctTypes === 1 ? "1 type in use" : `${distinctTypes} types in use`
+            distinctTypes === 1
+              ? "1 type in use"
+              : `${distinctTypes} types in use`
           }
         />
       </div>
@@ -355,9 +368,7 @@ export default function GlobalSecretsPage() {
         ) : (
           <div className="flex flex-col gap-2">
             <DataTable
-              columns={
-                columns as DataTableColumn<Record<string, unknown>>[]
-              }
+              columns={columns as DataTableColumn<Record<string, unknown>>[]}
               data={filtered as (GlobalSecret & Record<string, unknown>)[]}
               isLoading={isLoading}
               loadingRows={5}
@@ -373,11 +384,7 @@ export default function GlobalSecretsPage() {
                   : "No secrets are available to display."
               }
               emptyIcon={
-                activeFilterCount > 0 ? (
-                  <WarningCircleIcon />
-                ) : (
-                  <KeyIcon />
-                )
+                activeFilterCount > 0 ? <WarningCircleIcon /> : <KeyIcon />
               }
             />
 

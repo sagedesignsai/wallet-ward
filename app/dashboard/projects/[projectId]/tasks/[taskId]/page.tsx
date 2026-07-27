@@ -3,11 +3,7 @@
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import {
-  WarningIcon,
-  ListChecksIcon,
-  TrashIcon,
-} from "@phosphor-icons/react"
+import { WarningIcon, ListChecksIcon, TrashIcon } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
@@ -151,7 +147,11 @@ function TaskDetailInner({
       <Empty className="rounded-lg border border-border/40 bg-card py-16">
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            {error ? <WarningIcon className="size-4" /> : <ListChecksIcon className="size-4" />}
+            {error ? (
+              <WarningIcon className="size-4" />
+            ) : (
+              <ListChecksIcon className="size-4" />
+            )}
           </EmptyMedia>
           <EmptyTitle>Task not found</EmptyTitle>
           <EmptyDescription>
@@ -159,14 +159,16 @@ function TaskDetailInner({
           </EmptyDescription>
         </EmptyHeader>
         <Button variant="outline" size="sm" asChild className="mt-4">
-          <Link href={`/dashboard/projects/${projectId}/tasks`}>Back to Tasks</Link>
+          <Link href={`/dashboard/projects/${projectId}/tasks`}>
+            Back to Tasks
+          </Link>
         </Button>
       </Empty>
     )
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-2xl">
+    <div className="flex max-w-2xl flex-col gap-5">
       <div className="space-y-1.5">
         <Label htmlFor="task-title">Title</Label>
         <Input
@@ -215,12 +217,15 @@ function TaskDetailInner({
       </div>
 
       <div className="flex items-center gap-2">
-        <Button onClick={handleSave} disabled={!dirty || !title.trim() || isSaving}>
+        <Button
+          onClick={handleSave}
+          disabled={!dirty || !title.trim() || isSaving}
+        >
           {isSaving ? "Saving…" : "Save"}
         </Button>
         <Button
           variant="ghost"
-          className="text-red-400 hover:text-red-300 gap-1.5"
+          className="gap-1.5 text-red-400 hover:text-red-300"
           onClick={handleDelete}
         >
           <TrashIcon className="size-3.5" />

@@ -26,18 +26,39 @@ export function SecurityGrid() {
   return (
     <svg
       ref={svgRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
+      className="pointer-events-none absolute inset-0 h-full w-full"
       aria-hidden="true"
     >
       <defs>
         <radialGradient id="grid-fade" cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stopColor="oklch(0.6 0.18 242)" stopOpacity="0.15" />
-          <stop offset="70%" stopColor="oklch(0.6 0.18 242)" stopOpacity="0.03" />
+          <stop
+            offset="0%"
+            stopColor="oklch(0.6 0.18 242)"
+            stopOpacity="0.15"
+          />
+          <stop
+            offset="70%"
+            stopColor="oklch(0.6 0.18 242)"
+            stopOpacity="0.03"
+          />
           <stop offset="100%" stopColor="oklch(0.6 0.18 242)" stopOpacity="0" />
         </radialGradient>
 
-        <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="1" fill="oklch(0.5 0.1 240)" fillOpacity="0.35" />
+        <pattern
+          id="dots"
+          x="0"
+          y="0"
+          width="32"
+          height="32"
+          patternUnits="userSpaceOnUse"
+        >
+          <circle
+            cx="1"
+            cy="1"
+            r="1"
+            fill="oklch(0.5 0.1 240)"
+            fillOpacity="0.35"
+          />
         </pattern>
       </defs>
 

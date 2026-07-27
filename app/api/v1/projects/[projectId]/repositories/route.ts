@@ -38,7 +38,8 @@ export async function GET(
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    const repositories = await RepositoryService.listByProjectWithMetadata(projectId)
+    const repositories =
+      await RepositoryService.listByProjectWithMetadata(projectId)
 
     return NextResponse.json({ data: repositories })
   } catch (error) {

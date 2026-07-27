@@ -4,7 +4,10 @@ import { useMemo } from "react"
 import Link from "next/link"
 import { FileTextIcon, ListChecksIcon } from "@phosphor-icons/react"
 
-import { useGlobalDocuments, type GlobalDocument } from "@/hooks/use-global-documents"
+import {
+  useGlobalDocuments,
+  type GlobalDocument,
+} from "@/hooks/use-global-documents"
 import { useGlobalTasks, type GlobalTask } from "@/hooks/use-global-tasks"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { Badge } from "@/components/ui/badge"
@@ -34,7 +37,10 @@ export function RecentDocumentsCard({
         {isLoading ? (
           <div className="flex flex-col gap-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-md border border-border/30 px-3 py-2">
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-md border border-border/30 px-3 py-2"
+              >
                 <div className="size-6 animate-pulse rounded bg-muted" />
                 <div className="flex-1 space-y-1.5">
                   <div className="h-3 w-40 animate-pulse rounded bg-muted" />
@@ -55,13 +61,20 @@ export function RecentDocumentsCard({
         ) : (
           <div className="flex flex-col divide-y divide-border/30">
             {recent.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+              <div
+                key={doc.id}
+                className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0"
+              >
                 <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
                   <FileTextIcon className="size-3" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium text-foreground">{doc.title}</p>
-                  <p className="text-[0.625rem] text-muted-foreground">{doc.project.name}</p>
+                  <p className="truncate text-xs font-medium text-foreground">
+                    {doc.title}
+                  </p>
+                  <p className="text-[0.625rem] text-muted-foreground">
+                    {doc.project.name}
+                  </p>
                 </div>
                 <TimeAgo date={doc.updatedAt} className="shrink-0" />
               </div>
@@ -104,7 +117,10 @@ export function MyTasksCard({
         {isLoading ? (
           <div className="flex flex-col gap-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-md border border-border/30 px-3 py-2">
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-md border border-border/30 px-3 py-2"
+              >
                 <div className="size-6 animate-pulse rounded bg-muted" />
                 <div className="flex-1 space-y-1.5">
                   <div className="h-3 w-40 animate-pulse rounded bg-muted" />
@@ -126,19 +142,36 @@ export function MyTasksCard({
           <div className="flex flex-col divide-y divide-border/30">
             {myTasks.map((task) => {
               const statusVariant =
-                task.status === "done" ? "default" : task.status === "in_progress" ? "outline" : "secondary"
+                task.status === "done"
+                  ? "default"
+                  : task.status === "in_progress"
+                    ? "outline"
+                    : "secondary"
               const statusLabel =
-                task.status === "in_progress" ? "In Progress" : task.status === "done" ? "Done" : "Todo"
+                task.status === "in_progress"
+                  ? "In Progress"
+                  : task.status === "done"
+                    ? "Done"
+                    : "Todo"
               return (
-                <div key={task.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                <div
+                  key={task.id}
+                  className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0"
+                >
                   <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
                     <ListChecksIcon className="size-3" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium text-foreground">{task.title}</p>
-                    <p className="text-[0.625rem] text-muted-foreground">{task.project.name}</p>
+                    <p className="truncate text-xs font-medium text-foreground">
+                      {task.title}
+                    </p>
+                    <p className="text-[0.625rem] text-muted-foreground">
+                      {task.project.name}
+                    </p>
                   </div>
-                  <Badge variant={statusVariant} className="shrink-0">{statusLabel}</Badge>
+                  <Badge variant={statusVariant} className="shrink-0">
+                    {statusLabel}
+                  </Badge>
                 </div>
               )
             })}

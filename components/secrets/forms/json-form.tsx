@@ -101,11 +101,11 @@ export function JsonForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
-      <div className="rounded-lg border border-indigo-200 bg-indigo-50/50 dark:border-indigo-900 dark:bg-indigo-950/20 px-3 py-2">
+      <div className="rounded-lg border border-indigo-200 bg-indigo-50/50 px-3 py-2 dark:border-indigo-900 dark:bg-indigo-950/20">
         <p className="text-xs text-indigo-900 dark:text-indigo-100">
-          <FileJsIcon className="inline size-3 mr-1" />
-          Store JSON configuration files, service account keys, or structured data
-          securely.
+          <FileJsIcon className="mr-1 inline size-3" />
+          Store JSON configuration files, service account keys, or structured
+          data securely.
         </p>
       </div>
 
@@ -189,7 +189,7 @@ export function JsonForm({
               setErrors((prev) => ({ ...prev, value: "" }))
             }
           }}
-          className="font-mono text-xs resize-none"
+          className="resize-none font-mono text-xs"
           rows={12}
           disabled={isSubmitting}
           aria-invalid={!!errors.value}
@@ -206,7 +206,7 @@ export function JsonForm({
       <div className="grid gap-2">
         <Label htmlFor="json-description">
           Description{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="json-description"

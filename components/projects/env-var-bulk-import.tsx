@@ -58,7 +58,10 @@ function parseDotenv(content: string): Record<string, string> {
     ) {
       value = value.slice(1, -1)
     }
-    value = value.replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\")
+    value = value
+      .replace(/\\n/g, "\n")
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, "\\")
     result[key] = value
   }
   return result
@@ -168,9 +171,7 @@ export function EnvVarBulkImport({
           duplicates,
         })
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to read file"
-        )
+        setError(err instanceof Error ? err.message : "Failed to read file")
       }
     },
     [existingSecretNames]
@@ -217,9 +218,7 @@ export function EnvVarBulkImport({
         duplicates,
       })
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to parse content"
-      )
+      setError(err instanceof Error ? err.message : "Failed to parse content")
     }
   }, [pasteContent, existingSecretNames])
 
@@ -274,7 +273,7 @@ export function EnvVarBulkImport({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-2xl">
         <DialogHeader>
           <div className="flex items-center gap-2.5">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -289,7 +288,7 @@ export function EnvVarBulkImport({
           </div>
         </DialogHeader>
 
-        <Tabs defaultValue="manual" className="flex-1 min-h-0 flex flex-col">
+        <Tabs defaultValue="manual" className="flex min-h-0 flex-1 flex-col">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="manual">
               <KeyIcon className="size-3.5" />
@@ -307,20 +306,17 @@ export function EnvVarBulkImport({
 
           <TabsContent
             value="manual"
-            className="flex-1 min-h-0 overflow-y-auto mt-4"
+            className="mt-4 min-h-0 flex-1 overflow-y-auto"
           >
             <div className="flex flex-col gap-3 pr-1">
               {envVars.map((envVar, index) => (
                 <div
                   key={envVar.id}
-                  className="flex gap-2 items-start rounded-lg border border-border/60 bg-muted/20 p-3"
+                  className="flex items-start gap-2 rounded-lg border border-border/60 bg-muted/20 p-3"
                 >
-                  <div className="flex-1 grid gap-3 sm:grid-cols-2">
+                  <div className="grid flex-1 gap-3 sm:grid-cols-2">
                     <div className="grid gap-1.5">
-                      <Label
-                        htmlFor={`key-${envVar.id}`}
-                        className="text-xs"
-                      >
+                      <Label htmlFor={`key-${envVar.id}`} className="text-xs">
                         Key
                       </Label>
                       <Input
@@ -343,10 +339,7 @@ export function EnvVarBulkImport({
                       )}
                     </div>
                     <div className="grid gap-1.5">
-                      <Label
-                        htmlFor={`value-${envVar.id}`}
-                        className="text-xs"
-                      >
+                      <Label htmlFor={`value-${envVar.id}`} className="text-xs">
                         Value
                       </Label>
                       <Input
@@ -391,13 +384,16 @@ export function EnvVarBulkImport({
             </div>
           </TabsContent>
 
-          <TabsContent value="upload" className="flex-1 min-h-0 overflow-y-auto mt-4">
+          <TabsContent
+            value="upload"
+            className="mt-4 min-h-0 flex-1 overflow-y-auto"
+          >
             <div className="flex flex-col gap-4 pr-1">
               {!importStats ? (
                 <div
                   {...getRootProps()}
                   className={cn(
-                    "rounded-lg border-2 border-dashed bg-muted/20 p-6 text-center transition-all cursor-pointer",
+                    "cursor-pointer rounded-lg border-2 border-dashed bg-muted/20 p-6 text-center transition-all",
                     isDragActive
                       ? "border-primary bg-primary/5"
                       : "border-border/60 hover:border-border"
@@ -434,7 +430,7 @@ export function EnvVarBulkImport({
               ) : (
                 <>
                   <div className="rounded-lg border border-border/60 bg-card p-3">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <CheckCircleIcon className="size-4 text-green-600" />
                         <span className="text-sm font-medium">
@@ -463,7 +459,9 @@ export function EnvVarBulkImport({
                         </span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Duplicates:</span>{" "}
+                        <span className="text-muted-foreground">
+                          Duplicates:
+                        </span>{" "}
                         <span className="font-medium text-amber-600">
                           {importStats.duplicates}
                         </span>
@@ -472,34 +470,37 @@ export function EnvVarBulkImport({
                   </div>
 
                   <div className="rounded-lg border border-border/60 bg-card">
-                    <div className="border-b border-border/40 px-3 py-2 flex items-center justify-between">
+                    <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
                       <p className="text-xs font-medium">
                         Preview ({validCount} valid)
                       </p>
                     </div>
-                    <div className="max-h-64 overflow-y-auto p-2 space-y-2">
+                    <div className="max-h-64 space-y-2 overflow-y-auto p-2">
                       {envVars.map((v) => (
                         <div
                           key={v.id}
-                          className="flex gap-2 items-start rounded-lg border border-border/40 bg-muted/30 p-2"
+                          className="flex items-start gap-2 rounded-lg border border-border/40 bg-muted/30 p-2"
                         >
-                          <div className="flex-1 grid gap-2 sm:grid-cols-2 min-w-0">
-                            <div className="flex items-center gap-2 min-w-0">
+                          <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
+                            <div className="flex min-w-0 items-center gap-2">
                               {v.error ? (
-                                <WarningCircleIcon className="size-3 text-destructive shrink-0" />
+                                <WarningCircleIcon className="size-3 shrink-0 text-destructive" />
                               ) : (
-                                <CheckCircleIcon className="size-3 text-green-600 shrink-0" />
+                                <CheckCircleIcon className="size-3 shrink-0 text-green-600" />
                               )}
-                              <span className="font-mono font-medium truncate text-xs">
+                              <span className="truncate font-mono text-xs font-medium">
                                 {v.key || "(empty)"}
                               </span>
                               {existingSecretNames.includes(v.key) && (
-                                <Badge variant="outline" className="text-[0.625rem] shrink-0">
+                                <Badge
+                                  variant="outline"
+                                  className="shrink-0 text-[0.625rem]"
+                                >
                                   exists
                                 </Badge>
                               )}
                             </div>
-                            <span className="font-mono text-xs text-muted-foreground truncate">
+                            <span className="truncate font-mono text-xs text-muted-foreground">
                               {v.value ? "••••••" : "(empty)"}
                             </span>
                           </div>
@@ -509,7 +510,7 @@ export function EnvVarBulkImport({
                             size="icon-sm"
                             onClick={() => removeEnvVar(v.id)}
                             disabled={isSubmitting}
-                            className="text-muted-foreground hover:text-destructive shrink-0"
+                            className="shrink-0 text-muted-foreground hover:text-destructive"
                           >
                             <TrashIcon className="size-3.5" />
                           </Button>
@@ -525,15 +526,13 @@ export function EnvVarBulkImport({
           <TabsContent value="paste" className="mt-4">
             <div className="flex flex-col gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="paste-content">
-                  Paste .env file contents
-                </Label>
+                <Label htmlFor="paste-content">Paste .env file contents</Label>
                 <Textarea
                   id="paste-content"
                   placeholder={`DATABASE_URL=postgres://localhost/mydb\nAPI_KEY=secret123\nPORT=3000`}
                   value={pasteContent}
                   onChange={(e) => setPasteContent(e.target.value)}
-                  className="font-mono text-xs resize-none"
+                  className="resize-none font-mono text-xs"
                   rows={8}
                   disabled={isSubmitting}
                 />
@@ -555,7 +554,7 @@ export function EnvVarBulkImport({
 
               {importStats && (
                 <div className="rounded-lg border border-border/60 bg-card p-3">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="mb-2 flex items-center gap-2">
                     <CheckCircleIcon className="size-4 text-green-600" />
                     <span className="text-sm font-medium">
                       Content parsed successfully
@@ -596,11 +595,11 @@ export function EnvVarBulkImport({
                         className="flex items-center gap-2 rounded px-2 py-1 text-xs hover:bg-muted/30"
                       >
                         {v.error ? (
-                          <WarningCircleIcon className="size-3 text-destructive shrink-0" />
+                          <WarningCircleIcon className="size-3 shrink-0 text-destructive" />
                         ) : (
-                          <CheckCircleIcon className="size-3 text-green-600 shrink-0" />
+                          <CheckCircleIcon className="size-3 shrink-0 text-green-600" />
                         )}
-                        <span className="font-mono font-medium truncate">
+                        <span className="truncate font-mono font-medium">
                           {v.key || "(empty)"}
                         </span>
                         {existingSecretNames.includes(v.key) && (

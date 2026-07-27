@@ -148,14 +148,14 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
           </Button>
         </Empty>
       ) : (
-        <div className="rounded-xl border border-border/40 bg-card divide-y divide-border/30">
+        <div className="divide-y divide-border/30 rounded-xl border border-border/40 bg-card">
           {sessions.map((session) => (
             <AgentSessionRow key={session.id} session={session} />
           ))}
         </div>
       )}
 
-      <p className="text-[11px] text-muted-foreground text-center">
+      <p className="text-center text-[11px] text-muted-foreground">
         Full agent catalog in{" "}
         <Link href="/dashboard/agents" className="text-primary hover:underline">
           Agent Hub

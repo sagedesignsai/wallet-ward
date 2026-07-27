@@ -19,10 +19,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useAuth } from "@/hooks/use-auth"
-import {
-  useOrganization,
-  type Organization,
-} from "@/hooks/use-organization"
+import { useOrganization, type Organization } from "@/hooks/use-organization"
 import { useMembers, type Member, type Invitation } from "@/hooks/use-members"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import {
@@ -35,15 +32,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import {
-  InviteMemberForm,
-} from "@/components/organizations/invite-member-form"
-import {
-  MemberRowActions,
-} from "@/components/organizations/member-row-actions"
-import {
-  OrganizationSwitcher,
-} from "@/components/organizations/organization-switcher"
+import { InviteMemberForm } from "@/components/organizations/invite-member-form"
+import { MemberRowActions } from "@/components/organizations/member-row-actions"
+import { OrganizationSwitcher } from "@/components/organizations/organization-switcher"
 
 // --- Role helpers ---
 
@@ -96,12 +87,10 @@ function MemberAvatar({ member }: { member: Member }) {
   const name = member.user.name || member.user.email
   return (
     <Avatar size="sm">
-      {member.user.image && (
-        <AvatarImage src={member.user.image} alt={name} />
-      )}
+      {member.user.image && <AvatarImage src={member.user.image} alt={name} />}
       <AvatarFallback
         className={cn(
-          "bg-gradient-to-br text-white text-[0.625rem] font-bold",
+          "bg-gradient-to-br text-[0.625rem] font-bold text-white",
           getAvatarGradient(name)
         )}
       >
@@ -170,7 +159,7 @@ function InvitationRow({
           <span className="truncate text-xs font-medium text-foreground">
             {invitation.email}
           </span>
-          <Badge variant={role.variant} className="gap-0.5 shrink-0">
+          <Badge variant={role.variant} className="shrink-0 gap-0.5">
             <RoleIcon className="size-2.5" />
             {role.label}
           </Badge>
@@ -226,8 +215,7 @@ export default function OrganizationsPage() {
   const isOwnerOrAdmin = useMemo(() => {
     if (!activeOrganization) return false
     return (
-      activeOrganization.role === "owner" ||
-      activeOrganization.role === "admin"
+      activeOrganization.role === "owner" || activeOrganization.role === "admin"
     )
   }, [activeOrganization])
 
@@ -283,86 +271,85 @@ export default function OrganizationsPage() {
   )
 
   // Member table columns
-  const memberColumns: DataTableColumn<
-    Member & Record<string, unknown>
-  >[] = useMemo(
-    () => [
-      {
-        key: "user",
-        header: "Member",
-        className: "w-[280px]",
-        render: (row) => {
-          const member = row as unknown as Member
-          const name = member.user.name || member.user.email
-          const isSelf = member.userId === user?.id
-          return (
-            <div className="flex items-center gap-2.5">
-              <MemberAvatar member={member} />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="truncate text-xs font-medium text-foreground">
-                    {name}
-                  </span>
-                  {isSelf && (
-                    <span className="text-[0.625rem] text-muted-foreground italic">
-                      (you)
+  const memberColumns: DataTableColumn<Member & Record<string, unknown>>[] =
+    useMemo(
+      () => [
+        {
+          key: "user",
+          header: "Member",
+          className: "w-[280px]",
+          render: (row) => {
+            const member = row as unknown as Member
+            const name = member.user.name || member.user.email
+            const isSelf = member.userId === user?.id
+            return (
+              <div className="flex items-center gap-2.5">
+                <MemberAvatar member={member} />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate text-xs font-medium text-foreground">
+                      {name}
                     </span>
-                  )}
+                    {isSelf && (
+                      <span className="text-[0.625rem] text-muted-foreground italic">
+                        (you)
+                      </span>
+                    )}
+                  </div>
+                  <span className="block truncate text-[0.625rem] text-muted-foreground">
+                    {member.user.email}
+                  </span>
                 </div>
-                <span className="text-[0.625rem] text-muted-foreground truncate block">
-                  {member.user.email}
-                </span>
               </div>
-            </div>
-          )
+            )
+          },
         },
-      },
-      {
-        key: "role",
-        header: "Role",
-        className: "w-[100px]",
-        render: (row) => {
-          const member = row as unknown as Member
-          const role = getRoleConfig(member.role)
-          const RoleIcon = role.icon
-          return (
-            <Badge variant={role.variant} className="gap-0.5">
-              <RoleIcon className="size-2.5" />
-              {role.label}
-            </Badge>
-          )
+        {
+          key: "role",
+          header: "Role",
+          className: "w-[100px]",
+          render: (row) => {
+            const member = row as unknown as Member
+            const role = getRoleConfig(member.role)
+            const RoleIcon = role.icon
+            return (
+              <Badge variant={role.variant} className="gap-0.5">
+                <RoleIcon className="size-2.5" />
+                {role.label}
+              </Badge>
+            )
+          },
         },
-      },
-      {
-        key: "createdAt",
-        header: "Joined",
-        className: "w-[100px]",
-        render: (row) => {
-          const member = row as unknown as Member
-          return <TimeAgo date={member.createdAt} />
+        {
+          key: "createdAt",
+          header: "Joined",
+          className: "w-[100px]",
+          render: (row) => {
+            const member = row as unknown as Member
+            return <TimeAgo date={member.createdAt} />
+          },
         },
-      },
-      {
-        key: "actions",
-        header: "",
-        className: "w-[40px] text-right",
-        render: (row) => {
-          const member = row as unknown as Member
-          const isSelf = member.userId === user?.id
-          if (!isOwnerOrAdmin || isSelf) return null
-          return (
-            <MemberRowActions
-              member={member}
-              onUpdateRole={handleRoleChange}
-              onRemove={handleRemoveMember}
-              isCurrentUser={isSelf}
-            />
-          )
+        {
+          key: "actions",
+          header: "",
+          className: "w-[40px] text-right",
+          render: (row) => {
+            const member = row as unknown as Member
+            const isSelf = member.userId === user?.id
+            if (!isOwnerOrAdmin || isSelf) return null
+            return (
+              <MemberRowActions
+                member={member}
+                onUpdateRole={handleRoleChange}
+                onRemove={handleRemoveMember}
+                isCurrentUser={isSelf}
+              />
+            )
+          },
         },
-      },
-    ],
-    [isOwnerOrAdmin, user?.id, handleRoleChange, handleRemoveMember]
-  )
+      ],
+      [isOwnerOrAdmin, user?.id, handleRoleChange, handleRemoveMember]
+    )
 
   // --- Empty state: no organizations at all ---
   if (!orgLoading && organizations.length === 0) {
@@ -376,7 +363,7 @@ export default function OrganizationsPage() {
             <h3 className="text-base font-semibold text-foreground">
               No organizations yet
             </h3>
-            <p className="mt-2 max-w-sm text-xs text-muted-foreground leading-relaxed">
+            <p className="mt-2 max-w-sm text-xs leading-relaxed text-muted-foreground">
               Create an organization to collaborate with your team, manage
               access permissions, and share secrets securely.
             </p>
@@ -410,7 +397,7 @@ export default function OrganizationsPage() {
               refetchOrgs()
               refetchMembers()
             }}
-            className="ml-2 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors"
+            className="ml-2 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
           >
             Retry
           </button>
@@ -456,10 +443,7 @@ export default function OrganizationsPage() {
             count={organizations.length}
           />
         ) : (
-          <SectionHeader
-            icon={<BuildingsIcon />}
-            title="Active Organization"
-          />
+          <SectionHeader icon={<BuildingsIcon />} title="Active Organization" />
         )}
         <OrganizationSwitcher
           organizations={organizations}
@@ -498,7 +482,10 @@ export default function OrganizationsPage() {
 
             {/* Invite form card (only for owners/admins) */}
             {isOwnerOrAdmin && (
-              <Card size="sm" className="border-dashed border-primary/20 bg-primary/[0.02]">
+              <Card
+                size="sm"
+                className="border-dashed border-primary/20 bg-primary/[0.02]"
+              >
                 <CardContent className="pt-0">
                   <InviteMemberForm onInvite={invite} />
                 </CardContent>
@@ -520,7 +507,7 @@ export default function OrganizationsPage() {
 
           {/* Invitations Section */}
           {invitations.length > 0 && (
-            <div className="flex flex-col gap-2.5 mt-1">
+            <div className="mt-1 flex flex-col gap-2.5">
               <SectionHeader
                 icon={<EnvelopeSimpleIcon />}
                 title="Pending Invitations"

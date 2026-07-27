@@ -83,7 +83,9 @@ export function SecretRowActions({
           </DropdownMenuItem>
           {revealedValue && (
             <DropdownMenuItem
-              onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                e.stopPropagation()
+              }
               asChild
             >
               <div>
@@ -100,8 +102,12 @@ export function SecretRowActions({
             trigger={
               <DropdownMenuItem
                 variant="destructive"
-                onSelect={(e: React.MouseEvent<HTMLDivElement>) => e.preventDefault()}
-                onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+                onSelect={(e: React.MouseEvent<HTMLDivElement>) =>
+                  e.preventDefault()
+                }
+                onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                  e.stopPropagation()
+                }
               >
                 <TrashIcon />
                 Delete

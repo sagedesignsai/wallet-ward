@@ -103,19 +103,16 @@ function EnvironmentsInner({ projectId }: { projectId: string }) {
         header: "Environment",
         className: "w-[240px]",
         render: (env) => (
-          <div className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex min-w-0 flex-col gap-0.5">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-foreground truncate">
+              <span className="truncate font-medium text-foreground">
                 {env.name}
               </span>
-              <Badge
-                variant={envBadgeVariant(env.slug)}
-                className="shrink-0"
-              >
+              <Badge variant={envBadgeVariant(env.slug)} className="shrink-0">
                 {env.slug}
               </Badge>
             </div>
-            <span className="font-mono text-[0.625rem] text-muted-foreground truncate">
+            <span className="truncate font-mono text-[0.625rem] text-muted-foreground">
               {env.slug}
             </span>
           </div>
@@ -127,11 +124,11 @@ function EnvironmentsInner({ projectId }: { projectId: string }) {
         className: "w-[220px]",
         render: (env) =>
           env.description ? (
-            <span className="text-muted-foreground line-clamp-2">
+            <span className="line-clamp-2 text-muted-foreground">
               {env.description}
             </span>
           ) : (
-            <span className="italic text-muted-foreground/60">
+            <span className="text-muted-foreground/60 italic">
               No description
             </span>
           ),
@@ -183,7 +180,7 @@ function EnvironmentsInner({ projectId }: { projectId: string }) {
           <h3 className="text-sm font-semibold text-foreground">
             Failed to load environments
           </h3>
-          <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
+          <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
             {error ?? "Project not found."}
           </p>
         </div>
@@ -192,7 +189,7 @@ function EnvironmentsInner({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-4 duration-300 fade-in">
       <div className="flex flex-col gap-2.5">
         <DataTableToolbar
           searchPlaceholder="Search environments..."
@@ -202,9 +199,7 @@ function EnvironmentsInner({ projectId }: { projectId: string }) {
 
         <DataTable
           columns={columns}
-          data={
-            filtered as (ProjectEnvironment & Record<string, unknown>)[]
-          }
+          data={filtered as (ProjectEnvironment & Record<string, unknown>)[]}
           isLoading={false}
           onRowClick={handleRowClick}
           keyExtractor={(env) => env.id}

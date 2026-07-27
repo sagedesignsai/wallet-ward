@@ -225,7 +225,7 @@ function FileDetailInner({
   /* ---- loading ---- */
   if (isLoading) {
     return (
-      <div className="space-y-4 max-w-3xl">
+      <div className="max-w-3xl space-y-4">
         <Skeleton className="h-10 w-2/3" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -262,7 +262,7 @@ function FileDetailInner({
   const fileTypeColor = getFileTypeColor(file.type)
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl">
+    <div className="flex max-w-3xl flex-col gap-5">
       {/* ---- File header ---- */}
       <div className="flex items-center gap-3">
         <div
@@ -274,10 +274,10 @@ function FileDetailInner({
           <FileIconComponent className="size-6" weight="fill" />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg font-semibold text-foreground truncate">
+          <h1 className="truncate text-lg font-semibold text-foreground">
             {file.name}
           </h1>
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="mt-0.5 flex items-center gap-2">
             <Badge variant="secondary" className="text-[10px]">
               {file.type}
             </Badge>
@@ -291,22 +291,26 @@ function FileDetailInner({
       </div>
 
       {/* Quick nav links */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2">
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/dashboard/projects/${projectId}/files/${fileId}/preview`}>
-            <EyeIcon className="size-3.5 mr-1.5" />
+          <Link
+            href={`/dashboard/projects/${projectId}/files/${fileId}/preview`}
+          >
+            <EyeIcon className="mr-1.5 size-3.5" />
             Preview
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/dashboard/projects/${projectId}/files/${fileId}/versions`}>
-            <ClockCounterClockwiseIcon className="size-3.5 mr-1.5" />
+          <Link
+            href={`/dashboard/projects/${projectId}/files/${fileId}/versions`}
+          >
+            <ClockCounterClockwiseIcon className="mr-1.5 size-3.5" />
             Versions
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
           <Link href={`/dashboard/projects/${projectId}/files/upload`}>
-            <UploadSimpleIcon className="size-3.5 mr-1.5" />
+            <UploadSimpleIcon className="mr-1.5 size-3.5" />
             Upload New Version
           </Link>
         </Button>
@@ -317,7 +321,9 @@ function FileDetailInner({
         {/* Size (read-only) */}
         <div className="space-y-1.5">
           <Label>Size</Label>
-          <div className="text-sm text-foreground">{formatFileSize(file.size)}</div>
+          <div className="text-sm text-foreground">
+            {formatFileSize(file.size)}
+          </div>
         </div>
 
         {/* Type (editable) */}
@@ -369,7 +375,7 @@ function FileDetailInner({
         {/* Path (read-only) */}
         <div className="space-y-1.5">
           <Label>Path</Label>
-          <div className="text-sm text-foreground font-mono truncate">
+          <div className="truncate font-mono text-sm text-foreground">
             {file.path}
           </div>
         </div>
@@ -399,10 +405,10 @@ function FileDetailInner({
           <TagIcon className="size-3.5" />
           Tags
         </Label>
-        <div className="flex flex-wrap gap-1.5 mb-2">
+        <div className="mb-2 flex flex-wrap gap-1.5">
           {tags.length > 0 ? (
             tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs gap-1">
+              <Badge key={tag} variant="secondary" className="gap-1 text-xs">
                 {tag}
                 <button
                   type="button"
@@ -445,21 +451,25 @@ function FileDetailInner({
 
       {/* ---- Version info ---- */}
       {file._count && (
-        <div className="rounded-md border border-border/40 bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
+        <div className="space-y-1 rounded-md border border-border/40 bg-muted/30 p-3 text-xs text-muted-foreground">
           <div className="flex items-center justify-between">
             <span>Version</span>
-            <span className="text-foreground font-medium">v{file.version}</span>
+            <span className="font-medium text-foreground">v{file.version}</span>
           </div>
           {file._count.versions !== undefined && (
             <div className="flex items-center justify-between">
               <span>Total versions</span>
-              <span className="text-foreground font-medium">{file._count.versions}</span>
+              <span className="font-medium text-foreground">
+                {file._count.versions}
+              </span>
             </div>
           )}
           {file._count.shares !== undefined && (
             <div className="flex items-center justify-between">
               <span>Shares</span>
-              <span className="text-foreground font-medium">{file._count.shares}</span>
+              <span className="font-medium text-foreground">
+                {file._count.shares}
+              </span>
             </div>
           )}
         </div>
@@ -467,19 +477,16 @@ function FileDetailInner({
 
       {/* ---- Actions ---- */}
       <div className="flex items-center gap-2">
-        <Button
-          onClick={handleSave}
-          disabled={!dirty || !name.trim()}
-        >
+        <Button onClick={handleSave} disabled={!dirty || !name.trim()}>
           Save
         </Button>
         <Button variant="outline" onClick={handleDownload} disabled={!file.url}>
-          <DownloadIcon className="size-3.5 mr-1.5" />
+          <DownloadIcon className="mr-1.5 size-3.5" />
           Download
         </Button>
         <Button
           variant="ghost"
-          className="text-red-400 hover:text-red-300 gap-1.5 ml-auto"
+          className="ml-auto gap-1.5 text-red-400 hover:text-red-300"
           onClick={handleDelete}
         >
           <TrashIcon className="size-3.5" />

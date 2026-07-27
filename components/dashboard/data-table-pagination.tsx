@@ -75,7 +75,7 @@ export function DataTablePagination({
           >
             <CaretLeftIcon />
           </Button>
-          <span className="text-xs tabular-nums text-muted-foreground min-w-[3ch] text-center">
+          <span className="min-w-[3ch] text-center text-xs text-muted-foreground tabular-nums">
             {pageIndex + 1}/{totalPages}
           </span>
           <Button

@@ -70,13 +70,15 @@ export function ConnectGmailDialog({
         <DialogHeader>
           <DialogTitle>Connect Gmail</DialogTitle>
           <DialogDescription>
-            Connect your Gmail account to enable email sending capabilities for agents.
+            Connect your Gmail account to enable email sending capabilities for
+            agents.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3">
           <p className="text-xs text-muted-foreground">
-            Select a project to connect to Gmail. This will start the OAuth
-            flow to link your Google account with permissions to send and read emails.
+            Select a project to connect to Gmail. This will start the OAuth flow
+            to link your Google account with permissions to send and read
+            emails.
           </p>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="project-select">Project</Label>
@@ -97,8 +99,8 @@ export function ConnectGmailDialog({
             </Select>
           </div>
           <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Permissions requested:</p>
-            <ul className="list-disc list-inside space-y-0.5">
+            <p className="mb-1 font-medium">Permissions requested:</p>
+            <ul className="list-inside list-disc space-y-0.5">
               <li>Send emails on your behalf</li>
               <li>Read email messages</li>
               <li>View your email address</li>

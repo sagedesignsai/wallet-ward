@@ -1,6 +1,6 @@
 /**
  * Integration Tests: Approval Workflow
- * 
+ *
  * Tests the complete end-to-end flow:
  * 1. Agent proposes action
  * 2. Human approves
@@ -9,7 +9,14 @@
  * 5. Error handling
  */
 
-import { describe, test, expect, beforeAll, afterAll, beforeEach } from "@jest/globals"
+import {
+  describe,
+  test,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from "@jest/globals"
 
 // Mock data
 const mockOrg = {
@@ -98,7 +105,7 @@ describe("Approval Workflow Integration", () => {
       expect(data.status).toBe("awaiting_approval")
       expect(data.title).toBe(proposalData.title)
       expect(data.actionType).toBe("deploy")
-      
+
       proposalId = data.id
     })
 
@@ -242,7 +249,7 @@ describe("Approval Workflow Integration", () => {
       // Assert
       expect(response.ok).toBe(true)
       const { pendingProposals } = await response.json()
-      
+
       expect(pendingProposals).toHaveProperty("awaiting")
       expect(pendingProposals).toHaveProperty("approved")
       expect(pendingProposals).toHaveProperty("rejected")
@@ -259,7 +266,7 @@ describe("Approval Workflow Integration", () => {
       // Assert
       const { pendingProposals } = await response.json()
       const executedProposals = pendingProposals.executed
-      
+
       expect(executedProposals.length).toBeGreaterThan(0)
       expect(executedProposals[0]).toHaveProperty("executionResult")
       expect(executedProposals[0].executionResult).toHaveProperty("success")
@@ -316,10 +323,10 @@ describe("Approval Workflow Integration", () => {
       // Assert
       expect(response.ok).toBe(true)
       const { data: logs } = await response.json()
-      
+
       // Should have at least: created, approved, executed
       expect(logs.length).toBeGreaterThanOrEqual(3)
-      
+
       const actions = logs.map((log: any) => log.action)
       expect(actions).toContain("task_create") // Proposal created
       expect(actions).toContain("task_update") // Proposal approved
@@ -337,7 +344,7 @@ describe("Approval Workflow Integration", () => {
       const executionLog = logs.find(
         (log: any) => log.action === "agent_proxy_call"
       )
-      
+
       expect(executionLog).toBeDefined()
       expect(executionLog.metadata).toHaveProperty("actionType")
       expect(executionLog.metadata).toHaveProperty("success")
@@ -377,7 +384,7 @@ describe("Approval Workflow Integration", () => {
       // Assert
       const { data } = await response.json()
       const payloadStr = JSON.stringify(data)
-      
+
       // Should not contain any tokens or secrets
       expect(payloadStr).not.toMatch(/sk_.*/) // Vercel token pattern
       expect(payloadStr).not.toMatch(/ghp_.*/) // GitHub token pattern

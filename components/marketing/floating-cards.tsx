@@ -14,10 +14,25 @@ const CARDS = [
     tag: "PROD",
     tagColor: "text-red-400",
     icon: (
-      <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
-        <ellipse cx="10" cy="6" rx="7" ry="3" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M3 6v4c0 1.657 3.134 3 7 3s7-1.343 7-3V6" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M3 10v4c0 1.657 3.134 3 7 3s7-1.343 7-3v-4" stroke="currentColor" strokeWidth="1.5" />
+      <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5">
+        <ellipse
+          cx="10"
+          cy="6"
+          rx="7"
+          ry="3"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M3 6v4c0 1.657 3.134 3 7 3s7-1.343 7-3V6"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M3 10v4c0 1.657 3.134 3 7 3s7-1.343 7-3v-4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
       </svg>
     ),
     delay: "0s",
@@ -29,9 +44,19 @@ const CARDS = [
     tag: "API",
     tagColor: "text-purple-400",
     icon: (
-      <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
-        <path d="M11 3.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7z" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M11 10.5L7.5 14l-1.5 2-2-2 1.5-1.5L7 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5">
+        <path
+          d="M11 3.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M11 10.5L7.5 14l-1.5 2-2-2 1.5-1.5L7 11"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
         <circle cx="9" cy="12.5" r="0.75" fill="currentColor" />
       </svg>
     ),
@@ -44,9 +69,22 @@ const CARDS = [
     tag: "SSH",
     tagColor: "text-green-400",
     icon: (
-      <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
-        <rect x="3" y="9" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M7 9V6a3 3 0 016 0v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5">
+        <rect
+          x="3"
+          y="9"
+          width="14"
+          height="9"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M7 9V6a3 3 0 016 0v3"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
         <circle cx="10" cy="13.5" r="1.5" fill="currentColor" />
       </svg>
     ),
@@ -59,9 +97,20 @@ const CARDS = [
     tag: "AUTH",
     tagColor: "text-amber-400",
     icon: (
-      <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
-        <path d="M10 2L3 6v5c0 4 3 7 7 9 4-2 7-5 7-9V6L10 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-        <path d="M7 10l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5">
+        <path
+          d="M10 2L3 6v5c0 4 3 7 7 9 4-2 7-5 7-9V6L10 2z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M7 10l2 2 4-4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
     delay: "1.8s",
@@ -71,7 +120,7 @@ const CARDS = [
 
 export function FloatingCards({ className }: FloatingCardsProps) {
   return (
-    <div className={cn("relative w-full h-full", className)}>
+    <div className={cn("relative h-full w-full", className)}>
       <style>{`
         @keyframes float-a {
           0%, 100% { transform: translateY(0px) rotate(-1deg); }
@@ -89,9 +138,9 @@ export function FloatingCards({ className }: FloatingCardsProps) {
         <div
           key={i}
           className={cn(
-            "absolute flex items-center gap-3 px-4 py-3 rounded-xl",
-            "border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl",
-            "dark:bg-slate-900/70 dark:border-slate-700/50",
+            "absolute flex items-center gap-3 rounded-xl px-4 py-3",
+            "border border-white/10 bg-white/5 shadow-2xl backdrop-blur-md",
+            "dark:border-slate-700/50 dark:bg-slate-900/70",
             card.y
           )}
           style={{
@@ -103,24 +152,33 @@ export function FloatingCards({ className }: FloatingCardsProps) {
           }}
         >
           {/* Icon */}
-          <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
             {card.icon}
           </div>
 
           {/* Content */}
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-foreground truncate">{card.label}</span>
-              <span className={cn("text-[10px] font-bold flex-shrink-0", card.tagColor)}>{card.tag}</span>
+              <span className="truncate text-xs font-semibold text-foreground">
+                {card.label}
+              </span>
+              <span
+                className={cn(
+                  "flex-shrink-0 text-[10px] font-bold",
+                  card.tagColor
+                )}
+              >
+                {card.tag}
+              </span>
             </div>
-            <div className="text-xs text-muted-foreground font-mono mt-0.5 truncate">
+            <div className="mt-0.5 truncate font-mono text-xs text-muted-foreground">
               {card.value}
             </div>
           </div>
 
           {/* Status dot */}
-          <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0 shadow-[0_0_6px_2px_rgba(52,211,153,0.4)]">
-            <div className="w-full h-full rounded-full bg-emerald-400 animate-ping opacity-60" />
+          <div className="h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.4)]">
+            <div className="h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
           </div>
         </div>
       ))}

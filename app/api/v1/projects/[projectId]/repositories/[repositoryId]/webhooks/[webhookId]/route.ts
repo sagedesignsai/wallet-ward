@@ -48,7 +48,10 @@ export async function DELETE(
     // Verify repository exists and belongs to project
     const repository = await RepositoryService.getById(repositoryId)
     if (!repository || repository.projectId !== projectId) {
-      return NextResponse.json({ error: "Repository not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Repository not found" },
+        { status: 404 }
+      )
     }
 
     // Verify webhook exists and belongs to repository

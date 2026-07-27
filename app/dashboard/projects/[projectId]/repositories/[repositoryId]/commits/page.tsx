@@ -141,9 +141,7 @@ function CommitsInner({
 
         setNextCursor(body.next ?? null)
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load commits."
-        )
+        setError(err instanceof Error ? err.message : "Failed to load commits.")
       } finally {
         setIsLoading(false)
         setIsLoadingMore(false)
@@ -166,7 +164,7 @@ function CommitsInner({
 
   if (repoLoading) {
     return (
-      <div className="space-y-4 max-w-3xl">
+      <div className="max-w-3xl space-y-4">
         <Skeleton className="h-10 w-2/3" />
         <Skeleton className="h-[200px] rounded-lg" />
       </div>
@@ -174,7 +172,7 @@ function CommitsInner({
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl">
+    <div className="flex max-w-3xl flex-col gap-5">
       {/* Error banner */}
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
@@ -184,9 +182,7 @@ function CommitsInner({
 
       {/* Branch Selector */}
       <div className="flex items-center gap-3">
-        <label className="text-xs text-muted-foreground shrink-0">
-          Branch
-        </label>
+        <label className="shrink-0 text-xs text-muted-foreground">Branch</label>
         <BranchSelector
           projectId={projectId}
           repositoryId={repositoryId}
@@ -216,7 +212,7 @@ function CommitsInner({
       {/* Empty State */}
       {!isLoading && commits.length === 0 && !error && (
         <div className="overflow-hidden rounded-lg border border-dashed border-border/60 bg-card">
-          <div className="flex flex-col items-center gap-4 py-16 px-6">
+          <div className="flex flex-col items-center gap-4 px-6 py-16">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent text-purple-500 ring-1 ring-purple-500/10">
               <GitCommitIcon className="size-7" weight="light" />
             </div>
@@ -224,7 +220,7 @@ function CommitsInner({
               <h3 className="text-sm font-semibold text-foreground">
                 No commits found
               </h3>
-              <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
+              <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
                 {branch
                   ? `No commits found on the "${branch}" branch.`
                   : "Select a branch to view its commit history."}
@@ -237,10 +233,7 @@ function CommitsInner({
       {/* Commits List */}
       {!isLoading && commits.length > 0 && (
         <div className="rounded-lg border border-border/40 bg-card">
-          <CommitList
-            commits={commits}
-            repositoryUrl={repository?.url ?? ""}
-          />
+          <CommitList commits={commits} repositoryUrl={repository?.url ?? ""} />
 
           {/* Load More */}
           {nextCursor && (

@@ -23,7 +23,7 @@ function formatFileSize(bytes: number): string {
   const k = 1024
   const sizes = ["Bytes", "KB", "MB", "GB"]
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i]
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
 }
 
 export function FileForm({
@@ -142,11 +142,11 @@ export function FileForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
-      <div className="rounded-lg border border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-950/20 px-3 py-2">
+      <div className="rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/20">
         <p className="text-xs text-slate-900 dark:text-slate-100">
-          <FileIcon className="inline size-3 mr-1" />
-          Store binary files, images, documents, or any file type securely. Files
-          are base64 encoded. Max size: {formatFileSize(MAX_FILE_SIZE)}.
+          <FileIcon className="mr-1 inline size-3" />
+          Store binary files, images, documents, or any file type securely.
+          Files are base64 encoded. Max size: {formatFileSize(MAX_FILE_SIZE)}.
         </p>
       </div>
 
@@ -183,7 +183,7 @@ export function FileForm({
           <div
             {...getRootProps()}
             className={cn(
-              "rounded-lg border-2 border-dashed bg-muted/20 p-6 text-center transition-all cursor-pointer",
+              "cursor-pointer rounded-lg border-2 border-dashed bg-muted/20 p-6 text-center transition-all",
               isDragActive
                 ? "border-primary bg-primary/5"
                 : errors.file
@@ -216,7 +216,7 @@ export function FileForm({
                     </p>
                   </>
                 )}
-                <p className="text-[0.625rem] text-muted-foreground mt-1">
+                <p className="mt-1 text-[0.625rem] text-muted-foreground">
                   Any file type, up to {formatFileSize(MAX_FILE_SIZE)}
                 </p>
               </div>
@@ -225,12 +225,12 @@ export function FileForm({
         ) : (
           <div className="rounded-lg border border-border/60 bg-card p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950 text-green-600 dark:text-green-400">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
                   <CheckCircleIcon className="size-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{fileName}</p>
+                  <p className="truncate text-sm font-medium">{fileName}</p>
                   <p className="text-xs text-muted-foreground">
                     {formatFileSize(fileSize)}
                   </p>
@@ -259,7 +259,7 @@ export function FileForm({
       <div className="grid gap-2">
         <Label htmlFor="file-description">
           Description{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="file-description"

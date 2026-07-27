@@ -29,7 +29,10 @@ export async function GET(request: Request, ctx: Ctx) {
     const orgCtx = await requireOrganization(authCtx)
     requirePermission(orgCtx.memberRole, "project:read")
 
-    const integration = await getIntegration(integrationId, orgCtx.organizationId)
+    const integration = await getIntegration(
+      integrationId,
+      orgCtx.organizationId
+    )
 
     if (integration.provider !== "github") {
       throw badRequest("Integration is not a GitHub integration")
@@ -55,13 +58,21 @@ export async function GET(request: Request, ctx: Ctx) {
         break
       case "pulls":
         if (!query.owner || !query.repo) {
-          throw badRequest("`owner` and `repo` query params are required for pulls")
+          throw badRequest(
+            "`owner` and `repo` query params are required for pulls"
+          )
         }
-        data = await fetchGitHubPullRequests(accessToken, query.owner, query.repo)
+        data = await fetchGitHubPullRequests(
+          accessToken,
+          query.owner,
+          query.repo
+        )
         break
       case "commits":
         if (!query.owner || !query.repo) {
-          throw badRequest("`owner` and `repo` query params are required for commits")
+          throw badRequest(
+            "`owner` and `repo` query params are required for commits"
+          )
         }
         data = await fetchGitHubCommits(accessToken, query.owner, query.repo)
         break

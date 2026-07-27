@@ -19,7 +19,9 @@ export function SessionProposals({
           <CardTitle className="text-sm">Related Proposals</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xs text-muted-foreground italic">No proposals linked.</p>
+          <p className="text-xs text-muted-foreground italic">
+            No proposals linked.
+          </p>
         </CardContent>
       </Card>
     )
@@ -41,7 +43,7 @@ export function SessionProposals({
           {awaiting.length > 0 && (
             <Badge
               variant="outline"
-              className="h-5 text-[10px] bg-amber-500/15 text-amber-400 border-amber-500/25"
+              className="h-5 border-amber-500/25 bg-amber-500/15 text-[10px] text-amber-400"
             >
               {awaiting.length} pending
             </Badge>
@@ -50,19 +52,23 @@ export function SessionProposals({
       </CardHeader>
       <CardContent className="space-y-2">
         {awaiting.length === 0 && others.length === 0 && (
-          <p className="text-xs text-muted-foreground italic">No proposals yet.</p>
+          <p className="text-xs text-muted-foreground italic">
+            No proposals yet.
+          </p>
         )}
 
         {awaiting.map((p) => (
           <Link
             key={p.id}
             href={`/dashboard/proposals/${p.id}`}
-            className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 hover:bg-amber-500/10 transition-colors"
+            className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 transition-colors hover:bg-amber-500/10"
           >
-            <WarningCircleIcon className="size-3.5 text-amber-400 shrink-0 mt-0.5" />
+            <WarningCircleIcon className="mt-0.5 size-3.5 shrink-0 text-amber-400" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-foreground truncate">{p.title}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
+              <p className="truncate text-xs font-medium text-foreground">
+                {p.title}
+              </p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
                 {p.actionType}
                 {p.targetSystem ? ` · ${p.targetSystem}` : ""}
               </p>
@@ -74,12 +80,14 @@ export function SessionProposals({
           <Link
             key={p.id}
             href={`/dashboard/proposals/${p.id}`}
-            className="flex items-start gap-2 rounded-lg px-3 py-2 hover:bg-muted/30 transition-colors"
+            className="flex items-start gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-muted/30"
           >
-            <CheckCircleIcon className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
+            <CheckCircleIcon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-foreground truncate">{p.title}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">
+              <p className="truncate text-xs font-medium text-foreground">
+                {p.title}
+              </p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground capitalize">
                 {p.status.replace(/_/g, " ")} · {p.actionType}
               </p>
             </div>
@@ -87,7 +95,12 @@ export function SessionProposals({
         ))}
 
         {(awaiting.length > 0 || others.length > 0) && (
-          <Button variant="ghost" size="sm" asChild className="w-full h-8 text-xs mt-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="mt-1 h-8 w-full text-xs"
+          >
             <Link href="/dashboard/proposals">View all proposals</Link>
           </Button>
         )}

@@ -121,14 +121,14 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
           <h3 className="text-sm font-semibold text-foreground">
             Project not found
           </h3>
-          <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
+          <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
             {error ??
               "This project may have been deleted or you may not have access."}
           </p>
         </div>
         <Link
           href="/dashboard/projects"
-          className="text-xs text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
+          className="text-xs text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
         >
           Back to Projects
         </Link>
@@ -144,12 +144,12 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
   const connectedIntegrations = integrations.filter((i) => i.enabled)
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-6 duration-300 fade-in">
       {/* Hero Section */}
-      <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-gradient-to-br from-primary/8 via-background to-background p-6">
-        <div className="absolute inset-0 pointer-events-none" aria-hidden>
-          <div className="absolute -top-12 -left-12 w-48 h-48 bg-primary/8 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-8 w-32 h-32 bg-violet-500/6 rounded-full blur-2xl" />
+      <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-primary/8 via-background to-background p-6">
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <div className="absolute -top-12 -left-12 h-48 w-48 rounded-full bg-primary/8 blur-3xl" />
+          <div className="absolute right-8 bottom-0 h-32 w-32 rounded-full bg-violet-500/6 blur-2xl" />
         </div>
         <div className="relative z-10">
           <div className="flex items-start justify-between gap-4">
@@ -158,11 +158,13 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
                 <StackSimpleIcon className="size-6" weight="duotone" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">{project.name}</h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
+                <h1 className="text-xl font-bold text-foreground">
+                  {project.name}
+                </h1>
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {project.description ?? "No description provided"}
                 </p>
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <ClockCounterClockwiseIcon className="size-3" />
                     Created <TimeAgo date={project.createdAt} />
@@ -187,13 +189,19 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
           label="Secrets & Keys"
           value={secrets.length}
           icon={<KeyIcon className="size-4" />}
-          description={secrets.length === 1 ? "1 secret" : `${secrets.length} secrets`}
+          description={
+            secrets.length === 1 ? "1 secret" : `${secrets.length} secrets`
+          }
         />
         <StatCard
           label="Documents"
           value={documents.length}
           icon={<FileTextIcon className="size-4" />}
-          description={documents.length === 1 ? "1 document" : `${documents.length} documents`}
+          description={
+            documents.length === 1
+              ? "1 document"
+              : `${documents.length} documents`
+          }
         />
         <StatCard
           label="Tasks"
@@ -214,9 +222,13 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
         <Card className="border-amber-500/20 bg-amber-500/5">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <WarningCircleIcon className="size-5 text-amber-400" weight="fill" />
+              <WarningCircleIcon
+                className="size-5 text-amber-400"
+                weight="fill"
+              />
               <CardTitle className="text-sm text-amber-400">
-                {proposals.length} Pending Approval{proposals.length > 1 ? "s" : ""}
+                {proposals.length} Pending Approval
+                {proposals.length > 1 ? "s" : ""}
               </CardTitle>
             </div>
           </CardHeader>
@@ -260,8 +272,8 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
           </CardHeader>
           <CardContent>
             {activeSessions.length === 0 ? (
-              <div className="text-center py-6">
-                <RobotIcon className="size-10 text-muted-foreground/40 mx-auto mb-2" />
+              <div className="py-6 text-center">
+                <RobotIcon className="mx-auto mb-2 size-10 text-muted-foreground/40" />
                 <p className="text-xs text-muted-foreground">
                   No active agents
                 </p>
@@ -281,7 +293,10 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <StackSimpleIcon className="size-4 text-blue-400" weight="duotone" />
+                <StackSimpleIcon
+                  className="size-4 text-blue-400"
+                  weight="duotone"
+                />
                 <CardTitle className="text-sm">Environments</CardTitle>
                 <Badge variant="secondary">{environments.length}</Badge>
               </div>
@@ -294,8 +309,8 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
           </CardHeader>
           <CardContent>
             {environments.length === 0 ? (
-              <div className="text-center py-6">
-                <StackSimpleIcon className="size-10 text-muted-foreground/40 mx-auto mb-2" />
+              <div className="py-6 text-center">
+                <StackSimpleIcon className="mx-auto mb-2 size-10 text-muted-foreground/40" />
                 <p className="text-xs text-muted-foreground">
                   No environments yet
                 </p>
@@ -307,17 +322,22 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
                     key={env.id}
                     href={`/dashboard/projects/${projectId}/environments/${env.id}`}
                     className={cn(
-                      "flex items-center justify-between p-3 rounded-lg border border-l-[3px] bg-gradient-to-r transition-colors hover:bg-accent",
+                      "flex items-center justify-between rounded-lg border border-l-[3px] bg-gradient-to-r p-3 transition-colors hover:bg-accent",
                       envGradient(env.slug)
                     )}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-sm font-medium truncate">{env.name}</span>
-                      <Badge variant={envBadgeVariant(env.slug)} className="shrink-0">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="truncate text-sm font-medium">
+                        {env.name}
+                      </span>
+                      <Badge
+                        variant={envBadgeVariant(env.slug)}
+                        className="shrink-0"
+                      >
                         {env.slug}
                       </Badge>
                     </div>
-                    <ArrowRightIcon className="size-3.5 text-muted-foreground shrink-0" />
+                    <ArrowRightIcon className="size-3.5 shrink-0 text-muted-foreground" />
                   </Link>
                 ))}
               </div>
@@ -328,8 +348,10 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
 
       {/* Quick Actions Grid */}
       <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+        <h2 className="mb-3 text-sm font-semibold text-foreground">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
           {[
             {
               href: `/dashboard/projects/${projectId}/secrets`,
@@ -391,15 +413,25 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className="group flex flex-col gap-3 rounded-xl border border-border/40 bg-card p-4 hover:bg-accent hover:border-border/60 transition-all duration-200"
+              className="group flex flex-col gap-3 rounded-xl border border-border/40 bg-card p-4 transition-all duration-200 hover:border-border/60 hover:bg-accent"
             >
-              <div className={cn("flex size-10 items-center justify-center rounded-lg", item.bg)}>
-                <item.icon className={cn("size-5", item.color)} weight="duotone" />
+              <div
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-lg",
+                  item.bg
+                )}
+              >
+                <item.icon
+                  className={cn("size-5", item.color)}
+                  weight="duotone"
+                />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {item.label}
+                </p>
                 {item.count !== null && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     {item.count} {item.count === 1 ? "item" : "items"}
                   </p>
                 )}

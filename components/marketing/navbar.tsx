@@ -71,39 +71,42 @@ export function MarketingNavbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-200 border-b",
+        "fixed top-0 right-0 left-0 z-50 border-b transition-all duration-200",
         scrolled
-          ? "bg-background/90 backdrop-blur-md border-border/60 shadow-xs py-1.5"
-          : "bg-background/50 backdrop-blur-xs border-transparent py-2.5"
+          ? "border-border/60 bg-background/90 py-1.5 shadow-xs backdrop-blur-md"
+          : "border-transparent bg-background/50 py-2.5 backdrop-blur-xs"
       )}
     >
-      <nav className="container mx-auto px-4 sm:px-6 flex items-center justify-between h-11">
+      <nav className="container mx-auto flex h-11 items-center justify-between px-4 sm:px-6">
         {/* Compact Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 group select-none"
+          className="group flex items-center gap-2 select-none"
           onClick={() => setMobileOpen(false)}
         >
-          <div className="w-7 h-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-extrabold text-sm shadow-xs shadow-primary/30 group-hover:scale-105 transition-transform duration-200">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-sm font-extrabold text-primary-foreground shadow-xs shadow-primary/30 transition-transform duration-200 group-hover:scale-105">
             F
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-foreground text-sm tracking-tight">
+            <span className="text-sm font-bold tracking-tight text-foreground">
               Flowspace
             </span>
-            <Badge variant="outline" className="text-[10px] h-4 px-1.5 font-medium border-primary/20 text-primary bg-primary/5 hidden sm:inline-flex">
+            <Badge
+              variant="outline"
+              className="hidden h-4 border-primary/20 bg-primary/5 px-1.5 text-[10px] font-medium text-primary sm:inline-flex"
+            >
               v1.0
             </Badge>
           </div>
         </Link>
 
         {/* Dense Nav Links */}
-        <div className="hidden md:flex items-center gap-0.5 bg-muted/40 p-0.5 rounded-lg border border-border/40">
+        <div className="hidden items-center gap-0.5 rounded-lg border border-border/40 bg-muted/40 p-0.5 md:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.label}
               href={link.href}
-              className="px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-background/80 transition-all font-medium"
+              className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-all hover:bg-background/80 hover:text-foreground"
             >
               {link.label}
             </Link>
@@ -111,7 +114,7 @@ export function MarketingNavbar() {
         </div>
 
         {/* Auth-Aware Controls */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden items-center gap-2 md:flex">
           {isPending ? (
             <div className="flex items-center gap-2">
               <Skeleton className="h-8 w-20 rounded-md" />
@@ -119,9 +122,14 @@ export function MarketingNavbar() {
             </div>
           ) : isAuthenticated && user ? (
             <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold gap-1.5">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-xs font-semibold"
+              >
                 <Link href="/dashboard">
-                  <LockKeyIcon className="w-3.5 h-3.5 text-primary" />
+                  <LockKeyIcon className="h-3.5 w-3.5 text-primary" />
                   <span>Vault Dashboard</span>
                 </Link>
               </Button>
@@ -131,11 +139,14 @@ export function MarketingNavbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-8 w-8 rounded-full p-0 ring-1 ring-border/50 hover:ring-primary/40 transition-all"
+                    className="relative h-8 w-8 rounded-full p-0 ring-1 ring-border/50 transition-all hover:ring-primary/40"
                   >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User"} />
-                      <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                      <AvatarImage
+                        src={user.image ?? undefined}
+                        alt={user.name ?? "User"}
+                      />
+                      <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
                         {userInitials}
                       </AvatarFallback>
                     </Avatar>
@@ -145,26 +156,39 @@ export function MarketingNavbar() {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-xs font-semibold leading-none text-foreground">{user.name}</p>
-                      <p className="text-[11px] leading-none text-muted-foreground truncate">{user.email}</p>
+                      <p className="text-xs leading-none font-semibold text-foreground">
+                        {user.name}
+                      </p>
+                      <p className="truncate text-[11px] leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
 
                   <DropdownMenuGroup>
-                    <DropdownMenuItem asChild className="text-xs cursor-pointer">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer text-xs"
+                    >
                       <Link href="/dashboard">
                         <LockKeyIcon className="mr-2 h-3.5 w-3.5" />
                         <span>My Secrets Vault</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-xs cursor-pointer">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer text-xs"
+                    >
                       <Link href="/two-factor/setup">
                         <ShieldCheckIcon className="mr-2 h-3.5 w-3.5 text-primary" />
                         <span>2FA Security Setup</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-xs cursor-pointer">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer text-xs"
+                    >
                       <Link href="/settings">
                         <GearIcon className="mr-2 h-3.5 w-3.5" />
                         <span>Account Settings</span>
@@ -175,7 +199,7 @@ export function MarketingNavbar() {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem
-                    className="text-xs text-destructive focus:text-destructive cursor-pointer"
+                    className="cursor-pointer text-xs text-destructive focus:text-destructive"
                     onClick={handleSignOut}
                   >
                     <SignOutIcon className="mr-2 h-3.5 w-3.5" />
@@ -186,10 +210,19 @@ export function MarketingNavbar() {
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
-              <Button asChild variant="ghost" size="sm" className="h-8 text-xs font-medium px-3">
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 text-xs font-medium"
+              >
                 <Link href="/sign-in">Sign In</Link>
               </Button>
-              <Button asChild size="sm" className="h-8 text-xs font-semibold px-3 shadow-xs shadow-primary/20">
+              <Button
+                asChild
+                size="sm"
+                className="h-8 px-3 text-xs font-semibold shadow-xs shadow-primary/20"
+              >
                 <Link href="/sign-up">Get Started</Link>
               </Button>
             </div>
@@ -199,46 +232,60 @@ export function MarketingNavbar() {
         {/* Mobile Hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted/50 transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted/50 md:hidden"
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <XIcon className="w-4 h-4 text-foreground" /> : <ListIcon className="w-4 h-4 text-foreground" />}
+          {mobileOpen ? (
+            <XIcon className="h-4 w-4 text-foreground" />
+          ) : (
+            <ListIcon className="h-4 w-4 text-foreground" />
+          )}
         </button>
       </nav>
 
       {/* Mobile Menu */}
       <div
         className={cn(
-          "md:hidden overflow-hidden transition-all duration-200 bg-background/95 backdrop-blur-xl border-b border-border/40",
-          mobileOpen ? "max-h-96 opacity-100 py-3" : "max-h-0 opacity-0 py-0"
+          "overflow-hidden border-b border-border/40 bg-background/95 backdrop-blur-xl transition-all duration-200 md:hidden",
+          mobileOpen ? "max-h-96 py-3 opacity-100" : "max-h-0 py-0 opacity-0"
         )}
       >
-        <div className="container mx-auto px-4 flex flex-col gap-1">
+        <div className="container mx-auto flex flex-col gap-1 px-4">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.label}
               href={link.href}
-              className="px-3 py-2 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-muted/40 transition-colors font-medium"
+              className="rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
             </Link>
           ))}
 
-          <div className="pt-2 mt-2 border-t border-border/40">
+          <div className="mt-2 border-t border-border/40 pt-2">
             {isAuthenticated && user ? (
               <div className="space-y-2">
-                <div className="px-3 py-1 flex items-center gap-2">
+                <div className="flex items-center gap-2 px-3 py-1">
                   <Avatar className="h-6 w-6">
-                    <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                    <AvatarFallback className="bg-primary/10 text-[10px] font-bold text-primary">
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-xs font-medium text-foreground truncate">{user.email}</span>
+                  <span className="truncate text-xs font-medium text-foreground">
+                    {user.email}
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button asChild variant="outline" size="sm" className="h-8 text-xs">
-                    <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
+                  >
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileOpen(false)}
+                    >
                       Vault
                     </Link>
                   </Button>
@@ -257,12 +304,21 @@ export function MarketingNavbar() {
               </div>
             ) : (
               <div className="flex gap-2">
-                <Button asChild variant="outline" size="sm" className="flex-1 h-8 text-xs">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="h-8 flex-1 text-xs"
+                >
                   <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
                     Sign In
                   </Link>
                 </Button>
-                <Button asChild size="sm" className="flex-1 h-8 text-xs font-semibold">
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-8 flex-1 text-xs font-semibold"
+                >
                   <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
                     Get Started
                   </Link>

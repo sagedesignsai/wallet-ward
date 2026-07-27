@@ -22,7 +22,11 @@ type OrganizationSwitcherProps = {
 
 const ROLE_CONFIG: Record<
   string,
-  { label: string; variant: "default" | "secondary" | "outline" | "ghost"; icon: React.ElementType }
+  {
+    label: string
+    variant: "default" | "secondary" | "outline" | "ghost"
+    icon: React.ElementType
+  }
 > = {
   owner: {
     label: "Owner",
@@ -88,14 +92,16 @@ export function OrganizationSwitcher({
   return (
     <div className="flex flex-col gap-2">
       {hasMultiple && (
-        <p className="text-xs text-muted-foreground font-medium">
+        <p className="text-xs font-medium text-muted-foreground">
           Your organizations
         </p>
       )}
       <div
         className={cn(
           "grid gap-2",
-          hasMultiple ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
+          hasMultiple
+            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            : "grid-cols-1"
         )}
       >
         {organizations.map((org) => {
@@ -110,7 +116,7 @@ export function OrganizationSwitcher({
                 "group relative rounded-lg ring-1 transition-all",
                 isActive
                   ? "bg-primary/5 ring-primary/20"
-                  : "bg-card ring-foreground/10 hover:ring-foreground/20 hover:bg-muted/30"
+                  : "bg-card ring-foreground/10 hover:bg-muted/30 hover:ring-foreground/20"
               )}
             >
               <button
@@ -125,7 +131,7 @@ export function OrganizationSwitcher({
                 {/* Organization Avatar */}
                 <div
                   className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white text-xs font-bold",
+                    "flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-xs font-bold text-white",
                     getAvatarGradient(org.name)
                   )}
                 >
@@ -147,7 +153,10 @@ export function OrganizationSwitcher({
                       {org.name}
                     </span>
                     {isActive && (
-                      <CheckIcon className="size-3.5 shrink-0 text-primary" weight="bold" />
+                      <CheckIcon
+                        className="size-3.5 shrink-0 text-primary"
+                        weight="bold"
+                      />
                     )}
                   </div>
                   <div className="mt-1 flex items-center gap-1.5">
@@ -195,7 +204,7 @@ export function OrganizationInfoCard({
     <div className="flex items-center gap-3 rounded-lg bg-card p-3 ring-1 ring-foreground/10">
       <div
         className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white text-xs font-bold",
+          "flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-xs font-bold text-white",
           getAvatarGradient(organization.name)
         )}
       >
@@ -214,12 +223,12 @@ export function OrganizationInfoCard({
           <span className="truncate text-sm font-medium text-foreground">
             {organization.name}
           </span>
-          <Badge variant={role.variant} className="gap-0.5 shrink-0">
+          <Badge variant={role.variant} className="shrink-0 gap-0.5">
             <RoleIcon className="size-2.5" />
             {role.label}
           </Badge>
         </div>
-        <p className="mt-0.5 text-xs text-muted-foreground font-mono">
+        <p className="mt-0.5 font-mono text-xs text-muted-foreground">
           {organization.slug}
         </p>
       </div>

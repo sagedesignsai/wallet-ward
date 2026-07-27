@@ -4,10 +4,10 @@ import React from "react"
 
 export function VaultAnimation() {
   return (
-    <div className="relative flex items-center justify-center w-full h-full select-none">
+    <div className="relative flex h-full w-full items-center justify-center select-none">
       <svg
         viewBox="0 0 400 400"
-        className="w-full h-full max-w-[420px] max-h-[420px]"
+        className="h-full max-h-[420px] w-full max-w-[420px]"
         aria-hidden="true"
       >
         <defs>
@@ -29,24 +29,56 @@ export function VaultAnimation() {
 
           {/* Gradients */}
           <linearGradient id="shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="oklch(0.6 0.18 242)" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="oklch(0.5 0.2 210)" stopOpacity="0.6" />
+            <stop
+              offset="0%"
+              stopColor="oklch(0.6 0.18 242)"
+              stopOpacity="0.9"
+            />
+            <stop
+              offset="100%"
+              stopColor="oklch(0.5 0.2 210)"
+              stopOpacity="0.6"
+            />
           </linearGradient>
           <linearGradient id="lock-grad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="oklch(0.9 0.05 220)" />
             <stop offset="100%" stopColor="oklch(0.7 0.12 240)" />
           </linearGradient>
           <radialGradient id="core-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="oklch(0.6 0.18 242)" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="oklch(0.6 0.18 242)" stopOpacity="0" />
+            <stop
+              offset="0%"
+              stopColor="oklch(0.6 0.18 242)"
+              stopOpacity="0.35"
+            />
+            <stop
+              offset="100%"
+              stopColor="oklch(0.6 0.18 242)"
+              stopOpacity="0"
+            />
           </radialGradient>
           <linearGradient id="beam-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="oklch(0.85 0.15 240)" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="oklch(0.85 0.15 240)" stopOpacity="0" />
+            <stop
+              offset="0%"
+              stopColor="oklch(0.85 0.15 240)"
+              stopOpacity="0.9"
+            />
+            <stop
+              offset="100%"
+              stopColor="oklch(0.85 0.15 240)"
+              stopOpacity="0"
+            />
           </linearGradient>
           <radialGradient id="fragment-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="oklch(0.8 0.12 240)" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="oklch(0.6 0.18 242)" stopOpacity="0.4" />
+            <stop
+              offset="0%"
+              stopColor="oklch(0.8 0.12 240)"
+              stopOpacity="0.9"
+            />
+            <stop
+              offset="100%"
+              stopColor="oklch(0.6 0.18 242)"
+              stopOpacity="0.4"
+            />
           </radialGradient>
 
           {/* Clip path for shield */}
@@ -57,8 +89,18 @@ export function VaultAnimation() {
 
         {/* ── Background core glow ── */}
         <circle cx="200" cy="200" r="140" fill="url(#core-glow)">
-          <animate attributeName="r" values="130;155;130" dur="4s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" repeatCount="indefinite" />
+          <animate
+            attributeName="r"
+            values="130;155;130"
+            dur="4s"
+            repeatCount="indefinite"
+          />
+          <animate
+            attributeName="opacity"
+            values="0.8;1;0.8"
+            dur="4s"
+            repeatCount="indefinite"
+          />
         </circle>
 
         {/* ── Pulse rings ── */}
@@ -113,14 +155,20 @@ export function VaultAnimation() {
 
         {/* Shield top edge glow */}
         <line
-          x1="200" y1="58" x2="312" y2="104"
+          x1="200"
+          y1="58"
+          x2="312"
+          y2="104"
           stroke="oklch(0.8 0.15 240)"
           strokeWidth="2"
           strokeOpacity="0.8"
           filter="url(#glow-blue)"
         />
         <line
-          x1="200" y1="58" x2="88" y2="104"
+          x1="200"
+          y1="58"
+          x2="88"
+          y2="104"
           stroke="oklch(0.8 0.15 240)"
           strokeWidth="2"
           strokeOpacity="0.8"
@@ -130,13 +178,21 @@ export function VaultAnimation() {
         {/* ── Lock icon (center) ── */}
         {/* Lock body */}
         <rect
-          x="176" y="205" width="48" height="38"
+          x="176"
+          y="205"
+          width="48"
+          height="38"
           rx="6"
           fill="url(#lock-grad)"
           fillOpacity="0.95"
           filter="url(#glow-blue)"
         >
-          <animate attributeName="fill-opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" />
+          <animate
+            attributeName="fill-opacity"
+            values="0.9;1;0.9"
+            dur="2s"
+            repeatCount="indefinite"
+          />
         </rect>
         {/* Lock shackle */}
         <path
@@ -149,7 +205,14 @@ export function VaultAnimation() {
         />
         {/* Lock keyhole */}
         <circle cx="200" cy="220" r="6" fill="oklch(0.2 0.05 240)" />
-        <rect x="197" y="220" width="6" height="10" rx="1" fill="oklch(0.2 0.05 240)" />
+        <rect
+          x="197"
+          y="220"
+          width="6"
+          height="10"
+          rx="1"
+          fill="oklch(0.2 0.05 240)"
+        />
 
         {/* ── Beam / scan line ── */}
         <rect
@@ -170,7 +233,12 @@ export function VaultAnimation() {
             dur="5s"
             repeatCount="indefinite"
           />
-          <animate attributeName="opacity" values="0.6;0.9;0.6" dur="2.5s" repeatCount="indefinite" />
+          <animate
+            attributeName="opacity"
+            values="0.6;0.9;0.6"
+            dur="2.5s"
+            repeatCount="indefinite"
+          />
         </rect>
 
         {/* ── Orbiting data fragments ── */}

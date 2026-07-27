@@ -5,10 +5,7 @@ import {
 } from "@/lib/api/auth"
 import { handleRouteError, json } from "@/lib/api/http"
 import { putSecretValueSchema } from "@/lib/api/validators"
-import {
-  putSecretValue,
-  revealSecretValue,
-} from "@/lib/services/secrets"
+import { putSecretValue, revealSecretValue } from "@/lib/services/secrets"
 
 type Ctx = { params: Promise<{ secretId: string }> }
 

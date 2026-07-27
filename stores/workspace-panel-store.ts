@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { nanoid } from "nanoid";
+import { create } from "zustand"
+import { persist } from "zustand/middleware"
+import { nanoid } from "nanoid"
 
 // ─── Content types the Computer panel can display ────────────────────────────
 
@@ -15,20 +15,20 @@ export type ComputerTabType =
   | "secret"
   | "task"
   | "image"
-  | "file-tree";
+  | "file-tree"
 
 export interface ComputerTab {
-  id: string;
-  type: ComputerTabType;
-  title: string;
+  id: string
+  type: ComputerTabType
+  title: string
   /** Icon name from lucide (string key) */
-  icon?: string;
+  icon?: string
   /** The content payload — structure depends on type */
-  content: ComputerContent;
+  content: ComputerContent
   /** Whether this tab is pinned (won't auto-close) */
-  pinned?: boolean;
+  pinned?: boolean
   /** ISO timestamp when opened */
-  openedAt: string;
+  openedAt: string
 }
 
 // ─── Content payloads per type ───────────────────────────────────────────────
@@ -42,109 +42,109 @@ export type ComputerContent =
   | SecretContent
   | TaskContent
   | ImageContent
-  | FileTreeContent;
+  | FileTreeContent
 
 export interface CodeContent {
-  type: "code";
-  code: string;
-  language: string;
-  filename?: string;
+  type: "code"
+  code: string
+  language: string
+  filename?: string
   /** If tied to a DB record */
-  resourceId?: string;
+  resourceId?: string
 }
 
 export interface DocumentContent {
-  type: "document";
-  title: string;
-  body: string; // markdown / rich text
-  resourceId?: string;
-  projectId?: string;
-  editable?: boolean;
+  type: "document"
+  title: string
+  body: string // markdown / rich text
+  resourceId?: string
+  projectId?: string
+  editable?: boolean
 }
 
 export interface ArtifactContent {
-  type: "artifact";
-  title: string;
-  description?: string;
-  code?: string;
-  language?: string;
+  type: "artifact"
+  title: string
+  description?: string
+  code?: string
+  language?: string
   /** Rendered HTML string for preview */
-  html?: string;
+  html?: string
 }
 
 export interface PreviewContent {
-  type: "preview";
-  url: string;
-  title?: string;
+  type: "preview"
+  url: string
+  title?: string
 }
 
 export interface TerminalContent {
-  type: "terminal";
-  lines: string[];
-  title?: string;
+  type: "terminal"
+  lines: string[]
+  title?: string
 }
 
 export interface SecretContent {
-  type: "secret";
-  name: string;
-  secretType: string;
-  resourceId: string;
-  projectId: string;
-  environmentId: string;
+  type: "secret"
+  name: string
+  secretType: string
+  resourceId: string
+  projectId: string
+  environmentId: string
 }
 
 export interface TaskContent {
-  type: "task";
-  title: string;
-  description?: string;
-  status: string;
-  resourceId: string;
-  projectId: string;
+  type: "task"
+  title: string
+  description?: string
+  status: string
+  resourceId: string
+  projectId: string
 }
 
 export interface ImageContent {
-  type: "image";
-  url: string;
-  alt?: string;
+  type: "image"
+  url: string
+  alt?: string
 }
 
 export interface FileTreeContent {
-  type: "file-tree";
-  title: string;
+  type: "file-tree"
+  title: string
   /** Recursive tree structure */
-  tree: FileNode[];
+  tree: FileNode[]
   /** Initially selected path */
-  selectedPath?: string;
+  selectedPath?: string
 }
 
 export interface FileNode {
-  name: string;
-  path: string;
-  type: "file" | "folder";
-  language?: string;
-  children?: FileNode[];
+  name: string
+  path: string
+  type: "file" | "folder"
+  language?: string
+  children?: FileNode[]
 }
 
 // ─── Chat Session ─────────────────────────────────────────────────────────────
 
 export interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  createdAt: string;
+  id: string
+  role: "user" | "assistant"
+  content: string
+  createdAt: string
 }
 
 export interface ChatSession {
-  id: string;
-  title: string;
-  messages: ChatMessage[];
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title: string
+  messages: ChatMessage[]
+  createdAt: string
+  updatedAt: string
   /** Optional project context */
-  projectId?: string;
-  environmentId?: string;
+  projectId?: string
+  environmentId?: string
   /** Agent type if launched from Agent Hub */
-  agentType?: "coding" | "content" | "ops" | "research";
+  agentType?: "coding" | "content" | "ops" | "research"
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -152,12 +152,12 @@ export interface ChatSession {
 function createSession(
   projectId?: string,
   environmentId?: string,
-  agentType?: ChatSession["agentType"],
+  agentType?: ChatSession["agentType"]
 ): ChatSession {
-  const now = new Date().toISOString();
+  const now = new Date().toISOString()
   const title = agentType
     ? `${agentType.charAt(0).toUpperCase() + agentType.slice(1)} Agent`
-    : "New conversation";
+    : "New conversation"
   return {
     id: nanoid(),
     title,
@@ -167,50 +167,50 @@ function createSession(
     projectId,
     environmentId,
     agentType,
-  };
+  }
 }
 
-const defaultSession = createSession();
+const defaultSession = createSession()
 
 interface WorkspacePanelStore {
-  chatOpen: boolean;
-  computerOpen: boolean;
-  tabs: ComputerTab[];
-  activeTabId: string | null;
-  sessions: ChatSession[];
-  activeSessionId: string | null;
+  chatOpen: boolean
+  computerOpen: boolean
+  tabs: ComputerTab[]
+  activeTabId: string | null
+  sessions: ChatSession[]
+  activeSessionId: string | null
 
   // Chat
-  toggleChat: () => void;
-  openChat: () => void;
+  toggleChat: () => void
+  openChat: () => void
 
   // Computer
-  toggleComputer: () => void;
-  openComputer: () => void;
-  openTab: (tab: Omit<ComputerTab, "id" | "openedAt">) => void;
-  closeTab: (tabId: string) => void;
-  setActiveTab: (tabId: string) => void;
-  pinTab: (tabId: string) => void;
+  toggleComputer: () => void
+  openComputer: () => void
+  openTab: (tab: Omit<ComputerTab, "id" | "openedAt">) => void
+  closeTab: (tabId: string) => void
+  setActiveTab: (tabId: string) => void
+  pinTab: (tabId: string) => void
 
   // Sessions
   newSession: (
     projectId?: string,
     environmentId?: string,
-    agentType?: ChatSession["agentType"],
-  ) => void;
-  selectSession: (sessionId: string) => void;
-  deleteSession: (sessionId: string) => void;
-  updateSessionTitle: (sessionId: string, title: string) => void;
+    agentType?: ChatSession["agentType"]
+  ) => void
+  selectSession: (sessionId: string) => void
+  deleteSession: (sessionId: string) => void
+  updateSessionTitle: (sessionId: string, title: string) => void
   addMessage: (
     sessionId: string,
-    message: Omit<ChatMessage, "id" | "createdAt">,
-  ) => void;
+    message: Omit<ChatMessage, "id" | "createdAt">
+  ) => void
 
   // Terminal
-  appendTerminalLines: (tabId: string, lines: string[]) => void;
+  appendTerminalLines: (tabId: string, lines: string[]) => void
 
   // Agent
-  launchAgent: (agentType: string) => void;
+  launchAgent: (agentType: string) => void
 }
 
 export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
@@ -233,41 +233,41 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
       openComputer: () => set({ computerOpen: true }),
 
       openTab: (tab) => {
-        const state = get();
+        const state = get()
         const existing = state.tabs.find(
           (t) =>
             t.type === tab.type &&
             (t.content as { resourceId?: string }).resourceId ===
-              (tab.content as { resourceId?: string }).resourceId,
-        );
+              (tab.content as { resourceId?: string }).resourceId
+        )
         if (existing) {
-          set({ computerOpen: true, activeTabId: existing.id });
-          return;
+          set({ computerOpen: true, activeTabId: existing.id })
+          return
         }
         const newTab: ComputerTab = {
           ...tab,
           id: nanoid(),
           openedAt: new Date().toISOString(),
-        };
+        }
         set({
           computerOpen: true,
           tabs: [...state.tabs, newTab],
           activeTabId: newTab.id,
-        });
+        })
       },
 
       closeTab: (tabId) => {
-        const state = get();
-        const tabs = state.tabs.filter((t) => t.id !== tabId);
+        const state = get()
+        const tabs = state.tabs.filter((t) => t.id !== tabId)
         const activeTabId =
           state.activeTabId === tabId
             ? (tabs.at(-1)?.id ?? null)
-            : state.activeTabId;
+            : state.activeTabId
         set({
           tabs,
           activeTabId,
           computerOpen: tabs.length > 0 ? state.computerOpen : false,
-        });
+        })
       },
 
       setActiveTab: (tabId) => set({ activeTabId: tabId }),
@@ -275,35 +275,35 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
       pinTab: (tabId) =>
         set((s) => ({
           tabs: s.tabs.map((t) =>
-            t.id === tabId ? { ...t, pinned: !t.pinned } : t,
+            t.id === tabId ? { ...t, pinned: !t.pinned } : t
           ),
         })),
 
       // ─── Sessions ─────────────────────────────────────────────────────────
       newSession: (projectId?, environmentId?, agentType?) => {
-        const session = createSession(projectId, environmentId, agentType);
+        const session = createSession(projectId, environmentId, agentType)
         set((s) => ({
           sessions: [session, ...s.sessions],
           activeSessionId: session.id,
-        }));
+        }))
       },
 
       selectSession: (sessionId) => set({ activeSessionId: sessionId }),
 
       deleteSession: (sessionId) => {
-        const state = get();
-        const sessions = state.sessions.filter((s) => s.id !== sessionId);
+        const state = get()
+        const sessions = state.sessions.filter((s) => s.id !== sessionId)
         const activeSessionId =
           state.activeSessionId === sessionId
             ? (sessions[0]?.id ?? null)
-            : state.activeSessionId;
-        set({ sessions, activeSessionId });
+            : state.activeSessionId
+        set({ sessions, activeSessionId })
       },
 
       updateSessionTitle: (sessionId, title) =>
         set((s) => ({
           sessions: s.sessions.map((sess) =>
-            sess.id === sessionId ? { ...sess, title } : sess,
+            sess.id === sessionId ? { ...sess, title } : sess
           ),
         })),
 
@@ -312,37 +312,41 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
           ...message,
           id: nanoid(),
           createdAt: new Date().toISOString(),
-        };
+        }
         set((s) => ({
           sessions: s.sessions.map((sess) => {
-            if (sess.id !== sessionId) return sess;
+            if (sess.id !== sessionId) return sess
             const title =
               sess.messages.length === 0 && message.role === "user"
                 ? message.content.slice(0, 50)
-                : sess.title;
+                : sess.title
             return {
               ...sess,
               title,
               messages: [...sess.messages, msg],
               updatedAt: new Date().toISOString(),
-            };
+            }
           }),
-        }));
+        }))
       },
 
       // ─── Terminal ─────────────────────────────────────────────────────────
       appendTerminalLines: (tabId, lines) =>
         set((s) => ({
           tabs: s.tabs.map((t) => {
-            if (t.id !== tabId || t.type !== "terminal") return t;
-            const content = t.content as { type: "terminal"; lines: string[]; title?: string };
+            if (t.id !== tabId || t.type !== "terminal") return t
+            const content = t.content as {
+              type: "terminal"
+              lines: string[]
+              title?: string
+            }
             return {
               ...t,
               content: {
                 ...content,
                 lines: [...content.lines, ...lines],
               },
-            };
+            }
           }),
         })),
 
@@ -351,13 +355,13 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
         const session = createSession(
           undefined,
           undefined,
-          agentType as ChatSession["agentType"],
-        );
+          agentType as ChatSession["agentType"]
+        )
         set((s) => ({
           sessions: [session, ...s.sessions],
           activeSessionId: session.id,
           chatOpen: true,
-        }));
+        }))
       },
     }),
     {
@@ -368,6 +372,6 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
         activeSessionId: state.activeSessionId,
         chatOpen: state.chatOpen,
       }),
-    },
-  ),
-);
+    }
+  )
+)

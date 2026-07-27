@@ -38,18 +38,24 @@ const FAQ = [
 function FaqItem({ q, a }: { q: string; a: string }) {
   "use client"
   return (
-    <details className="group border border-border/40 rounded-xl overflow-hidden">
-      <summary className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer select-none text-sm font-semibold text-foreground hover:bg-foreground/[0.02] transition-colors list-none">
+    <details className="group overflow-hidden rounded-xl border border-border/40">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-foreground transition-colors select-none hover:bg-foreground/[0.02]">
         {q}
         <svg
           viewBox="0 0 20 20"
           fill="none"
-          className="w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-open:rotate-180"
+          className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-open:rotate-180"
         >
-          <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M5 7.5l5 5 5-5"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </summary>
-      <div className="px-5 pb-5 pt-1 text-sm text-muted-foreground leading-relaxed border-t border-border/30 bg-foreground/[0.01]">
+      <div className="border-t border-border/30 bg-foreground/[0.01] px-5 pt-1 pb-5 text-sm leading-relaxed text-muted-foreground">
         {a}
       </div>
     </details>
@@ -63,14 +69,17 @@ export default function PricingPage() {
         <PricingSection showFullPage />
 
         {/* FAQ section */}
-        <section className="py-20 container mx-auto px-6 max-w-3xl">
-          <div className="text-center mb-12 space-y-3">
-            <h2 className="text-3xl font-black text-foreground tracking-tight">
+        <section className="container mx-auto max-w-3xl px-6 py-20">
+          <div className="mb-12 space-y-3 text-center">
+            <h2 className="text-3xl font-black tracking-tight text-foreground">
               Frequently asked questions
             </h2>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               Can&apos;t find the answer you&apos;re looking for?{" "}
-              <a href="/contact" className="text-primary hover:underline font-medium">
+              <a
+                href="/contact"
+                className="font-medium text-primary hover:underline"
+              >
                 Chat with our team.
               </a>
             </p>

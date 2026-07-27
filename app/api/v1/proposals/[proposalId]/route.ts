@@ -1,5 +1,9 @@
 import { handleRouteError, json } from "@/lib/api/http"
-import { requireAuth, requireOrganization, requirePermission } from "@/lib/api/auth"
+import {
+  requireAuth,
+  requireOrganization,
+  requirePermission,
+} from "@/lib/api/auth"
 import { getProposal } from "@/lib/services/proposals"
 
 type Ctx = { params: Promise<{ proposalId: string }> }

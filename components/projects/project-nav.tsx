@@ -94,10 +94,5 @@ const ITEMS = [
 ]
 
 export function ProjectNav({ projectId }: ProjectNavProps) {
-  return (
-    <SectionNav
-      base={`/dashboard/projects/${projectId}`}
-      items={ITEMS}
-    />
-  )
+  return <SectionNav base={`/dashboard/projects/${projectId}`} items={ITEMS} />
 }

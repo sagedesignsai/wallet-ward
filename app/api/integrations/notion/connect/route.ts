@@ -5,7 +5,10 @@ import {
   requirePermission,
 } from "@/lib/api/auth"
 import { handleRouteError } from "@/lib/api/http"
-import { notionConnectSchema, createOAuthState } from "@/lib/services/integrations"
+import {
+  notionConnectSchema,
+  createOAuthState,
+} from "@/lib/services/integrations"
 import { badRequest } from "@/lib/api/errors"
 
 export async function POST(request: Request) {
@@ -27,7 +30,9 @@ export async function POST(request: Request) {
     const redirectUri = `${appUrl}/api/integrations/notion/callback`
 
     // Notion OAuth 2.0
-    const authorizationUrl = new URL("https://api.notion.com/v1/oauth/authorize")
+    const authorizationUrl = new URL(
+      "https://api.notion.com/v1/oauth/authorize"
+    )
     authorizationUrl.searchParams.set("client_id", clientId)
     authorizationUrl.searchParams.set("response_type", "code")
     authorizationUrl.searchParams.set("owner", "user")

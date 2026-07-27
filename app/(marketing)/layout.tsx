@@ -9,7 +9,14 @@ export const metadata: Metadata = {
   },
   description:
     "Encrypt, organize, and share credentials across your team with military-grade AES-256 security and a zero-knowledge architecture.",
-  keywords: ["secrets management", "credential vault", "API keys", "encryption", "security", "2FA"],
+  keywords: [
+    "secrets management",
+    "credential vault",
+    "API keys",
+    "encryption",
+    "security",
+    "2FA",
+  ],
   openGraph: {
     type: "website",
     siteName: "Flowspace",
@@ -25,7 +32,7 @@ export default function MarketingLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="relative min-h-screen flex flex-col bg-background">
+    <div className="relative flex min-h-screen flex-col bg-background">
       <MarketingNavbar />
       <main className="flex-1">{children}</main>
       <MarketingFooter />

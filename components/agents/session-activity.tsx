@@ -12,22 +12,24 @@ export function SessionActivity({ session }: { session: AgentSessionDto }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
+          <p className="mb-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
             Current task
           </p>
           <p className="text-sm text-foreground">
             {session.currentTask || (
-              <span className="text-muted-foreground italic">No active task</span>
+              <span className="text-muted-foreground italic">
+                No active task
+              </span>
             )}
           </p>
         </div>
 
         {session.prompt && (
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
+            <p className="mb-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
               Prompt
             </p>
-            <p className="text-xs text-muted-foreground whitespace-pre-wrap rounded-lg border border-border/30 bg-muted/20 p-3 max-h-48 overflow-y-auto">
+            <p className="max-h-48 overflow-y-auto rounded-lg border border-border/30 bg-muted/20 p-3 text-xs whitespace-pre-wrap text-muted-foreground">
               {session.prompt}
             </p>
           </div>
@@ -36,13 +38,13 @@ export function SessionActivity({ session }: { session: AgentSessionDto }) {
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-border/30 bg-muted/20 p-2.5">
             <p className="text-[10px] text-muted-foreground">Created</p>
-            <p className="text-xs font-medium mt-0.5">
+            <p className="mt-0.5 text-xs font-medium">
               <TimeAgo date={session.createdAt} />
             </p>
           </div>
           <div className="rounded-lg border border-border/30 bg-muted/20 p-2.5">
             <p className="text-[10px] text-muted-foreground">Updated</p>
-            <p className="text-xs font-medium mt-0.5">
+            <p className="mt-0.5 text-xs font-medium">
               <TimeAgo date={session.updatedAt} />
             </p>
           </div>
@@ -50,10 +52,10 @@ export function SessionActivity({ session }: { session: AgentSessionDto }) {
 
         {session.metadata && Object.keys(session.metadata).length > 0 && (
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
+            <p className="mb-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
               Metadata
             </p>
-            <pre className="text-[11px] text-muted-foreground rounded-lg border border-border/30 bg-muted/20 p-3 overflow-x-auto max-h-40">
+            <pre className="max-h-40 overflow-x-auto rounded-lg border border-border/30 bg-muted/20 p-3 text-[11px] text-muted-foreground">
               {JSON.stringify(session.metadata, null, 2)}
             </pre>
           </div>

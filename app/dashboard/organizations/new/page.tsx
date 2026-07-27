@@ -2,10 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import {
-  BuildingsIcon,
-  ArrowLeftIcon,
-} from "@phosphor-icons/react"
+import { BuildingsIcon, ArrowLeftIcon } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useOrganization } from "@/hooks/use-organization"
@@ -129,9 +126,7 @@ export default function NewOrganizationPage() {
                 )}
               </div>
 
-              {error && (
-                <p className="text-xs text-destructive">{error}</p>
-              )}
+              {error && <p className="text-xs text-destructive">{error}</p>}
             </form>
           </CardContent>
           <CardFooter className="border-t border-border/40">

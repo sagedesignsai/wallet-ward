@@ -28,12 +28,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  InviteMemberForm,
-} from "@/components/organizations/invite-member-form"
-import {
-  MemberRowActions,
-} from "@/components/organizations/member-row-actions"
+import { InviteMemberForm } from "@/components/organizations/invite-member-form"
+import { MemberRowActions } from "@/components/organizations/member-row-actions"
 
 // --- Role helpers ---
 
@@ -85,12 +81,10 @@ function MemberAvatar({ member }: { member: Member }) {
   const name = member.user.name || member.user.email
   return (
     <Avatar size="sm">
-      {member.user.image && (
-        <AvatarImage src={member.user.image} alt={name} />
-      )}
+      {member.user.image && <AvatarImage src={member.user.image} alt={name} />}
       <AvatarFallback
         className={cn(
-          "bg-gradient-to-br text-white text-[0.625rem] font-bold",
+          "bg-gradient-to-br text-[0.625rem] font-bold text-white",
           getAvatarGradient(name)
         )}
       >
@@ -130,7 +124,7 @@ function InvitationRow({
           <span className="truncate text-xs font-medium text-foreground">
             {invitation.email}
           </span>
-          <Badge variant={role.variant} className="gap-0.5 shrink-0">
+          <Badge variant={role.variant} className="shrink-0 gap-0.5">
             <RoleIcon className="size-2.5" />
             {role.label}
           </Badge>
@@ -261,86 +255,85 @@ function OrgMembersInner({ orgId }: { orgId: string }) {
   )
 
   // Member table columns
-  const memberColumns: DataTableColumn<
-    Member & Record<string, unknown>
-  >[] = useMemo(
-    () => [
-      {
-        key: "user",
-        header: "Member",
-        className: "w-[280px]",
-        render: (row) => {
-          const member = row as unknown as Member
-          const name = member.user.name || member.user.email
-          const isSelf = member.userId === user?.id
-          return (
-            <div className="flex items-center gap-2.5">
-              <MemberAvatar member={member} />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="truncate text-xs font-medium text-foreground">
-                    {name}
-                  </span>
-                  {isSelf && (
-                    <span className="text-[0.625rem] text-muted-foreground italic">
-                      (you)
+  const memberColumns: DataTableColumn<Member & Record<string, unknown>>[] =
+    useMemo(
+      () => [
+        {
+          key: "user",
+          header: "Member",
+          className: "w-[280px]",
+          render: (row) => {
+            const member = row as unknown as Member
+            const name = member.user.name || member.user.email
+            const isSelf = member.userId === user?.id
+            return (
+              <div className="flex items-center gap-2.5">
+                <MemberAvatar member={member} />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate text-xs font-medium text-foreground">
+                      {name}
                     </span>
-                  )}
+                    {isSelf && (
+                      <span className="text-[0.625rem] text-muted-foreground italic">
+                        (you)
+                      </span>
+                    )}
+                  </div>
+                  <span className="block truncate text-[0.625rem] text-muted-foreground">
+                    {member.user.email}
+                  </span>
                 </div>
-                <span className="text-[0.625rem] text-muted-foreground truncate block">
-                  {member.user.email}
-                </span>
               </div>
-            </div>
-          )
+            )
+          },
         },
-      },
-      {
-        key: "role",
-        header: "Role",
-        className: "w-[100px]",
-        render: (row) => {
-          const member = row as unknown as Member
-          const role = getRoleConfig(member.role)
-          const RoleIcon = role.icon
-          return (
-            <Badge variant={role.variant} className="gap-0.5">
-              <RoleIcon className="size-2.5" />
-              {role.label}
-            </Badge>
-          )
+        {
+          key: "role",
+          header: "Role",
+          className: "w-[100px]",
+          render: (row) => {
+            const member = row as unknown as Member
+            const role = getRoleConfig(member.role)
+            const RoleIcon = role.icon
+            return (
+              <Badge variant={role.variant} className="gap-0.5">
+                <RoleIcon className="size-2.5" />
+                {role.label}
+              </Badge>
+            )
+          },
         },
-      },
-      {
-        key: "createdAt",
-        header: "Joined",
-        className: "w-[100px]",
-        render: (row) => {
-          const member = row as unknown as Member
-          return <TimeAgo date={member.createdAt} />
+        {
+          key: "createdAt",
+          header: "Joined",
+          className: "w-[100px]",
+          render: (row) => {
+            const member = row as unknown as Member
+            return <TimeAgo date={member.createdAt} />
+          },
         },
-      },
-      {
-        key: "actions",
-        header: "",
-        className: "w-[40px] text-right",
-        render: (row) => {
-          const member = row as unknown as Member
-          const isSelf = member.userId === user?.id
-          if (!isOwnerOrAdmin || isSelf) return null
-          return (
-            <MemberRowActions
-              member={member}
-              onUpdateRole={handleRoleChange}
-              onRemove={handleRemoveMember}
-              isCurrentUser={isSelf}
-            />
-          )
+        {
+          key: "actions",
+          header: "",
+          className: "w-[40px] text-right",
+          render: (row) => {
+            const member = row as unknown as Member
+            const isSelf = member.userId === user?.id
+            if (!isOwnerOrAdmin || isSelf) return null
+            return (
+              <MemberRowActions
+                member={member}
+                onUpdateRole={handleRoleChange}
+                onRemove={handleRemoveMember}
+                isCurrentUser={isSelf}
+              />
+            )
+          },
         },
-      },
-    ],
-    [isOwnerOrAdmin, user?.id, handleRoleChange, handleRemoveMember]
-  )
+      ],
+      [isOwnerOrAdmin, user?.id, handleRoleChange, handleRemoveMember]
+    )
 
   // Loading state
   if (orgLoading) {
@@ -353,14 +346,14 @@ function OrgMembersInner({ orgId }: { orgId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-5 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-5 duration-300 fade-in">
       {/* Error banner */}
       {membersError && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
           {membersError}
           <button
             onClick={refetchMembers}
-            className="ml-2 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors"
+            className="ml-2 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
           >
             Retry
           </button>
@@ -384,7 +377,10 @@ function OrgMembersInner({ orgId }: { orgId: string }) {
             </Button>
           </SectionHeader>
 
-          <Card size="sm" className="border-dashed border-primary/20 bg-primary/[0.02]">
+          <Card
+            size="sm"
+            className="border-dashed border-primary/20 bg-primary/[0.02]"
+          >
             <CardContent className="pt-0">
               <InviteMemberForm onInvite={invite} />
             </CardContent>
@@ -413,7 +409,7 @@ function OrgMembersInner({ orgId }: { orgId: string }) {
 
       {/* Invitations Section */}
       {invitations.length > 0 && (
-        <div className="flex flex-col gap-2.5 mt-1">
+        <div className="mt-1 flex flex-col gap-2.5">
           <SectionHeader
             icon={<EnvelopeSimpleIcon />}
             title="Pending Invitations"

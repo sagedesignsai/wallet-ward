@@ -41,9 +41,7 @@ export default function BranchesPage({
   params: Promise<{ projectId: string; repositoryId: string }>
 }) {
   const { projectId, repositoryId } = use(params)
-  return (
-    <BranchesInner projectId={projectId} repositoryId={repositoryId} />
-  )
+  return <BranchesInner projectId={projectId} repositoryId={repositoryId} />
 }
 
 function BranchesInner({
@@ -138,7 +136,7 @@ function BranchesInner({
 
   if (repoLoading) {
     return (
-      <div className="space-y-4 max-w-3xl">
+      <div className="max-w-3xl space-y-4">
         <Skeleton className="h-10 w-2/3" />
         <Skeleton className="h-[200px] rounded-lg" />
       </div>
@@ -146,7 +144,7 @@ function BranchesInner({
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl">
+    <div className="flex max-w-3xl flex-col gap-5">
       {/* Error banner */}
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
@@ -156,14 +154,14 @@ function BranchesInner({
 
       {/* Search */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex-1 max-w-md">
+        <div className="max-w-md flex-1">
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <MagnifyingGlassIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search branches\u2026"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9"
+              className="h-9 pl-9"
             />
           </div>
         </div>
@@ -187,7 +185,7 @@ function BranchesInner({
       {/* Empty State */}
       {!isLoading && branches.length === 0 && !error && (
         <div className="overflow-hidden rounded-lg border border-dashed border-border/60 bg-card">
-          <div className="flex flex-col items-center gap-4 py-16 px-6">
+          <div className="flex flex-col items-center gap-4 px-6 py-16">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent text-purple-500 ring-1 ring-purple-500/10">
               <TreeStructureIcon className="size-7" weight="light" />
             </div>
@@ -195,7 +193,7 @@ function BranchesInner({
               <h3 className="text-sm font-semibold text-foreground">
                 No branches found
               </h3>
-              <p className="mt-1.5 max-w-xs text-xs text-muted-foreground leading-relaxed">
+              <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
                 This repository may not have been synced yet. Try syncing to
                 fetch branches.
               </p>
@@ -208,7 +206,7 @@ function BranchesInner({
       {!isLoading && filteredBranches.length > 0 && (
         <div className="rounded-lg border border-border/40 bg-card">
           {/* Table Header */}
-          <div className="grid grid-cols-[1fr_2fr_auto] gap-3 border-b border-border/40 px-3 py-2 text-[0.625rem] font-medium uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-[1fr_2fr_auto] gap-3 border-b border-border/40 px-3 py-2 text-[0.625rem] font-medium tracking-wider text-muted-foreground uppercase">
             <span>Branch</span>
             <span>Last Commit</span>
             <span>Updated</span>
@@ -219,21 +217,23 @@ function BranchesInner({
             <Link
               key={branch.name}
               href={`/dashboard/projects/${projectId}/repositories/${repositoryId}/commits?branch=${encodeURIComponent(branch.name)}`}
-              className="grid grid-cols-[1fr_2fr_auto] gap-3 border-b border-border/40 px-3 py-2.5 last:border-b-0 hover:bg-muted/30 transition-colors"
+              className="grid grid-cols-[1fr_2fr_auto] gap-3 border-b border-border/40 px-3 py-2.5 transition-colors last:border-b-0 hover:bg-muted/30"
             >
-              <div className="min-w-0 flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <GitBranchIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                <span className="font-mono text-xs truncate">{branch.name}</span>
+                <span className="truncate font-mono text-xs">
+                  {branch.name}
+                </span>
                 {branch.isDefault && (
                   <Badge
                     variant="secondary"
-                    className="text-[10px] h-4 px-1.5 shrink-0"
+                    className="h-4 shrink-0 px-1.5 text-[10px]"
                   >
                     default
                   </Badge>
                 )}
               </div>
-              <div className="min-w-0 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
                 {branch.lastCommit ? (
                   <>
                     <GitCommitIcon className="size-3 shrink-0" />
@@ -245,7 +245,7 @@ function BranchesInner({
                   <span>No commits</span>
                 )}
               </div>
-              <div className="shrink-0 flex items-center">
+              <div className="flex shrink-0 items-center">
                 {branch.lastCommit?.date && (
                   <TimeAgo date={branch.lastCommit.date} />
                 )}
@@ -256,15 +256,13 @@ function BranchesInner({
       )}
 
       {/* No Results */}
-      {!isLoading &&
-        branches.length > 0 &&
-        filteredBranches.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-sm text-muted-foreground">
-              No branches match your search.
-            </p>
-          </div>
-        )}
+      {!isLoading && branches.length > 0 && filteredBranches.length === 0 && (
+        <div className="py-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            No branches match your search.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

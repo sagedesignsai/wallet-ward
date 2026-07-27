@@ -10,7 +10,7 @@ import { notFound, forbidden } from "@/lib/api/errors"
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ sessionId: string }> },
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const auth = await requireAuth()
@@ -42,7 +42,9 @@ export async function GET(
 // ---------------------------------------------------------------------------
 
 const updateSessionSchema = z.object({
-  status: z.enum(["idle", "running", "awaiting_approval", "completed", "failed"]).optional(),
+  status: z
+    .enum(["idle", "running", "awaiting_approval", "completed", "failed"])
+    .optional(),
   name: z.string().min(1).optional(),
   currentTask: z.string().optional().nullable(),
   daytonaSandboxId: z.string().optional().nullable(),
@@ -52,7 +54,7 @@ const updateSessionSchema = z.object({
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ sessionId: string }> },
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const auth = await requireAuth()
@@ -81,7 +83,7 @@ export async function PATCH(
     const data = await prisma.agentSession.update({
       where: { id: sessionId },
       data: Object.fromEntries(
-        Object.entries(parsed).filter(([, v]) => v !== undefined),
+        Object.entries(parsed).filter(([, v]) => v !== undefined)
       ),
     })
 
@@ -97,7 +99,7 @@ export async function PATCH(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ sessionId: string }> },
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const auth = await requireAuth()

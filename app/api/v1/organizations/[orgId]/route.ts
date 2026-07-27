@@ -23,7 +23,10 @@ export async function GET(_request: Request, ctx: Ctx) {
     })
 
     if (!org) {
-      return json({ error: { message: "Organization not found" } }, { status: 404 })
+      return json(
+        { error: { message: "Organization not found" } },
+        { status: 404 }
+      )
     }
 
     return json({

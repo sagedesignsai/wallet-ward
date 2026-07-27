@@ -8,7 +8,11 @@ import {
 } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
-import { useAuditLogs, type AuditLog, type AuditAction } from "@/hooks/use-audit-logs"
+import {
+  useAuditLogs,
+  type AuditLog,
+  type AuditAction,
+} from "@/hooks/use-audit-logs"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -33,11 +37,7 @@ import {
 
 const CATEGORY_ACTIONS: Record<ActionCategory, AuditAction[]> = {
   all: [],
-  projects: [
-    "project_create",
-    "project_update",
-    "project_delete",
-  ],
+  projects: ["project_create", "project_update", "project_delete"],
   environments: [
     "environment_create",
     "environment_update",
@@ -163,7 +163,9 @@ export default function AuditLogsPage() {
       const q = search.toLowerCase()
       result = result.filter((l) => {
         // Search across action name, resource type, and metadata values
-        const metaStr = l.metadata ? JSON.stringify(l.metadata).toLowerCase() : ""
+        const metaStr = l.metadata
+          ? JSON.stringify(l.metadata).toLowerCase()
+          : ""
         return (
           l.action.toLowerCase().includes(q) ||
           l.resourceType.toLowerCase().includes(q) ||
@@ -202,7 +204,7 @@ export default function AuditLogsPage() {
           <span className="flex-1">{error}</span>
           <button
             onClick={refetch}
-            className="shrink-0 font-medium underline underline-offset-2 hover:text-destructive/80 transition-colors"
+            className="shrink-0 font-medium underline underline-offset-2 transition-colors hover:text-destructive/80"
           >
             Retry
           </button>
@@ -230,7 +232,7 @@ export default function AuditLogsPage() {
       <div className="flex flex-col">
         {isLoading ? (
           /* Loading skeleton */
-          <div className="rounded-lg border border-border/40 bg-card overflow-hidden">
+          <div className="overflow-hidden rounded-lg border border-border/40 bg-card">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -266,23 +268,24 @@ export default function AuditLogsPage() {
               <div key={group.dateKey} className="flex flex-col gap-1">
                 {/* Date group header */}
                 <div className="flex items-center gap-3 px-1">
-                  <span className="text-[0.625rem] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                  <span className="text-[0.625rem] font-semibold tracking-wider text-muted-foreground/70 uppercase">
                     {group.label}
                   </span>
-                  <span className="text-[0.625rem] text-muted-foreground/50 font-mono">
+                  <span className="font-mono text-[0.625rem] text-muted-foreground/50">
                     {new Date(group.dateKey + "T00:00:00").toLocaleDateString(
                       "en-US",
                       { month: "short", day: "numeric", year: "numeric" }
                     )}
                   </span>
-                  <div className="flex-1 h-px bg-border/30" />
+                  <div className="h-px flex-1 bg-border/30" />
                   <span className="text-[0.625rem] text-muted-foreground/50 tabular-nums">
-                    {group.logs.length} event{group.logs.length !== 1 ? "s" : ""}
+                    {group.logs.length} event
+                    {group.logs.length !== 1 ? "s" : ""}
                   </span>
                 </div>
 
                 {/* Entries */}
-                <div className="rounded-lg border border-border/40 bg-card overflow-hidden divide-y divide-border/30">
+                <div className="divide-y divide-border/30 overflow-hidden rounded-lg border border-border/40 bg-card">
                   {group.logs.map((log, i) => (
                     <LogEntry
                       key={log.id}

@@ -3,11 +3,7 @@
 import React, { useEffect, useState, useCallback, use } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import {
-  FileTextIcon,
-  PlusIcon,
-  WarningIcon,
-} from "@phosphor-icons/react"
+import { FileTextIcon, PlusIcon, WarningIcon } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
@@ -109,7 +105,7 @@ function DocumentsInner({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+    <div className="flex animate-in flex-col gap-4 duration-300 fade-in">
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
           <WarningIcon className="size-3.5 shrink-0" />
@@ -200,7 +196,7 @@ function DocumentCard({ doc }: { doc: Document }) {
           <CardTitle className="flex-1 truncate text-sm">
             <Link
               href={`/dashboard/projects/${doc.projectId}/documents/${doc.id}`}
-              className="hover:text-primary transition-colors"
+              className="transition-colors hover:text-primary"
             >
               {doc.title}
             </Link>
@@ -225,7 +221,7 @@ function DocumentCard({ doc }: { doc: Document }) {
           href={`/dashboard/projects/${doc.projectId}/documents/${doc.id}`}
           className="block"
         >
-          <p className="line-clamp-3 text-xs text-muted-foreground leading-relaxed">
+          <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
             {excerpt}
           </p>
           <div className="mt-2 flex items-center gap-3 text-[0.625rem] text-muted-foreground">
