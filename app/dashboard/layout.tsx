@@ -11,6 +11,7 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { DashboardConfigProvider } from "@/hooks/use-dashboard-config"
 import { ProjectInitializer } from "@/stores/project-initializer"
 import { WorkspaceLayout } from "@/components/workspace"
+import { PageBackground } from "@/components/dashboard/page-background"
 
 export const metadata: Metadata = {
   title: {
@@ -32,7 +33,8 @@ export default function DashboardLayout({
         <SidebarProvider defaultOpen={false} className="h-full overflow-hidden">
           <DashboardSidebar />
           <SidebarRail />
-          <SidebarInset className="min-h-0">
+          <SidebarInset className="min-h-0 relative">
+            <PageBackground />
             <DashboardConfigProvider>
               <DashboardHeader />
               <div className="min-h-0 flex-1 overflow-hidden">

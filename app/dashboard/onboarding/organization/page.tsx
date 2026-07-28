@@ -75,12 +75,6 @@ export default function OrganizationOnboardingPage() {
 
   return (
     <div className="flex min-h-full flex-col items-center justify-center px-4 py-12">
-      {/* Background visual elements */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <div className="absolute -top-32 -left-32 h-[500px] w-[500px] animate-[pulse_8s_ease-in-out_infinite] rounded-full bg-primary/6 blur-3xl" />
-        <div className="absolute top-1/3 -right-24 h-80 w-80 animate-[pulse_10s_ease-in-out_2s_infinite] rounded-full bg-blue-500/5 blur-3xl" />
-      </div>
-
       <div className="relative z-10 w-full max-w-lg">
         {/* Progress Indicator */}
         <div className="mb-8 flex items-center gap-2">

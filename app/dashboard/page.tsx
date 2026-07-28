@@ -170,13 +170,6 @@ function DashboardLanding() {
 
   return (
     <div className="flex min-h-full flex-col items-center justify-center px-4 py-12">
-      {/* Background visual elements */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <div className="absolute -top-32 -left-32 h-[500px] w-[500px] animate-[pulse_8s_ease-in-out_infinite] rounded-full bg-primary/6 blur-3xl" />
-        <div className="absolute top-1/3 -right-24 h-80 w-80 animate-[pulse_10s_ease-in-out_2s_infinite] rounded-full bg-violet-500/5 blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 h-72 w-72 animate-[pulse_7s_ease-in-out_1s_infinite] rounded-full bg-cyan-500/4 blur-3xl" />
-      </div>
-
       <div className="relative z-10 flex w-full max-w-2xl flex-col items-center gap-8">
         {/* Welcome message */}
         <div className="flex flex-col items-center gap-3 text-center">
