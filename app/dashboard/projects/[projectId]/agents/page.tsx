@@ -7,13 +7,17 @@ import {
   RobotIcon,
   WarningIcon,
   LightningIcon,
+  CodeIcon,
+  ListBulletsIcon,
 } from "@phosphor-icons/react"
 
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useAgentSessions } from "@/hooks/use-agent-sessions"
-import { useWorkspacePanelStore } from "@/stores/workspace-panel-store"
+import { useWorkspaceNavigation } from "@/hooks/use-workspace-navigation"
+import { useRepositories } from "@/hooks/use-repositories"
 import { AgentSessionRow } from "@/components/agents/agent-session-row"
+import { CodingAgentWorkbench } from "@/components/agents/coding-agent-workbench"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -39,6 +43,7 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from "@/components/ui/empty"
+import { cn } from "@/lib/utils"
 import type { AgentType } from "@/hooks/use-agent-sessions"
 
 export default function ProjectAgentsPage({
@@ -55,8 +60,10 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
   const { project } = useProject(projectId)
   const { sessions, isLoading, error, createSession, refetch } =
     useAgentSessions({ projectId, polling: true })
-  const launchAgent = useWorkspacePanelStore((s) => s.launchAgent)
+  const { launchAgentInWorkspace } = useWorkspaceNavigation()
+  const { repositories } = useRepositories(projectId)
 
+  const [activeTab, setActiveTab] = useState<"sessions" | "workbench">("sessions")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [name, setName] = useState("")
   const [type, setType] = useState<AgentType>("coding")
@@ -71,7 +78,7 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => launchAgent("coding")}
+              onClick={() => launchAgentInWorkspace("coding")}
             >
               <LightningIcon className="size-3.5" />
               Quick Launch
@@ -90,7 +97,7 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
         ],
       })
     }
-  }, [project, sessions.length, setConfig, projectId, launchAgent])
+  }, [project, sessions.length, setConfig, projectId, launchAgentInWorkspace])
 
   const handleCreate = async () => {
     if (!name.trim()) return
@@ -105,7 +112,7 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
       setDialogOpen(false)
       setName("")
       setType("coding")
-      launchAgent(type)
+      launchAgentInWorkspace(type)
     }
   }
 
@@ -119,6 +126,14 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
     )
   }
 
+  // Map repositories for workbench component
+  const repoList = repositories.map((r) => ({
+    id: r.id,
+    name: r.name,
+    url: r.url,
+    branch: r.branch,
+  }))
+
   return (
     <div className="flex flex-col gap-4">
       {error && (
@@ -131,36 +146,78 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
         </div>
       )}
 
-      {sessions.length === 0 ? (
-        <Empty className="rounded-lg border border-border/40 bg-card py-16">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <RobotIcon className="size-4" />
-            </EmptyMedia>
-            <EmptyTitle>No agent sessions</EmptyTitle>
-            <EmptyDescription>
-              Launch an agent to start autonomous work on this project.
-            </EmptyDescription>
-          </EmptyHeader>
-          <Button className="mt-4" onClick={() => setDialogOpen(true)}>
-            <PlusIcon className="size-3.5" />
-            New Session
-          </Button>
-        </Empty>
-      ) : (
-        <div className="divide-y divide-border/30 rounded-xl border border-border/40 bg-card">
-          {sessions.map((session) => (
-            <AgentSessionRow key={session.id} session={session} />
-          ))}
-        </div>
+      {/* View Tabs */}
+      <div className="flex items-center gap-1 border-b border-border/40 pb-0">
+        <button
+          onClick={() => setActiveTab("sessions")}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors",
+            activeTab === "sessions"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <ListBulletsIcon className="size-3.5" />
+          All Sessions
+        </button>
+        <button
+          onClick={() => setActiveTab("workbench")}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors",
+            activeTab === "workbench"
+              ? "border-blue-500 text-blue-400"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <CodeIcon className="size-3.5" />
+          Coding Workbench
+        </button>
+      </div>
+
+      {/* Sessions Tab */}
+      {activeTab === "sessions" && (
+        <>
+          {sessions.length === 0 ? (
+            <Empty className="rounded-lg border border-border/40 bg-card py-16">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <RobotIcon className="size-4" />
+                </EmptyMedia>
+                <EmptyTitle>No agent sessions</EmptyTitle>
+                <EmptyDescription>
+                  Launch an agent to start autonomous work on this project.
+                </EmptyDescription>
+              </EmptyHeader>
+              <Button className="mt-4" onClick={() => setDialogOpen(true)}>
+                <PlusIcon className="size-3.5" />
+                New Session
+              </Button>
+            </Empty>
+          ) : (
+            <div className="divide-y divide-border/30 rounded-xl border border-border/40 bg-card">
+              {sessions.map((session) => (
+                <AgentSessionRow key={session.id} session={session} />
+              ))}
+            </div>
+          )}
+
+          <p className="text-center text-[11px] text-muted-foreground">
+            Full agent catalog in{" "}
+            <Link href="/dashboard/agents" className="text-primary hover:underline">
+              Agent Hub
+            </Link>
+          </p>
+        </>
       )}
 
-      <p className="text-center text-[11px] text-muted-foreground">
-        Full agent catalog in{" "}
-        <Link href="/dashboard/agents" className="text-primary hover:underline">
-          Agent Hub
-        </Link>
-      </p>
+      {/* Coding Workbench Tab */}
+      {activeTab === "workbench" && (
+        <CodingAgentWorkbench
+          projectId={projectId}
+          projectName={project?.name}
+          repositories={repoList}
+        />
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -215,3 +272,4 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
     </div>
   )
 }
+

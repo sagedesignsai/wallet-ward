@@ -16,6 +16,7 @@ import {
   RobotIcon,
   CheckCircleIcon,
   HouseIcon,
+  SquaresFourIcon,
 } from "@phosphor-icons/react"
 
 import { usePendingApprovals } from "@/hooks/use-pending-approvals"
@@ -46,6 +47,11 @@ export function DashboardSidebar() {
     {
       label: "⚡ Autonomous",
       items: [
+        {
+          label: "Workspace",
+          href: "/dashboard/workspace",
+          icon: SquaresFourIcon,
+        },
         {
           label: "Agent Hub",
           href: "/dashboard/agents",

@@ -32,6 +32,8 @@ import { getWebTerminalUrlTool } from "./get-web-terminal-url";
 import { listSandboxFilesTool } from "./list-sandbox-files";
 import { readSandboxFileTool } from "./read-sandbox-file";
 
+import { opencodeSubagentTool } from "./opencode-subagent";
+
 /**
  * All available tools for the Flowspace agent suite
  */
@@ -62,4 +64,5 @@ export const workspaceTools = {
   getWebTerminalUrl: getWebTerminalUrlTool,
   listSandboxFiles: listSandboxFilesTool,
   readSandboxFile: readSandboxFileTool,
+  opencodeSubagent: opencodeSubagentTool,
 } as const;

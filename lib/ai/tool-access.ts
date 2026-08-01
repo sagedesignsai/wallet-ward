@@ -14,6 +14,7 @@ export const TOOL_ACCESS_MATRIX: Record<string, AgentType[]> = {
   createSandbox: ["coding"],
   executeCommand: ["coding"],
   getSandboxPreview: ["coding"],
+  opencodeSubagent: ["coding"],
 
   // Deployment & Infrastructure (Coding, Ops)
   triggerVercelDeploy: ["coding", "ops"],

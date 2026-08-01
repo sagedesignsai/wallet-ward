@@ -17,7 +17,7 @@ import {
 import { useSession } from "@/lib/auth-client"
 import { useDashboardConfig } from "@/hooks/use-dashboard-config"
 import { useProjects } from "@/hooks/use-projects"
-import { useWorkspacePanelStore } from "@/stores/workspace-panel-store"
+import { useWorkspaceNavigation } from "@/hooks/use-workspace-navigation"
 import { useGlobalSecrets } from "@/hooks/use-global-secrets"
 import { useGlobalIntegrations } from "@/hooks/use-global-integrations"
 import { useAuditLogs } from "@/hooks/use-audit-logs"
@@ -40,7 +40,7 @@ export default function OverviewPage() {
     limit: 5,
     polling: true,
   })
-  const openChat = useWorkspacePanelStore((s) => s.openChat)
+  const { openWorkspace } = useWorkspaceNavigation()
 
   const user = sessionData?.user
   const firstName = user?.name?.split(" ")[0] ?? null
@@ -74,7 +74,7 @@ export default function OverviewPage() {
           </div>
           <Button
             className="shrink-0 gap-2 font-semibold shadow-lg shadow-primary/20"
-            onClick={openChat}
+            onClick={() => openWorkspace()}
           >
             <LightningIcon className="size-4" />
             Launch Agent
@@ -85,7 +85,7 @@ export default function OverviewPage() {
       {/* Command Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <button
-          onClick={openChat}
+          onClick={() => openWorkspace()}
           className="group flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 text-left transition-all duration-200 hover:border-primary/40 hover:bg-primary/10"
         >
           <div className="flex items-center justify-between">
@@ -318,7 +318,7 @@ export default function OverviewPage() {
                 variant="ghost"
                 size="sm"
                 className="h-8 justify-start gap-2 text-xs"
-                onClick={openChat}
+                onClick={() => openWorkspace()}
               >
                 <ChatTeardropTextIcon className="size-3.5 text-primary" />
                 Ask AI Assistant

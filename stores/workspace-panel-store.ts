@@ -3,6 +3,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { nanoid } from "nanoid"
+import type { UIMessage } from "ai"
 
 // ─── Content types the Computer panel can display ────────────────────────────
 
@@ -149,17 +150,10 @@ export interface FileNode {
 
 // ─── Chat Session ─────────────────────────────────────────────────────────────
 
-export interface ChatMessage {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  createdAt: string
-}
-
 export interface ChatSession {
   id: string
   title: string
-  messages: ChatMessage[]
+  messages: UIMessage[]
   createdAt: string
   updatedAt: string
   /** Optional project context */
@@ -201,6 +195,11 @@ interface WorkspacePanelStore {
   activeTabId: string | null
   sessions: ChatSession[]
   activeSessionId: string | null
+  /** Prompt to auto-send when the workspace panel mounts for a session */
+  pendingPrompt: { sessionId: string; text: string } | null
+
+  // Workspace mode (mobile tab toggle: "chat" | "canvas")
+  workspaceMode: "chat" | "canvas"
 
   // Chat
   toggleChat: () => void
@@ -220,20 +219,20 @@ interface WorkspacePanelStore {
     projectId?: string,
     environmentId?: string,
     agentType?: ChatSession["agentType"]
-  ) => void
+  ) => string
   selectSession: (sessionId: string) => void
   deleteSession: (sessionId: string) => void
-  updateSessionTitle: (sessionId: string, title: string) => void
-  addMessage: (
-    sessionId: string,
-    message: Omit<ChatMessage, "id" | "createdAt">
-  ) => void
+  setPendingPrompt: (pendingPrompt: { sessionId: string; text: string } | null) => void
+  syncSessionMessages: (sessionId: string, messages: UIMessage[]) => void
 
   // Terminal
   appendTerminalLines: (tabId: string, lines: string[]) => void
 
   // Agent
-  launchAgent: (agentType: string) => void
+  launchAgent: (agentType: string) => string
+
+  // Workspace mode
+  setWorkspaceMode: (mode: "chat" | "canvas") => void
 }
 
 export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
@@ -246,6 +245,8 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
       activeTabId: null,
       sessions: [defaultSession],
       activeSessionId: defaultSession.id,
+      pendingPrompt: null,
+      workspaceMode: "chat" as "chat" | "canvas",
 
       // ─── Chat ─────────────────────────────────────────────────────────────
       toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
@@ -336,6 +337,7 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
           sessions: [session, ...s.sessions],
           activeSessionId: session.id,
         }))
+        return session.id
       },
 
       selectSession: (sessionId) => set({ activeSessionId: sessionId }),
@@ -350,35 +352,27 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
         set({ sessions, activeSessionId })
       },
 
-      updateSessionTitle: (sessionId, title) =>
-        set((s) => ({
-          sessions: s.sessions.map((sess) =>
-            sess.id === sessionId ? { ...sess, title } : sess
-          ),
-        })),
+      setPendingPrompt: (pendingPrompt) => set({ pendingPrompt }),
 
-      addMessage: (sessionId, message) => {
-        const msg: ChatMessage = {
-          ...message,
-          id: nanoid(),
-          createdAt: new Date().toISOString(),
-        }
+      syncSessionMessages: (sessionId, messages) =>
         set((s) => ({
           sessions: s.sessions.map((sess) => {
             if (sess.id !== sessionId) return sess
-            const title =
-              sess.messages.length === 0 && message.role === "user"
-                ? message.content.slice(0, 50)
-                : sess.title
+            const firstUser = messages.find((m) => m.role === "user")
+            const firstUserText = firstUser?.parts.find(
+              (p): p is { type: "text"; text: string } => p.type === "text"
+            )?.text
             return {
               ...sess,
-              title,
-              messages: [...sess.messages, msg],
+              title:
+                sess.title === "New conversation" && firstUserText
+                  ? firstUserText.slice(0, 50)
+                  : sess.title,
+              messages,
               updatedAt: new Date().toISOString(),
             }
           }),
-        }))
-      },
+        })),
 
       // ─── Terminal ─────────────────────────────────────────────────────────
       appendTerminalLines: (tabId, lines) =>
@@ -412,15 +406,20 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
           activeSessionId: session.id,
           chatOpen: true,
         }))
+        return session.id
       },
+
+      // ─── Workspace mode ──────────────────────────────────────────────────
+      setWorkspaceMode: (mode) => set({ workspaceMode: mode }),
     }),
     {
       name: "nimbus:workspace-panel",
-      // Only persist sessions and panel toggle state — tabs are ephemeral
+      // Only persist sessions, panel toggle state, and workspace mode — tabs are ephemeral
       partialize: (state) => ({
         sessions: state.sessions,
         activeSessionId: state.activeSessionId,
         chatOpen: state.chatOpen,
+        workspaceMode: state.workspaceMode,
       }),
     }
   )

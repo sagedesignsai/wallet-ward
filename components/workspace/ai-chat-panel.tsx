@@ -45,7 +45,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
@@ -181,6 +181,9 @@ export function AIChatPanel({
   const openTab = useWorkspacePanelStore((s) => s.openTab);
   const openComputer = useWorkspacePanelStore((s) => s.openComputer);
   const appendTerminalLines = useWorkspacePanelStore((s) => s.appendTerminalLines);
+  const pendingPrompt = useWorkspacePanelStore((s) => s.pendingPrompt);
+  const setPendingPrompt = useWorkspacePanelStore((s) => s.setPendingPrompt);
+  const syncSessionMessages = useWorkspacePanelStore((s) => s.syncSessionMessages);
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
   const [text, setText] = useState("");
   const { proposals, count: proposalCount, refresh: refreshProposals } = usePendingApprovals();
@@ -190,6 +193,7 @@ export function AIChatPanel({
 
   // Use DefaultChatTransport for structured message parts
   const { messages, sendMessage, status, error, regenerate } = useChat({
+    messages: activeSession?.messages ?? [],
     id: activeSession?.id,
     transport: new DefaultChatTransport({
       api: "/api/ai/chat",
@@ -342,6 +346,22 @@ export function AIChatPanel({
       console.error("[Chat error]", error);
     },
   });
+
+  const consumedPromptRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!pendingPrompt || pendingPrompt.sessionId !== activeSession?.id) return;
+    const key = `${pendingPrompt.sessionId}:${pendingPrompt.text}`;
+    if (consumedPromptRef.current === key) return;
+    consumedPromptRef.current = key;
+    sendMessage({ text: pendingPrompt.text });
+    setPendingPrompt(null);
+  }, [pendingPrompt, activeSession?.id, sendMessage, setPendingPrompt]);
+
+  useEffect(() => {
+    if (!activeSession || messages.length === 0) return;
+    syncSessionMessages(activeSession.id, messages);
+  }, [messages, activeSession?.id, syncSessionMessages]);
 
   const chatStatus = useMemo<"ready" | "streaming" | "error">(
     () =>

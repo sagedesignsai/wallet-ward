@@ -21,7 +21,6 @@ import {
   MagnifyingGlassIcon,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
-import { useRouter } from "nextjs-toploader/app"
 import { useEffect, useState } from "react"
 import {
   DropdownMenu,
@@ -30,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
+import { useWorkspaceNavigation } from "@/hooks/use-workspace-navigation"
 
 // ─── Agent Type Config ────────────────────────────────────────────────────────
 
@@ -110,15 +110,15 @@ function StatCard({
 
 function LaunchAgentButton() {
   const [isLaunching, setIsLaunching] = useState(false)
-  const router = useRouter()
+  const { launchAgentInWorkspace } = useWorkspaceNavigation()
 
   const handleLaunch = async (agentType: string) => {
     setIsLaunching(true)
     try {
-      // TODO: Implement agent launch API
       toast.success(`Launching ${agentType} agent...`)
-      // Redirect to workspace with new session
-      router.push(`/dashboard?agent=${agentType}`)
+      launchAgentInWorkspace(
+        agentType as "coding" | "content" | "ops" | "research"
+      )
     } catch (error) {
       toast.error("Failed to launch agent")
       console.error(error)

@@ -54,18 +54,18 @@ import { toast } from "sonner";
 function TabIcon({ type }: { type: ComputerTab["type"] }) {
   const cls = "size-3.5 shrink-0";
   switch (type) {
-    case "code":      return <CodeIcon className={cls} />;
-    case "document":  return <FileTextIcon className={cls} />;
-    case "artifact":  return <GlobeIcon className={cls} />;
-    case "preview":   return <GlobeIcon className={cls} />;
-    case "terminal":  return <TerminalIcon className={cls} />;
-    case "secret":    return <KeyIcon className={cls} />;
-    case "task":      return <ListChecksIcon className={cls} />;
-    case "image":     return <ImageIcon className={cls} />;
+    case "code": return <CodeIcon className={cls} />;
+    case "document": return <FileTextIcon className={cls} />;
+    case "artifact": return <GlobeIcon className={cls} />;
+    case "preview": return <GlobeIcon className={cls} />;
+    case "terminal": return <TerminalIcon className={cls} />;
+    case "secret": return <KeyIcon className={cls} />;
+    case "task": return <ListChecksIcon className={cls} />;
+    case "image": return <ImageIcon className={cls} />;
     case "file-tree": return <FolderIcon className={cls} />;
-    case "desktop":      return <DesktopIcon className={cls} />;
+    case "desktop": return <DesktopIcon className={cls} />;
     case "web-terminal": return <TerminalWindowIcon className={cls} />;
-    default:          return <FileTextIcon className={cls} />;
+    default: return <FileTextIcon className={cls} />;
   }
 }
 
@@ -260,8 +260,8 @@ function DesktopRenderer({ tab }: { tab: ComputerTab }) {
           <div className={cn(
             "flex size-2 rounded-full",
             timeRemaining <= 0 ? "bg-red-500" :
-            timeRemaining < 300 ? "bg-amber-400" :
-            "bg-emerald-400"
+              timeRemaining < 300 ? "bg-amber-400" :
+                "bg-emerald-400"
           )} />
           <span className="text-xs font-medium text-foreground">Desktop</span>
         </div>
@@ -332,8 +332,8 @@ function WebTerminalRenderer({ tab }: { tab: ComputerTab }) {
           <div className={cn(
             "flex size-2 rounded-full",
             timeRemaining <= 0 ? "bg-red-500" :
-            timeRemaining < 300 ? "bg-amber-400" :
-            "bg-emerald-400"
+              timeRemaining < 300 ? "bg-amber-400" :
+                "bg-emerald-400"
           )} />
           <span className="text-xs font-medium text-foreground">Terminal</span>
         </div>
@@ -538,18 +538,18 @@ function FileTreeRenderer({ tab }: { tab: ComputerTab }) {
 
 function TabContent({ tab }: { tab: ComputerTab }) {
   switch (tab.type) {
-    case "code":      return <CodeRenderer tab={tab} />;
-    case "document":  return <DocumentRenderer tab={tab} />;
-    case "artifact":  return <ArtifactRenderer tab={tab} />;
-    case "preview":   return <PreviewRenderer tab={tab} />;
-    case "terminal":  return <TerminalRenderer tab={tab} />;
-    case "secret":    return <SecretRenderer tab={tab} />;
-    case "task":      return <TaskRenderer tab={tab} />;
-    case "image":     return <ImageRenderer tab={tab} />;
+    case "code": return <CodeRenderer tab={tab} />;
+    case "document": return <DocumentRenderer tab={tab} />;
+    case "artifact": return <ArtifactRenderer tab={tab} />;
+    case "preview": return <PreviewRenderer tab={tab} />;
+    case "terminal": return <TerminalRenderer tab={tab} />;
+    case "secret": return <SecretRenderer tab={tab} />;
+    case "task": return <TaskRenderer tab={tab} />;
+    case "image": return <ImageRenderer tab={tab} />;
     case "file-tree": return <FileTreeRenderer tab={tab} />;
-    case "desktop":      return <DesktopRenderer tab={tab} />;
+    case "desktop": return <DesktopRenderer tab={tab} />;
     case "web-terminal": return <WebTerminalRenderer tab={tab} />;
-    default:          return <div className="p-4 text-muted-foreground text-sm">Unknown content type</div>;
+    default: return <div className="p-4 text-muted-foreground text-sm">Unknown content type</div>;
   }
 }
 
@@ -585,7 +585,16 @@ function ComputerEmptyState() {
 
 // ─── Main Computer Panel ──────────────────────────────────────────────────────
 
-export function ComputerPanel({ className }: { className?: string }) {
+export interface ComputerPanelProps {
+  className?: string
+  /**
+   * - "panel" (default in workspace): fills parent height 100%, no external border radius
+   * - "standalone" (legacy): keeps current styling for Sheet/overlay usage
+   */
+  variant?: "panel" | "standalone"
+}
+
+export function ComputerPanel({ className, variant = "standalone" }: ComputerPanelProps) {
   const tabs = useWorkspacePanelStore((s) => s.tabs);
   const activeTabId = useWorkspacePanelStore((s) => s.activeTabId);
   const closeTab = useWorkspacePanelStore((s) => s.closeTab);
@@ -594,8 +603,12 @@ export function ComputerPanel({ className }: { className?: string }) {
   const openTab = useWorkspacePanelStore((s) => s.openTab);
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? null;
 
+  const panelClass = variant === "panel"
+    ? cn("flex h-full flex-col bg-background border-0 rounded-none", className)
+    : cn("flex h-full flex-col bg-background", className);
+
   return (
-    <div className={cn("flex h-full flex-col bg-background", className)}>
+    <div className={panelClass}>
       {/* Tab bar */}
       {tabs.length > 0 && (
         <div className="flex items-center border-b border-border/60 bg-muted/20 min-h-9">

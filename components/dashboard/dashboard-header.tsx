@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { PanelToggleBar } from "@/components/workspace"
 
 function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
   if (!items || items.length === 0) return null
@@ -212,13 +211,17 @@ function AgentStatusIndicator() {
   if (activeSessions.length === 0) return null
 
   return (
-    <div className="flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/5 px-2.5 py-1">
+    <Link
+      href="/dashboard/workspace"
+      className="flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/5 px-2.5 py-1 transition-colors hover:bg-green-500/10"
+      title="Go to workspace"
+    >
       <div className="size-2 animate-pulse rounded-full bg-green-500" />
       <span className="text-xs font-medium text-green-400">
         {activeSessions.length} agent{activeSessions.length > 1 ? "s" : ""}{" "}
         active
       </span>
-    </div>
+    </Link>
   )
 }
 
@@ -265,8 +268,6 @@ export function DashboardHeader() {
           {config.actions}
 
           <AgentStatusIndicator />
-
-          <PanelToggleBar />
 
           <Separator orientation="vertical" className="h-4!" />
 

@@ -119,5 +119,9 @@ export function buildToolsContext(
       organizationId,
       projectId: options?.projectId,
     },
+    opencodeSubagent: {
+      organizationId,
+      projectId: options?.projectId,
+    },
   };
 }
