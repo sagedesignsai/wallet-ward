@@ -1,4 +1,5 @@
 import { handleRouteError, json } from "@/lib/api/http"
+import { requireAuth } from "@/lib/api/auth"
 import { listSandboxes, createSandbox } from "@/lib/daytona"
 
 // ---------------------------------------------------------------------------
@@ -7,6 +8,8 @@ import { listSandboxes, createSandbox } from "@/lib/daytona"
 
 export async function GET() {
   try {
+    await requireAuth()
+
     if (!process.env.DAYTONA_API_KEY) {
       return json(
         {
@@ -33,6 +36,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    await requireAuth()
+
     if (!process.env.DAYTONA_API_KEY) {
       return json(
         {

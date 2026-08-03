@@ -1,7 +1,8 @@
 import { handleRouteError, json } from "@/lib/api/http";
-import { requireAuth } from "@/lib/api/auth";
-import { forbidden, badRequest } from "@/lib/api/errors";
+import { requireAuth, requireOrganization, requirePermission } from "@/lib/api/auth";
+import { forbidden, badRequest, notFound } from "@/lib/api/errors";
 import { CodingAgentService } from "@/lib/services/coding-agent-service";
+import { prisma as db } from "@/lib/db";
 import { z } from "zod";
 
 export const runtime = "nodejs";
@@ -21,15 +22,25 @@ const initTaskSchema = z.object({
 export async function POST(request: Request) {
   try {
     const auth = await requireAuth();
-    if (!auth.organizationId) {
-      throw forbidden("No active organization");
-    }
+    const orgCtx = await requireOrganization(auth);
 
     const body = await request.json();
     const parsed = initTaskSchema.parse(body);
 
+    // Org-scope the project: the caller must belong to the project's org
+    // and hold project:write before a paid sandbox is provisioned.
+    const project = await db.project.findFirst({
+      where: { id: parsed.projectId, organizationId: orgCtx.organizationId },
+      select: { id: true },
+    });
+    if (!project) {
+      throw notFound("Project not found");
+    }
+    requirePermission(orgCtx.memberRole, "project:write");
+
     const result = await CodingAgentService.initiateTask({
       projectId: parsed.projectId,
+      organizationId: orgCtx.organizationId,
       prompt: parsed.prompt,
       sessionName: parsed.sessionName,
       repositoryId: parsed.repositoryId,
@@ -49,9 +60,7 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   try {
     const auth = await requireAuth();
-    if (!auth.organizationId) {
-      throw forbidden("No active organization");
-    }
+    const orgCtx = await requireOrganization(auth);
 
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get("projectId");
@@ -59,7 +68,20 @@ export async function GET(request: Request) {
       throw badRequest("Missing projectId query parameter");
     }
 
-    const sessions = await CodingAgentService.listSessions(projectId);
+    // Org-scope the project before listing its coding sessions.
+    const project = await db.project.findFirst({
+      where: { id: projectId, organizationId: orgCtx.organizationId },
+      select: { id: true },
+    });
+    if (!project) {
+      throw notFound("Project not found");
+    }
+    requirePermission(orgCtx.memberRole, "project:read");
+
+    const sessions = await CodingAgentService.listSessions(
+      projectId,
+      orgCtx.organizationId
+    );
     return json({ data: sessions });
   } catch (error) {
     return handleRouteError(error);

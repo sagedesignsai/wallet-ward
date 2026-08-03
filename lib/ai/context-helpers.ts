@@ -123,5 +123,48 @@ export function buildToolsContext(
       organizationId,
       projectId: options?.projectId,
     },
+    getSandboxPreview: {
+      organizationId,
+    },
+    createGithubPullRequest: {
+      organizationId,
+    },
+    triggerVercelDeploy: {
+      organizationId,
+      agentType: options?.agentType,
+    },
+    sendSlackNotification: {
+      organizationId,
+    },
+    sendEmail: {
+      organizationId,
+    },
+    getPendingProposals: {
+      organizationId,
+    },
+    startDesktop: {
+      organizationId,
+      agentType: options?.agentType,
+    },
+    stopDesktop: {
+      organizationId,
+      agentType: options?.agentType,
+    },
+    computerUse: {
+      organizationId,
+      agentType: options?.agentType,
+    },
+    getWebTerminalUrl: {
+      organizationId,
+      agentType: options?.agentType,
+    },
+    listSandboxFiles: {
+      organizationId,
+      agentType: options?.agentType,
+    },
+    readSandboxFile: {
+      organizationId,
+      agentType: options?.agentType,
+    },
   };
 }

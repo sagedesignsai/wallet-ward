@@ -1,6 +1,7 @@
 import { handleRouteError, json } from "@/lib/api/http"
 import { requireAuth } from "@/lib/api/auth"
 import { prisma } from "@/lib/db"
+import { deleteSandbox } from "@/lib/daytona"
 import { z } from "zod"
 import { notFound, forbidden } from "@/lib/api/errors"
 
@@ -119,6 +120,16 @@ export async function DELETE(
 
     if (!existing) {
       throw notFound("Session not found")
+    }
+
+    // Destroy the Daytona sandbox first (best-effort) so a session delete
+    // never leaves a paid sandbox running. DB row is removed regardless.
+    if (existing.daytonaSandboxId) {
+      try {
+        await deleteSandbox(existing.daytonaSandboxId)
+      } catch (err) {
+        console.error("[DELETE session] Failed to destroy sandbox:", err)
+      }
     }
 
     await prisma.agentSession.delete({

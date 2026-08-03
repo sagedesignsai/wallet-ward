@@ -3,7 +3,7 @@
 import { useWorkspacePanelStore } from "@/stores/workspace-panel-store"
 import { useProjectStore } from "@/stores/project-store"
 import { AIChatPanel } from "./ai-chat-panel"
-import { ComputerPanel } from "./computer-panel"
+import { DesktopCanvas, DesktopProvider } from "@/components/desktop"
 import { usePendingApprovals } from "@/hooks/use-pending-approvals"
 import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -161,7 +161,9 @@ export function WorkspaceSplitLayout({
               environmentId={environmentId}
             />
           ) : (
-            <ComputerPanel variant="panel" className="h-full" />
+            <DesktopProvider>
+              <DesktopCanvas className="h-full" />
+            </DesktopProvider>
           )}
         </div>
       </div>
@@ -192,7 +194,9 @@ export function WorkspaceSplitLayout({
 
         {/* Agent Work Canvas – right column (always fills remaining space) */}
         <ResizablePanel id="canvas" defaultSize="70%" minSize="25%">
-          <ComputerPanel variant="panel" className="h-full" />
+          <DesktopProvider>
+            <DesktopCanvas className="h-full" />
+          </DesktopProvider>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

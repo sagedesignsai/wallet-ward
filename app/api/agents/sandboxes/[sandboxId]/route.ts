@@ -1,4 +1,5 @@
 import { handleRouteError, json } from "@/lib/api/http"
+import { requireAuth } from "@/lib/api/auth"
 import {
   getSandbox,
   stopSandbox,
@@ -16,6 +17,8 @@ export async function GET(
   { params }: { params: Promise<{ sandboxId: string }> }
 ) {
   try {
+    await requireAuth()
+
     if (!process.env.DAYTONA_API_KEY) {
       return json(
         {
@@ -46,6 +49,8 @@ export async function POST(
   { params }: { params: Promise<{ sandboxId: string }> }
 ) {
   try {
+    await requireAuth()
+
     if (!process.env.DAYTONA_API_KEY) {
       return json(
         {

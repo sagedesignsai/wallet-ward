@@ -36,12 +36,11 @@ export function useCodingTask(projectId: string) {
     setIsLoading(true);
     try {
       const res = await fetch(`/api/agents/coding?projectId=${projectId}`);
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
+      if (Array.isArray(json.data)) {
         setSessions(json.data);
-        if (json.data.length > 0 && !activeSession) {
-          setActiveSession(json.data[0]);
-        }
+        setActiveSession((prev) => prev ?? json.data[0]);
       }
     } catch (err) {
       console.error("[useCodingTask] Failed to fetch sessions:", err);
@@ -49,7 +48,7 @@ export function useCodingTask(projectId: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [projectId, activeSession]);
+  }, [projectId]);
 
   const initiateCodingTask = useCallback(
     async (prompt: string, repositoryId?: string, branchName?: string) => {
@@ -68,7 +67,7 @@ export function useCodingTask(projectId: string) {
         });
 
         const json = await res.json();
-        if (!res.ok || !json.success) {
+        if (!res.ok) {
           throw new Error(json.error || "Failed to start coding task");
         }
 

@@ -1,12 +1,17 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { createSandbox, getSandboxPreviewUrl, getWebTerminalUrl } from "@/lib/daytona";
+import {
+  createSandbox,
+  getSandboxPreviewUrl,
+  getWebTerminalUrl,
+  deleteSandbox,
+} from "@/lib/daytona";
 import { db } from "@/lib/db";
 
 export const opencodeSubagentTool = tool({
   description:
     "Delegates complex coding tasks, multi-file code modifications, dependency installs, or builds to an autonomous OpenCode subagent running inside an isolated Daytona Cloud Sandbox.",
-  parameters: z.object({
+  inputSchema: z.object({
     taskDescription: z
       .string()
       .describe("Detailed description of the coding task, bug fix, or feature build to perform."),
@@ -28,9 +33,14 @@ export const opencodeSubagentTool = tool({
       .optional()
       .describe("Environment variables to inject into the Daytona sandbox."),
   }),
+  contextSchema: z.object({
+    organizationId: z.string(),
+  }),
   execute: async (
     { taskDescription, projectId, repositoryUrl, branchName = "main", envVars }
   ) => {
+    // Track the sandbox so it can be destroyed if provisioning partially fails.
+    let sandboxId: string | undefined;
     try {
       // 1. Resolve project details if projectId is supplied
       let projectName = "coding-task-workspace";
@@ -47,6 +57,7 @@ export const opencodeSubagentTool = tool({
       // 2. Provision Daytona Cloud Sandbox
       const sandboxName = `opencode-${projectName}-${Date.now().toString(36)}`;
       const sandbox = await createSandbox(sandboxName, "typescript", envVars);
+      sandboxId = sandbox.id;
 
       // 3. Obtain web terminal and preview links
       let previewUrl: string | undefined;
@@ -77,6 +88,15 @@ export const opencodeSubagentTool = tool({
         ],
       };
     } catch (error) {
+      // Destroy the sandbox if it was created but something later failed,
+      // so a paid sandbox never leaks from a partial tool invocation.
+      if (sandboxId) {
+        try {
+          await deleteSandbox(sandboxId);
+        } catch {
+          // ignore cleanup failure; the original error is more useful
+        }
+      }
       console.error("[OpenCode Subagent Error]", error);
       return {
         status: "error",

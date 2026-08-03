@@ -1,8 +1,14 @@
 import { prisma as db } from "@/lib/db";
-import { createSandbox, getSandboxPreviewUrl, getWebTerminalUrl } from "@/lib/daytona";
+import {
+  createSandbox,
+  getSandboxPreviewUrl,
+  getWebTerminalUrl,
+  deleteSandbox,
+} from "@/lib/daytona";
 import type { AgentSession, ProposalRiskLevel } from "@prisma/client";
 
 export interface InitiateCodingTaskInput {
+  organizationId: string;
   projectId: string;
   sessionName?: string;
   prompt: string;
@@ -22,9 +28,9 @@ export class CodingAgentService {
     previewUrl?: string;
     terminalUrl?: string;
   }> {
-    // 1. Fetch project and optionally linked repository
-    const project = await db.project.findUnique({
-      where: { id: input.projectId },
+    // 1. Fetch project (org-scoped) and optionally linked repository
+    const project = await db.project.findFirst({
+      where: { id: input.projectId, organizationId: input.organizationId },
       include: {
         repositories: true,
         files: true,
@@ -53,25 +59,36 @@ export class CodingAgentService {
       console.warn("[CodingAgentService] Preview URL fallback:", err);
     }
 
-    // 3. Create AgentSession record
-    const session = await db.agentSession.create({
-      data: {
-        projectId: input.projectId,
-        name: input.sessionName || `Coding Task: ${input.prompt.slice(0, 40)}...`,
-        type: "coding",
-        status: "running",
-        prompt: input.prompt,
-        daytonaSandboxId: sandbox.id,
-        sandboxUrl: previewUrl,
-        currentTask: input.prompt,
-        metadata: {
-          repositoryUrl: linkedRepo?.url,
-          branchName: input.branchName || linkedRepo?.branch || "main",
-          terminalUrl,
-          filesCount: project.files.length,
+    // 3. Create AgentSession record — destroy the sandbox if this fails so a
+    // paid sandbox never leaks on partial provisioning.
+    let session: AgentSession;
+    try {
+      session = await db.agentSession.create({
+        data: {
+          projectId: input.projectId,
+          name: input.sessionName || `Coding Task: ${input.prompt.slice(0, 40)}...`,
+          type: "coding",
+          status: "running",
+          prompt: input.prompt,
+          daytonaSandboxId: sandbox.id,
+          sandboxUrl: previewUrl,
+          currentTask: input.prompt,
+          metadata: {
+            repositoryUrl: linkedRepo?.url,
+            branchName: input.branchName || linkedRepo?.branch || "main",
+            terminalUrl,
+            filesCount: project.files.length,
+          },
         },
-      },
-    });
+      });
+    } catch (err) {
+      try {
+        await deleteSandbox(sandbox.id);
+      } catch {
+        // ignore cleanup failure; the original error is more useful
+      }
+      throw err;
+    }
 
     return {
       session,
@@ -112,11 +129,18 @@ export class CodingAgentService {
   }
 
   /**
-   * List coding agent sessions for a project
+   * List coding agent sessions for a project (org-scoped)
    */
-  static async listSessions(projectId: string): Promise<AgentSession[]> {
+  static async listSessions(
+    projectId: string,
+    organizationId: string
+  ): Promise<AgentSession[]> {
     return db.agentSession.findMany({
-      where: { projectId, type: "coding" },
+      where: {
+        projectId,
+        type: "coding",
+        project: { organizationId },
+      },
       orderBy: { createdAt: "desc" },
       include: {
         proposals: true,

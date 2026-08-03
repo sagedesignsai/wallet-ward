@@ -107,6 +107,7 @@ export async function POST(request: Request) {
     // Stream response using agent - agent.stream() handles tool loop internally
     const result = await agent.stream({
       messages: modelMessages,
+      toolsContext,
     })
 
     // Use createUIMessageStreamResponse to properly handle tool invocations and results

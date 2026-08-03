@@ -1,8 +1,10 @@
 import { ToolLoopAgent, tool, isStepCount } from "ai";
 import { z } from "zod";
 import { getModel, SYSTEM_PROMPTS, type SystemPromptKey } from "./config";
-import type { User } from "@prisma/client";
+import type { AgentType, User } from "@prisma/client";
 import { workspaceTools } from "./tools";
+import { canAgentUseTool } from "./tool-access";
+import { canAgentUseTool } from "./tool-access";
 
 // ─── Workspace Context Schema ────────────────────────────────────────────────
 
@@ -32,16 +34,31 @@ export interface AgentRuntimeContext {
  * persona-specific instructions; otherwise falls back to the
  * general secretsManager prompt.
  */
+const AGENT_TYPES: AgentType[] = ["coding", "content", "ops", "research"];
+
 export function createAgent(agentType?: string) {
   const promptKey: SystemPromptKey =
     agentType && agentType in SYSTEM_PROMPTS
       ? (agentType as SystemPromptKey)
       : "secretsManager";
 
+  const agentTypeKey =
+    agentType && (AGENT_TYPES as string[]).includes(agentType)
+      ? (agentType as AgentType)
+      : undefined;
+
+  const tools = agentTypeKey
+    ? Object.fromEntries(
+        Object.entries(workspaceTools).filter(([name]) =>
+          canAgentUseTool(agentTypeKey, name)
+        )
+      )
+    : workspaceTools;
+
   return new ToolLoopAgent({
     model: getModel("openrouter", "openrouter/free"),
     instructions: SYSTEM_PROMPTS[promptKey],
-    tools: workspaceTools,
+    tools,
     // Allow up to 30 steps for complex multi-tool workflows
     stopWhen: isStepCount(30),
   } as any);
