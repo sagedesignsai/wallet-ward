@@ -1,12 +1,33 @@
 import { handleRouteError, json } from "@/lib/api/http"
-import { requireAuth } from "@/lib/api/auth"
+import { requireAuth, requireOrganization } from "@/lib/api/auth"
+import { notFound } from "@/lib/api/errors"
+import { db } from "@/lib/db"
 import {
   getSandbox,
   stopSandbox,
   startSandbox,
   deleteSandbox,
   getSandboxPreviewUrl,
+  getDesktopUrl,
+  getWebTerminalUrl,
 } from "@/lib/daytona"
+
+/**
+ * Sandboxes are owned via AgentSession.daytonaSandboxId → project → org.
+ * Reject any access to a sandbox that isn't linked to a session in the
+ * caller's organization (prevents re-resolving signed URLs for foreign
+ * sandboxes, e.g. through persisted desktop window refs).
+ */
+async function assertSandboxInOrg(sandboxId: string, organizationId: string) {
+  const session = await db.agentSession.findFirst({
+    where: {
+      daytonaSandboxId: sandboxId,
+      project: { organizationId },
+    },
+    select: { id: true },
+  })
+  if (!session) throw notFound("Sandbox not found")
+}
 
 // ---------------------------------------------------------------------------
 // GET /api/agents/sandboxes/:sandboxId — Get a single sandbox
@@ -17,7 +38,7 @@ export async function GET(
   { params }: { params: Promise<{ sandboxId: string }> }
 ) {
   try {
-    await requireAuth()
+    const authCtx = await requireAuth()
 
     if (!process.env.DAYTONA_API_KEY) {
       return json(
@@ -33,6 +54,8 @@ export async function GET(
     }
 
     const { sandboxId } = await params
+    const orgCtx = await requireOrganization(authCtx)
+    await assertSandboxInOrg(sandboxId, orgCtx.organizationId)
     const sandbox = await getSandbox(sandboxId)
     return json({ data: sandbox })
   } catch (error) {
@@ -49,7 +72,7 @@ export async function POST(
   { params }: { params: Promise<{ sandboxId: string }> }
 ) {
   try {
-    await requireAuth()
+    const authCtx = await requireAuth()
 
     if (!process.env.DAYTONA_API_KEY) {
       return json(
@@ -65,16 +88,23 @@ export async function POST(
     }
 
     const { sandboxId } = await params
+    const orgCtx = await requireOrganization(authCtx)
+    await assertSandboxInOrg(sandboxId, orgCtx.organizationId)
     const body = await request.json()
     const action = body.action as string | undefined
 
-    if (!action || !["stop", "start", "delete", "preview"].includes(action)) {
+    if (
+      !action ||
+      !["stop", "start", "delete", "preview", "desktop", "web-terminal"].includes(
+        action
+      )
+    ) {
       return json(
         {
           error: {
             code: "validation_error",
             message:
-              "A valid action is required: 'stop', 'start', 'delete', or 'preview'.",
+              "A valid action is required: 'stop', 'start', 'delete', 'preview', 'desktop', or 'web-terminal'.",
           },
         },
         { status: 400 }
@@ -98,6 +128,16 @@ export async function POST(
         const port = (body.port as number) || 3000
         const url = await getSandboxPreviewUrl(sandboxId, port)
         return json({ data: { url } })
+      }
+
+      case "desktop": {
+        const { url, token } = await getDesktopUrl(sandboxId)
+        return json({ data: { url, token } })
+      }
+
+      case "web-terminal": {
+        const { url, token } = await getWebTerminalUrl(sandboxId)
+        return json({ data: { url, token } })
       }
 
       default:

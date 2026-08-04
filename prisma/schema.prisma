@@ -31,6 +31,7 @@ model User {
   assignedTasks    Task[]     @relation("TaskAssignee")
   proposalsCreated ActionProposal[] @relation("ProposalCreatedBy")
   proposalsApproved ActionProposal[] @relation("ProposalApprovedBy")
+  desktopStates    DesktopState[]
 
   @@map("user")
 }
@@ -120,6 +121,27 @@ model Organization {
   auditLogs     AuditLog[]
 
   @@map("organization")
+}
+
+// ─── Desktop persistence ─────────────────────────────────────────────────────
+
+model DesktopState {
+  id        String   @id @default(cuid())
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  name      String   @default("default")
+  windows   Json     @default("[]")
+  desktop   Json     @default("{}")
+  version   Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId, name])
+  @@index([projectId])
+  @@map("desktop_state")
 }
 
 model Member {
@@ -224,6 +246,7 @@ model Project {
   files        ProjectFile[]
   agentSessions AgentSession[]
   proposals    ActionProposal[]
+  desktopStates DesktopState[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])

@@ -4,7 +4,6 @@
  */
 
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
 
 export interface DesktopIcon {
   id: string
@@ -70,7 +69,7 @@ export interface ContextMenuItem {
   submenu?: ContextMenuItem[]
 }
 
-const DEFAULT_SETTINGS: DesktopSettings = {
+export const DEFAULT_SETTINGS: DesktopSettings = {
   wallpaper: "gradient",
   wallpaperColor: "#0f172a",
   iconSize: "medium",
@@ -81,13 +80,11 @@ const DEFAULT_SETTINGS: DesktopSettings = {
   animationsEnabled: true,
 }
 
-export const useDesktopState = create<DesktopStateStore>()(
-  persist(
-    (set, get) => ({
-      icons: [],
-      settings: DEFAULT_SETTINGS,
-      appLauncherOpen: false,
-      contextMenu: null,
+export const useDesktopState = create<DesktopStateStore>()((set, get) => ({
+  icons: [],
+  settings: DEFAULT_SETTINGS,
+  appLauncherOpen: false,
+  contextMenu: null,
 
       addIcon: (icon) => {
         const id = `icon-${Date.now()}`
@@ -138,13 +135,5 @@ export const useDesktopState = create<DesktopStateStore>()(
       closeContextMenu: () => {
         set({ contextMenu: null })
       },
-    }),
-    {
-      name: "flowspace:desktop-state",
-      partialize: (state) => ({
-        icons: state.icons,
-        settings: state.settings,
-      }),
-    }
-  )
+    })
 )

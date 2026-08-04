@@ -175,31 +175,23 @@ const result = await getPendingProposals({
 
 ## Tool Access Control
 
+Tool access is enforced structurally: each specialist agent (`lib/ai/agents/`) imports only its domain's tools from `lib/ai/tools/{sandbox,ops,content,shared}/`, so an agent can never invoke tools outside its domain. Sensitive tools also verify `runtimeContext.agentType` at runtime (e.g. `lib/ai/tools/shared/agent-proxy.ts`).
+
+The domain → tool mapping:
+
 ```typescript
-// lib/ai/tool-access.ts
-const TOOL_ACCESS_MATRIX = {
-  // Sandboxes (coding only)
-  createSandbox: ["coding"],
-  executeCommand: ["coding"],
-  
-  // Deployments (coding + ops)
-  triggerVercelDeploy: ["coding", "ops"],
-  createGithubPullRequest: ["coding", "ops"],
-  
-  // Secrets (coding + ops only, NOT content/research)
-  getSecrets: ["coding", "ops"],
-  
-  // Documents (content + ops + research)
-  createDocument: ["content", "ops", "research"],
-  
-  // Tasks (ops + research)
-  createTask: ["ops", "research"],
-  getTasks: ["ops", "research"],
-  
-  // Proposals (all)
-  proposeAction: ["coding", "ops", "content", "research"],
-  getPendingProposals: ["coding", "ops", "content", "research"],
-}
+// lib/ai/agents/coding-agent.ts   — sandbox/* (Daytona, VNC) + create-github-pr,
+//                                   send-slack-notification, trigger-vercel-deploy
+//                                   + shared/* (projects, repos, files, secrets,
+//                                   agent-proxy, proposals)
+// lib/ai/agents/ops-agent.ts      — ops/* (tasks, audit logs, deployments,
+//                                   notifications) + get-web-terminal-url + shared/*
+// lib/ai/agents/content-agent.ts  — content/* (documents, email, Notion, Airtable,
+//                                   Jira, Trello) + search-audit-logs,
+//                                   send-slack-notification + shared/*
+// lib/ai/agents/research-agent.ts — read-only subset: get-documents, get-tasks,
+//                                   search-audit-logs + shared/* minus get-secrets
+//                                   and agent-proxy
 ```
 
 ---

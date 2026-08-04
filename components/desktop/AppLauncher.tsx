@@ -5,17 +5,18 @@ import { useWindowManager } from "@/stores/desktop/window-manager.store"
 import { useDesktopState } from "@/stores/desktop/desktop-state.store"
 import { cn } from "@/lib/utils"
 import { XIcon } from "@phosphor-icons/react"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 export function AppLauncher() {
-  const apps = useAppRegistry((s) => s.list())
+  const appsMap = useAppRegistry((s) => s.apps)
+  const apps = useMemo(() => Array.from(appsMap.values()), [appsMap])
   const openWindow = useWindowManager((s) => s.openWindow)
   const appLauncherOpen = useDesktopState((s) => s.appLauncherOpen)
   const closeAppLauncher = useDesktopState((s) => s.closeAppLauncher)
   const [searchQuery, setSearchQuery] = useState("")
 
-  const filteredApps = apps.filter((app) =>
-    app.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredApps = apps.filter(
+    (app) => !app.hidden && app.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const handleAppClick = useCallback(
@@ -33,7 +34,6 @@ export function AppLauncher() {
         resizable: app.resizable,
         minimizable: app.minimizable,
         maximizable: app.maximizable,
-        content: {},
         state: "normal",
       })
 

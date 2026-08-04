@@ -118,10 +118,10 @@ Navigation:
 | Feature | Status | Location | Notes |
 |:---|:---:|:---|:---|
 | Integration Storage | ✅ | `Integration` model | Encrypted tokens per project |
-| GitHub Integration | ✅ | `lib/ai/tools/create-github-pr.ts` | Create PRs, branches |
-| Slack Integration | ✅ | `lib/ai/tools/send-slack-notification.ts` | Post messages |
+| GitHub Integration | ✅ | `lib/ai/tools/ops/create-github-pr.ts` | Create PRs, branches |
+| Slack Integration | ✅ | `lib/ai/tools/ops/send-slack-notification.ts` | Post messages |
 | Vercel Integration | ✅ | `lib/services/proposals.ts` | Deploy via proxy |
-| Agent Proxy Tool | ✅ | `lib/ai/tools/agent-proxy.ts` | Generic API proxy |
+| Agent Proxy Tool | ✅ | `lib/ai/tools/shared/agent-proxy.ts` | Generic API proxy |
 | Proposal Backend | ✅ | `lib/services/proposals.ts` | Full CRUD + execution |
 | Proposal API | ✅ | `app/api/v1/projects/[id]/proposals/` | Approve/reject endpoints |
 | Approval UI Component | ✅ | `components/proposals/approval-card.tsx` | Rich approval card |

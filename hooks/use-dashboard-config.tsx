@@ -12,6 +12,7 @@ type DashboardConfig = {
   description?: string
   breadcrumbs?: BreadcrumbItem[]
   actions?: React.ReactNode
+  collapsibleHeader?: boolean
 }
 
 type DashboardConfigContextValue = {
@@ -33,11 +34,18 @@ export function DashboardConfigProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [config, setConfig] = React.useState<DashboardConfig>(DEFAULT_CONFIG)
+  const [config, setRawConfig] = React.useState<DashboardConfig>(DEFAULT_CONFIG)
+
+  const setConfig = React.useCallback(
+    (partial: DashboardConfig) => {
+      setRawConfig((prev) => ({ ...prev, ...partial }))
+    },
+    []
+  )
 
   const value = React.useMemo(
     () => ({ config, setConfig }),
-    [config]
+    [config, setConfig]
   )
 
   return (

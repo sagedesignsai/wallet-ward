@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils"
 import { XIcon, MinusIcon, SquareIcon } from "@phosphor-icons/react"
 import { useCallback, useState } from "react"
 import type { DesktopWindow, WindowState } from "@/types/desktop/window"
+import { IframeAppShell } from "./IframeAppShell"
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { useDesktopState } from "@/stores/desktop/desktop-state.store"
 
 export interface WindowFrameProps {
   window: DesktopWindow
@@ -16,11 +19,18 @@ export function WindowFrame({ window }: WindowFrameProps) {
   const { updateWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow, restoreWindow } =
     useWindowManager()
   const appManifest = useAppRegistry((s) => s.get(window.appId))
+  const showTaskbar = useDesktopState((s) => s.settings.showTaskbar)
   const [isDragging, setIsDragging] = useState(false)
+  const [isResizing, setIsResizing] = useState(false)
+
+  // Below the canvas-mode breakpoint the window fills the canvas, so drag/resize
+  // are disabled and it renders full-screen (accounting for the bottom taskbar).
+  const isMobile = useMediaQuery("(max-width: 1023px)")
 
   if (!appManifest) return null
 
   const AppComponent = appManifest.component
+  const isIframe = appManifest.kind === "iframe"
 
   const handleDragStart = useCallback(() => {
     setIsDragging(true)
@@ -35,8 +45,13 @@ export function WindowFrame({ window }: WindowFrameProps) {
     [window.id, updateWindow]
   )
 
+  const handleResizeStart = useCallback(() => {
+    setIsResizing(true)
+  }, [])
+
   const handleResizeStop = useCallback(
     (e: any, direction: string, ref: HTMLElement, delta: any, position: { x: number; y: number }) => {
+      setIsResizing(false)
       updateWindow(window.id, {
         x: position.x,
         y: position.y,
@@ -69,16 +84,29 @@ export function WindowFrame({ window }: WindowFrameProps) {
 
   const isMaximized = window.state === "maximized"
 
+  const titleBarButtonClass = cn(
+    "flex items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground",
+    isMobile ? "size-10" : "size-6"
+  )
+
   return (
     <Rnd
-      position={{ x: window.x, y: window.y }}
-      size={{ width: window.width, height: window.height }}
+      position={isMobile ? { x: 0, y: 0 } : { x: window.x, y: window.y }}
+      size={
+        isMobile
+          ? {
+              width: "100%",
+              height: showTaskbar ? "calc(100% - 48px)" : "100%",
+            }
+          : { width: window.width, height: window.height }
+      }
       onDragStart={handleDragStart}
       onDragStop={handleDragStop}
+      onResizeStart={handleResizeStart}
       onResizeStop={handleResizeStop}
       style={{ zIndex: window.zIndex }}
-      disableDragging={isMaximized}
-      enableResizing={window.resizable && !isMaximized}
+      disableDragging={isMobile || isMaximized}
+      enableResizing={window.resizable && !isMaximized && !isMobile}
       minWidth={300}
       minHeight={200}
       bounds="parent"
@@ -86,13 +114,19 @@ export function WindowFrame({ window }: WindowFrameProps) {
     >
       <div
         className={cn(
-          "flex h-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl",
+          "flex h-full flex-col overflow-hidden bg-background shadow-xl",
+          isMobile ? "rounded-none" : "rounded-lg border border-border",
           isDragging && "cursor-grabbing"
         )}
         onMouseDown={handleTitleBarClick}
       >
         {/* Title bar */}
-        <div className="window-title-bar flex h-9 cursor-grab items-center justify-between border-b bg-muted/60 px-3 select-none">
+        <div
+          className={cn(
+            "window-title-bar flex items-center justify-between border-b bg-muted/60 px-3 select-none",
+            isMobile ? "h-11 cursor-default" : "h-9 cursor-grab"
+          )}
+        >
           <div className="flex items-center gap-2 min-w-0">
             {typeof appManifest.icon === "string" ? (
               <span className="text-xs">{appManifest.icon}</span>
@@ -106,40 +140,54 @@ export function WindowFrame({ window }: WindowFrameProps) {
             {window.minimizable && (
               <button
                 onClick={handleMinimize}
-                className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                className={cn(titleBarButtonClass, "hover:text-foreground")}
                 aria-label="Minimize"
               >
                 <MinusIcon className="size-3.5" />
               </button>
             )}
-            {window.maximizable && (
+            {window.maximizable && !isMobile && (
               <button
                 onClick={handleMaximize}
-                className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                className={titleBarButtonClass}
                 aria-label={isMaximized ? "Restore" : "Maximize"}
               >
                 <SquareIcon className="size-3" weight={isMaximized ? "fill" : "regular"} />
               </button>
             )}
-            <button
-              onClick={handleClose}
-              className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              aria-label="Close"
-            >
-              <XIcon className="size-3.5" />
-            </button>
+            {window.closable !== false && (
+              <button
+                onClick={handleClose}
+                className={cn(
+                  titleBarButtonClass,
+                  "text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                )}
+                aria-label="Close"
+              >
+                <XIcon className="size-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          <AppComponent
-            windowId={window.id}
-            content={window.content}
-            onClose={handleClose}
-            onMinimize={handleMinimize}
-            onMaximize={handleMaximize}
-          />
+        <div
+          className={cn(
+            "flex-1 overflow-hidden",
+            (isDragging || isResizing) && "pointer-events-none"
+          )}
+        >
+          {isIframe ? (
+            <IframeAppShell window={window} app={appManifest} />
+          ) : AppComponent ? (
+            <AppComponent
+              windowId={window.id}
+              content={window.content}
+              onClose={handleClose}
+              onMinimize={handleMinimize}
+              onMaximize={handleMaximize}
+            />
+          ) : null}
         </div>
       </div>
     </Rnd>

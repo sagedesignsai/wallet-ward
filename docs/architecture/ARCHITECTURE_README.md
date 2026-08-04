@@ -291,7 +291,8 @@ Approve agent action            |  ✅   |  ✅   |   ✅   |  ❌   |     N/A
 ## 🔗 Related Files
 
 - `prisma/schema.prisma` — Database schema (see models: Project, AgentSession, etc)
-- `lib/ai/tools/` — Agent tool implementations (agentProxy, proposeAction, etc)
+- `lib/ai/agents/` — Specialist agents + orchestrator (AI SDK v7 ToolLoopAgent)
+- `lib/ai/tools/{sandbox,ops,content,shared}/` — Agent tool implementations by domain (agentProxy, proposeAction, etc)
 - `lib/services/` — Business logic (secrets, projects, tasks, etc)
 - `app/api/v1/agent-proxy/route.ts` — Vault proxy endpoint
 - `app/api/agents/sessions/route.ts` — Agent session CRUD

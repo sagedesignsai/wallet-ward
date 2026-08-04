@@ -13,7 +13,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   DesktopIcon,
   ChatTeardropTextIcon,
@@ -54,64 +53,6 @@ export function WorkspaceMobileToggle() {
         <DesktopIcon className="size-3.5" />
         Canvas
       </Button>
-    </div>
-  )
-}
-
-// ─── Floating panel toggle toolbar (workspace-only) ───────────────────────────
-
-function PanelToggleBar() {
-  const chatOpen = useWorkspacePanelStore((s) => s.chatOpen)
-  const computerOpen = useWorkspacePanelStore((s) => s.computerOpen)
-  const toggleChat = useWorkspacePanelStore((s) => s.toggleChat)
-  const toggleComputer = useWorkspacePanelStore((s) => s.toggleComputer)
-  const { count: proposalCount } = usePendingApprovals()
-
-  return (
-    <div className="flex items-center gap-1">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="relative">
-            <Button
-              variant={chatOpen ? "secondary" : "ghost"}
-              size="icon-sm"
-              onClick={toggleChat}
-              aria-label="Toggle AI chat"
-            >
-              <ChatTeardropTextIcon className="size-4" />
-            </Button>
-            {proposalCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[9px] font-bold animate-pulse"
-              >
-                {proposalCount}
-              </Badge>
-            )}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          AI Chat {chatOpen ? "(open)" : "(closed)"}
-          {proposalCount > 0 &&
-            ` · ${proposalCount} pending approval${proposalCount > 1 ? "s" : ""}`}
-        </TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant={computerOpen ? "secondary" : "ghost"}
-            size="icon-sm"
-            onClick={toggleComputer}
-            aria-label="Toggle computer panel"
-          >
-            <DesktopIcon className="size-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          Computer {computerOpen ? "(open)" : "(closed)"}
-        </TooltipContent>
-      </Tooltip>
     </div>
   )
 }
@@ -161,7 +102,7 @@ export function WorkspaceSplitLayout({
               environmentId={environmentId}
             />
           ) : (
-            <DesktopProvider>
+            <DesktopProvider projectId={projectId}>
               <DesktopCanvas className="h-full" />
             </DesktopProvider>
           )}
@@ -194,7 +135,7 @@ export function WorkspaceSplitLayout({
 
         {/* Agent Work Canvas – right column (always fills remaining space) */}
         <ResizablePanel id="canvas" defaultSize="70%" minSize="25%">
-          <DesktopProvider>
+          <DesktopProvider projectId={projectId}>
             <DesktopCanvas className="h-full" />
           </DesktopProvider>
         </ResizablePanel>
@@ -202,6 +143,3 @@ export function WorkspaceSplitLayout({
     </div>
   )
 }
-
-// Export the toggle bar for backward compatibility
-export { PanelToggleBar }

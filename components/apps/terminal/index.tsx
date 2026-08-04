@@ -10,7 +10,12 @@ export interface TerminalContent {
 }
 
 export function TerminalApp({ content, windowId }: AppProps) {
-  const terminalContent = (content ?? { lines: [] }) as TerminalContent
+  const raw = content as TerminalContent | undefined
+  const terminalContent = {
+    lines: raw?.lines ?? ([] as string[]),
+    title: raw?.title,
+    cwd: raw?.cwd,
+  }
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom when lines change

@@ -27,6 +27,7 @@ export default function WorkspaceSessionPage({
             title: "Workspace",
             description: "Agent collaboration surface",
             breadcrumbs: [{ label: "Workspace" }],
+            collapsibleHeader: true,
         })
     }, [setConfig])
 

@@ -213,24 +213,25 @@ Before starting implementation, ensure:
 - `lib/services/projects.ts` — Project management
 - `lib/services/secrets.ts` — Secret encryption/decryption
 - `lib/services/tasks.ts` — Task management
-- `lib/services/proposals.ts` — (TODO) Action proposal service
+- `lib/services/proposals.ts` — Action proposal service (approval workflow)
 
 ### API Endpoints
 - `app/api/v1/projects/` — Project CRUD
 - `app/api/v1/agent-proxy/` — Vault proxy (credentials injected server-side)
 - `app/api/agents/sessions/` — Agent session management
 - `app/api/agents/sandboxes/` — Daytona sandbox management
-- `app/api/agents/proposals/` — (TODO) Approval workflow
+- `app/api/agents/proposals/` — Approval workflow
 
 ### AI/Agents
-- `lib/ai/tools/` — Agent tool implementations
+- `lib/ai/agents/` — Specialist agents (coding, ops, content, research) + orchestrator
+- `lib/ai/tools/{sandbox,ops,content,shared}/` — Agent tool implementations by domain
 - `lib/ai/config.ts` — Model configuration
-- `lib/ai/context-helpers.ts` — Context building
+- `lib/ai/context-builders.ts` — Context building
 
 ### UI Components
 - `components/workspace/` — Workspace layout
 - `components/ai-elements/` — Agent output rendering
-- `components/proposals/` — (TODO) Approval UI
+- `components/proposals/` — Approval UI
 
 ---
 

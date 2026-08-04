@@ -1,6 +1,8 @@
 "use client"
 
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import { useRouter } from "nextjs-toploader/app"
 import {
   GearIcon,
@@ -229,6 +231,11 @@ export function DashboardHeader() {
   const { config } = useDashboardConfig()
   const { user, signOut } = useAuth()
   const router = useRouter()
+  const isMobile = useMediaQuery("(max-width: 1023px)")
+  const collapsible = config.collapsibleHeader && !isMobile
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const handleSignOut = async () => {
     await signOut({
@@ -249,91 +256,155 @@ export function DashboardHeader() {
       .slice(0, 2)
     : "WW"
 
+  const handleMouseEnter = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = null
+    }
+    setIsHovering(true)
+    setIsHeaderVisible(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovering(false)
+    if (collapsible) {
+      hideTimeoutRef.current = setTimeout(() => {
+        setIsHeaderVisible(false)
+      }, 500)
+    }
+  }
+
+  // Show header immediately if not collapsible
+  useEffect(() => {
+    if (!collapsible) {
+      setIsHeaderVisible(true)
+    } else {
+      setIsHeaderVisible(false)
+    }
+  }, [collapsible])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current)
+      }
+    }
+  }, [])
+
   return (
-    <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2 border-b border-border/60 bg-background/90 px-4 backdrop-blur-md">
-      <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
-      <Separator orientation="vertical" />
+    <>
+      {/* Hover trigger zone - only shown when header is collapsible and hidden */}
+      {collapsible && !isHeaderVisible && (
+        <div
+          className="fixed top-0 left-0 right-0 z-40 h-1.5 cursor-pointer transition-all duration-200"
+          onMouseEnter={handleMouseEnter}
+          style={{
+            background: 'linear-gradient(to bottom, var(--primary) 0%, transparent 100%)',
+            opacity: 0.3,
+          }}
+        />
+      )}
+      
+      <header
+        className={cn(
+          "z-30 flex h-12 shrink-0 items-center gap-2 border-b border-border/60 bg-background/90 px-4 backdrop-blur-md transition-all duration-200 ease-out",
+          collapsible
+            ? cn(
+                "absolute top-0 left-0 right-0 w-full",
+                isHeaderVisible
+                  ? "translate-y-0 opacity-100"
+                  : "-translate-y-full opacity-0 pointer-events-none"
+              )
+            : "sticky top-0"
+        )}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+        <Separator orientation="vertical" />
 
-      <div className="flex flex-1 items-center justify-between gap-4 overflow-hidden">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <Breadcrumbs items={config.breadcrumbs ?? []} />
-          {config.description && (
-            <span className="hidden truncate text-xs text-muted-foreground sm:inline">
-              {config.description}
-            </span>
-          )}
-        </div>
+        <div className="flex flex-1 items-center justify-between gap-4 overflow-hidden">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <Breadcrumbs items={config.breadcrumbs ?? []} />
+            {config.description && (
+              <span className="hidden truncate text-xs text-muted-foreground sm:inline">
+                {config.description}
+              </span>
+            )}
+          </div>
 
-        <div className="flex items-center gap-2">
-          {config.actions}
+          <div className="flex items-center gap-2">
+            {config.actions}
 
-          <AgentStatusIndicator />
+            <AgentStatusIndicator />
 
-          <Separator orientation="vertical" className="h-4!" />
+            <Separator orientation="vertical" className="h-4!" />
 
-          <ProjectSwitcher />
-          <OrgSwitcher />
+            <ProjectSwitcher />
+            <OrgSwitcher />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="relative h-8 gap-1.5 px-2 text-xs"
-              >
-                <Avatar className="h-5 w-5">
-                  <AvatarImage
-                    src={user?.image ?? undefined}
-                    alt={user?.name ?? "User"}
-                  />
-                  <AvatarFallback className="bg-primary/10 text-[9px] font-bold text-primary">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="hidden font-medium text-foreground md:inline">
-                  {user?.name ?? "User"}
-                </span>
-                <CaretDownIcon className="h-3 w-3 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-8 gap-1.5 px-2 text-xs"
+                >
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage
+                      src={user?.image ?? undefined}
+                      alt={user?.name ?? "User"}
+                    />
+                    <AvatarFallback className="bg-primary/10 text-[9px] font-bold text-primary">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="hidden font-medium text-foreground md:inline">
+                    {user?.name ?? "User"}
+                  </span>
+                  <CaretDownIcon className="h-3 w-3 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-48" align="end">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-xs leading-none font-semibold text-foreground">
-                    {user?.name}
-                  </p>
-                  <p className="truncate text-[11px] leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                  <Link href="/dashboard/settings">
-                    <GearIcon className="mr-2 h-3.5 w-3.5" />
-                    <span>Settings</span>
-                  </Link>
+              <DropdownMenuContent className="w-48" align="end">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-xs leading-none font-semibold text-foreground">
+                      {user?.name}
+                    </p>
+                    <p className="truncate text-[11px] leading-none text-muted-foreground">
+                      {user?.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild className="cursor-pointer text-xs">
+                    <Link href="/dashboard/settings">
+                      <GearIcon className="mr-2 h-3.5 w-3.5" />
+                      <span>Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer text-xs">
+                    <Link href="/two-factor/setup">
+                      <ShieldCheckIcon className="mr-2 h-3.5 w-3.5 text-primary" />
+                      <span>2FA Security</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                  onClick={handleSignOut}
+                >
+                  <SignOutIcon className="mr-2 h-3.5 w-3.5" />
+                  <span>Sign Out</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                  <Link href="/two-factor/setup">
-                    <ShieldCheckIcon className="mr-2 h-3.5 w-3.5 text-primary" />
-                    <span>2FA Security</span>
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="cursor-pointer text-xs text-destructive focus:text-destructive"
-                onClick={handleSignOut}
-              >
-                <SignOutIcon className="mr-2 h-3.5 w-3.5" />
-                <span>Sign Out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   )
 }

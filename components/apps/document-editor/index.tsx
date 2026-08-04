@@ -13,7 +13,14 @@ export interface DocumentContent {
 }
 
 export function DocumentEditorApp({ content }: AppProps) {
-  const docContent = (content ?? { title: "Untitled", body: "" }) as DocumentContent
+  const raw = content as DocumentContent | undefined
+  const docContent = {
+    title: raw?.title ?? "Untitled",
+    body: raw?.body ?? "",
+    resourceId: raw?.resourceId,
+    projectId: raw?.projectId,
+    editable: raw?.editable,
+  }
   const [body, setBody] = useState(docContent.body)
   const [editing, setEditing] = useState(false)
 

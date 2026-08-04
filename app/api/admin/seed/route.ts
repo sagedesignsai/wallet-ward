@@ -10,7 +10,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SeedOrchestrator } from '@/lib/seeding/orchestrator'
 import type { SeedConfig } from '@/lib/seeding/types'
-import { unauthorized, forbidden, badRequest } from '@/lib/api/errors'
 
 /**
  * POST /api/admin/seed
@@ -23,18 +22,27 @@ export async function POST(request: NextRequest) {
     const isAdmin = true // Replace with actual auth check
 
     if (!isAdmin) {
-      return forbidden('Only administrators can execute seed operations')
+      return NextResponse.json(
+        { error: 'Only administrators can execute seed operations' },
+        { status: 403 }
+      )
     }
 
     const body: SeedConfig = await request.json()
 
     // Validate configuration
     if (!body.organizationCount || body.organizationCount < 1) {
-      return badRequest('organizationCount must be at least 1')
+      return NextResponse.json(
+        { error: 'organizationCount must be at least 1' },
+        { status: 400 }
+      )
     }
 
     if (!body.projectsPerOrg || body.projectsPerOrg < 1) {
-      return badRequest('projectsPerOrg must be at least 1')
+      return NextResponse.json(
+        { error: 'projectsPerOrg must be at least 1' },
+        { status: 400 }
+      )
     }
 
     // Initialize orchestrator
@@ -94,7 +102,10 @@ export async function GET(request: NextRequest) {
     const isAdmin = true // Replace with actual auth check
 
     if (!isAdmin) {
-      return forbidden('Only administrators can access seed operations')
+      return NextResponse.json(
+        { error: 'Only administrators can access seed operations' },
+        { status: 403 }
+      )
     }
 
     return NextResponse.json({

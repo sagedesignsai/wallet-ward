@@ -44,7 +44,7 @@ Package manager is **pnpm**. Do not use npm/yarn.
 
 **Vault proxy (zero-leak)** — Agents never see raw credentials. They call `agentProxy()` which server-side injects tokens from encrypted Integration records. Response never contains the raw token.
 
-**Agent type-based tool access** — Each tool in `lib/ai/tool-access.ts` has an allowed-agent-type list. Four agent types: `coding`, `ops`, `content`, `research`.
+**Tool access via domain organization** — Tools live in `lib/ai/tools/{sandbox,ops,content,shared}/`. Each specialist agent (`lib/ai/agents/{coding,ops,content,research}-agent.ts`) imports only its domain's tools, so access is enforced at construction; runtime checks use `runtimeContext.agentType`. Four agent types: `coding`, `ops`, `content`, `research`.
 
 **Human-in-the-loop** — High-risk actions go through `ActionProposal` (awaiting_approval → approved → executed/rejected). Agents poll via `getPendingProposals`.
 

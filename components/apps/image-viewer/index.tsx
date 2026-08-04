@@ -8,7 +8,11 @@ export interface ImageViewerContent {
 }
 
 export function ImageViewerApp({ content }: AppProps) {
-  const imageContent = (content ?? {}) as ImageViewerContent
+  const raw = content as ImageViewerContent | undefined
+  const imageContent = {
+    url: raw?.url ?? "",
+    alt: raw?.alt,
+  }
 
   return (
     <div className="flex items-center justify-center h-full bg-checkerboard p-4">

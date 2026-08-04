@@ -4,6 +4,7 @@
  */
 
 import type { ReactNode } from "react"
+import type { WindowContent } from "./content"
 
 export type WindowState = "normal" | "minimized" | "maximized"
 
@@ -50,7 +51,7 @@ export interface DesktopWindow {
   }
 
   /** App-specific content payload */
-  content: Record<string, unknown>
+  content: WindowContent
 
   /** Can this window be resized? */
   resizable?: boolean
@@ -60,6 +61,18 @@ export interface DesktopWindow {
 
   /** Can this window be maximized? */
   maximizable?: boolean
+
+  /** Can this window be closed? (default true) */
+  closable?: boolean
+
+  /** Pinned window (cannot be closed) */
+  pinned?: boolean
+
+  /** Resolved URL (for iframe apps) */
+  url?: string
+
+  /** Timestamp (ms) when a signed URL expires */
+  expiresAt?: number
 
   /** ISO timestamp when window was opened */
   openedAt: string
@@ -76,7 +89,7 @@ export interface WindowManagerStore {
   maxZIndex: number
 
   // Actions
-  openWindow: (config: Omit<DesktopWindow, "id" | "zIndex" | "openedAt">) => string
+  openWindow: (config: Omit<DesktopWindow, "id" | "zIndex" | "openedAt" | "content" | "x" | "y"> & { content?: WindowContent; x?: number; y?: number }) => string
   closeWindow: (windowId: string) => void
   focusWindow: (windowId: string) => void
   updateWindow: (windowId: string, updates: Partial<DesktopWindow>) => void
@@ -85,4 +98,6 @@ export interface WindowManagerStore {
   restoreWindow: (windowId: string) => void
   bringToFront: (windowId: string) => void
   getWindow: (windowId: string) => DesktopWindow | undefined
+  appendTerminalLines: (windowId: string, lines: string[]) => void
+  updateWindowUrl: (windowId: string, url: string, token?: string) => void
 }

@@ -25,7 +25,6 @@ export function DesktopIcons() {
       resizable: app.resizable,
       minimizable: app.minimizable,
       maximizable: app.maximizable,
-      content: {},
       state: "normal",
     })
   }

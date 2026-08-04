@@ -17,7 +17,12 @@ export interface FileManagerContent {
 }
 
 export function FileManagerApp({ content }: AppProps) {
-  const fileContent = (content ?? { title: "Files", tree: [] }) as FileManagerContent
+  const raw = content as FileManagerContent | undefined
+  const fileContent = {
+    title: raw?.title ?? "Files",
+    tree: raw?.tree ?? ([] as FileNode[]),
+    selectedPath: raw?.selectedPath,
+  }
   const [selected, setSelected] = useState(fileContent.selectedPath ?? "")
 
   function renderNode(node: FileNode) {

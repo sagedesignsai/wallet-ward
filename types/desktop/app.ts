@@ -5,6 +5,7 @@
 
 import type { ComponentType } from "react"
 import type { WindowPosition, WindowDimensions } from "./window"
+import type { WindowContent } from "./content"
 
 export interface AppManifest {
   /** Unique app identifier (e.g., "code-editor", "terminal") */
@@ -34,8 +35,38 @@ export interface AppManifest {
   /** Can windows be maximized? */
   maximizable?: boolean
 
-  /** React component to render */
-  component: ComponentType<AppProps>
+  /** App kind — "component" renders a React component, "iframe" renders a URL */
+  kind?: "component" | "iframe"
+
+  /** React component to render (required for kind "component") */
+  component?: ComponentType<AppProps>
+
+  /** URL or URL resolver for iframe apps */
+  url?: string | ((content: WindowContent) => string)
+
+  /** iframe sandbox attribute */
+  sandbox?: string
+
+  /** iframe allow attribute */
+  allow?: string
+
+  /** Signed-URL lifetime in seconds; when set, IframeAppShell shows a sandbox header + countdown */
+  expiry?: number
+
+  /** Refresh a signed URL before it expires */
+  onRefresh?: (windowId: string) => Promise<{ url: string; token?: string }>
+
+  /** Only one window of this app at a time */
+  singleInstance?: boolean
+
+  /** Can windows of this app be closed? (default true) */
+  closable?: boolean
+
+  /** Dedupe key — returns a key identifying identical windows of this app */
+  dedupeKey?: (content: WindowContent) => string | undefined
+
+  /** Hide from app launcher */
+  hidden?: boolean
 
   /** Required permissions */
   permissions?: string[]
@@ -68,7 +99,7 @@ export interface AppProps {
   params?: Record<string, unknown>
 
   /** Window content payload */
-  content?: Record<string, unknown>
+  content?: WindowContent
 
   /** Callback to close the window */
   onClose?: () => void

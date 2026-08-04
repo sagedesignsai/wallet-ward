@@ -17,7 +17,14 @@ export interface CodeEditorContent {
 }
 
 export function CodeEditorApp({ content, onClose }: AppProps) {
-  const codeContent = (content ?? { code: "", language: "text" }) as CodeEditorContent
+  const raw = content as CodeEditorContent | undefined
+  const codeContent = {
+    code: raw?.code ?? "",
+    language: raw?.language ?? "text",
+    filename: raw?.filename,
+    resourceId: raw?.resourceId,
+    readOnly: raw?.readOnly,
+  }
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(codeContent.code)

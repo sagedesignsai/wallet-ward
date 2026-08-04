@@ -1,6 +1,7 @@
 "use client";
 
 import { useWorkspacePanelStore, type ChatSession } from "@/stores/workspace-panel-store";
+import { useWindowManager } from "@/stores/desktop/window-manager.store"
 import { MessageRenderer } from "@/components/ai-elements/message-renderer";
 import { usePendingApprovals } from "@/hooks/use-pending-approvals";
 import { ApprovalCard } from "@/components/proposals/approval-card";
@@ -177,10 +178,9 @@ export function AIChatPanel({
 }) {
   const sessions = useWorkspacePanelStore((s) => s.sessions);
   const activeSessionId = useWorkspacePanelStore((s) => s.activeSessionId);
-  const tabs = useWorkspacePanelStore((s) => s.tabs);
   const openTab = useWorkspacePanelStore((s) => s.openTab);
-  const openComputer = useWorkspacePanelStore((s) => s.openComputer);
-  const appendTerminalLines = useWorkspacePanelStore((s) => s.appendTerminalLines);
+  const windows = useWindowManager((s) => s.windows);
+  const appendTerminalLines = useWindowManager((s) => s.appendTerminalLines);
   const pendingPrompt = useWorkspacePanelStore((s) => s.pendingPrompt);
   const setPendingPrompt = useWorkspacePanelStore((s) => s.setPendingPrompt);
   const syncSessionMessages = useWorkspacePanelStore((s) => s.syncSessionMessages);
@@ -226,7 +226,6 @@ export function AIChatPanel({
           const { toolName, result, args } = part.toolInvocation;
 
           if (toolName === "createSandbox" && result?.id) {
-            openComputer();
             openTab({
               type: "terminal",
               title: `Sandbox: ${result.name || result.id}`,
@@ -248,15 +247,15 @@ export function AIChatPanel({
           }
 
           if (toolName === "executeCommand" && result) {
-            const terminalTab = tabs.findLast(
-              (t) => t.type === "terminal" && t.pinned
+            const terminalWindow = windows.findLast(
+              (w) => w.appId === "terminal" && w.pinned
             );
-            if (terminalTab) {
+            if (terminalWindow) {
               const cmd = args?.command || "unknown";
               const output = result.result || result.output || JSON.stringify(result);
               const exitCode = result.exitCode ?? 0;
               const exitColor = exitCode === 0 ? "\x1b[32m" : "\x1b[31m";
-              appendTerminalLines(terminalTab.id, [
+              appendTerminalLines(terminalWindow.id, [
                 `\x1b[1m$ ${cmd}\x1b[0m`,
                 output,
                 `${exitColor}exit: ${exitCode}\x1b[0m`,
@@ -272,12 +271,13 @@ export function AIChatPanel({
               content: {
                 type: "preview",
                 url: result.url,
+                sandboxId: result.sandboxId,
+                port: result.port,
               },
             });
           }
 
           if (toolName === "startDesktop" && result?.desktopUrl) {
-            openComputer();
             openTab({
               type: "desktop",
               title: `Desktop: ${result.sandboxId?.slice(0, 8) || "Sandbox"}`,
@@ -293,7 +293,6 @@ export function AIChatPanel({
           }
 
           if (toolName === "getWebTerminalUrl" && result?.url) {
-            openComputer();
             openTab({
               type: "web-terminal",
               title: `Terminal: ${result.sandboxId?.slice(0, 8) || "Sandbox"}`,
@@ -309,7 +308,6 @@ export function AIChatPanel({
           }
 
           if (toolName === "computerUse" && result?.screenshot) {
-            openComputer();
             const dataUrl = `data:image/png;base64,${result.screenshot}`
             openTab({
               type: "image",
@@ -328,7 +326,6 @@ export function AIChatPanel({
               path: `${result.path}/${f.name}`,
               type: f.isDir ? "folder" as const : "file" as const,
             }))
-            openComputer();
             openTab({
               type: "file-tree",
               title: `Files: ${result.path}`,

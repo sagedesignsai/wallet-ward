@@ -1,81 +1,75 @@
-import { ToolLoopAgent, tool, isStepCount } from "ai";
-import { z } from "zod";
-import { getModel, SYSTEM_PROMPTS, type SystemPromptKey } from "./config";
-import type { AgentType, User } from "@prisma/client";
-import { workspaceTools } from "./tools";
-import { canAgentUseTool } from "./tool-access";
-import { canAgentUseTool } from "./tool-access";
+import { ToolLoopAgent } from "ai"
+import { createCodingAgent } from "./agents/coding-agent"
+import { createOpsAgent } from "./agents/ops-agent"
+import { createContentAgent } from "./agents/content-agent"
+import { createResearchAgent } from "./agents/research-agent"
+import { createOrchestrator } from "./agents/orchestrator"
+import type {
+  AgentRuntimeContext,
+  CodingAgentContext,
+  OpsAgentContext,
+  ContentAgentContext,
+  ResearchAgentContext,
+  OrchestratorContext,
+} from "./context-builders"
 
-// ─── Workspace Context Schema ────────────────────────────────────────────────
-
-export const WorkspaceContextSchema = z.object({
-  userId: z.string(),
-  organizationId: z.string(),
-  projectId: z.string().optional(),
-  environmentId: z.string().optional(),
-});
-
-export type WorkspaceContext = z.infer<typeof WorkspaceContextSchema>;
-
-// ─── Runtime Context (flows through agent loop) ──────────────────────────────
-
-export interface AgentRuntimeContext {
-  requestId: string;
-  workspaceContext: WorkspaceContext;
-  user: Pick<User, "id" | "name" | "email">;
-  timestamp: string;
-}
-
-// ─── Agent Factory ───────────────────────────────────────────────────────────
+// ─── Agent factory ────────────────────────────────────────────────────────────
 
 /**
- * Create a type-aware agent instance.
- * When agentType matches a system prompt key, the agent gets
- * persona-specific instructions; otherwise falls back to the
- * general secretsManager prompt.
+ * Union of every agent's toolsContext shape, so the route can build one
+ * context map per request and dispatch it to the correct agent constructor.
  */
-const AGENT_TYPES: AgentType[] = ["coding", "content", "ops", "research"];
-
-export function createAgent(agentType?: string) {
-  const promptKey: SystemPromptKey =
-    agentType && agentType in SYSTEM_PROMPTS
-      ? (agentType as SystemPromptKey)
-      : "secretsManager";
-
-  const agentTypeKey =
-    agentType && (AGENT_TYPES as string[]).includes(agentType)
-      ? (agentType as AgentType)
-      : undefined;
-
-  const tools = agentTypeKey
-    ? Object.fromEntries(
-        Object.entries(workspaceTools).filter(([name]) =>
-          canAgentUseTool(agentTypeKey, name)
-        )
-      )
-    : workspaceTools;
-
-  return new ToolLoopAgent({
-    model: getModel("openrouter", "openrouter/free"),
-    instructions: SYSTEM_PROMPTS[promptKey],
-    tools,
-    // Allow up to 30 steps for complex multi-tool workflows
-    stopWhen: isStepCount(30),
-  } as any);
+export type AgentFactoryOptions = {
+  toolsContext:
+    | CodingAgentContext
+    | OpsAgentContext
+    | ContentAgentContext
+    | ResearchAgentContext
+    | OrchestratorContext
+  runtimeContext?: AgentRuntimeContext
 }
 
-// ─── Base Agent Definition (fallback) ────────────────────────────────────────
-
 /**
- * Flowspace Base Agent
- * 
- * The core AI agent for Flowspace workspace with workspace-aware tools.
- * Can retrieve secrets, documents, tasks, and create new resources.
- * 
- * Tools are modular and defined in ./tools/ directory.
+ * Returns the correct specialist agent for the given agentType, or the
+ * orchestrator when no type is specified (free-form chat).
+ *
+ * toolsContext and runtimeContext are constructor options in AI SDK v7 and
+ * are forwarded to the selected agent. The chat route builds the per-tool
+ * context map via buildAgentContext() and passes it here.
  */
-export const nimbusBaseAgent = createAgent();
+export function createAgent(
+  agentType?: string,
+  options?: AgentFactoryOptions
+): ToolLoopAgent<never, any> {
+  switch (agentType) {
+    case "coding":
+      return createCodingAgent({
+        toolsContext: options?.toolsContext as CodingAgentContext,
+        runtimeContext: options?.runtimeContext,
+      })
+    case "ops":
+      return createOpsAgent({
+        toolsContext: options?.toolsContext as OpsAgentContext,
+        runtimeContext: options?.runtimeContext,
+      })
+    case "content":
+      return createContentAgent({
+        toolsContext: options?.toolsContext as ContentAgentContext,
+        runtimeContext: options?.runtimeContext,
+      })
+    case "research":
+      return createResearchAgent({
+        toolsContext: options?.toolsContext as ResearchAgentContext,
+        runtimeContext: options?.runtimeContext,
+      })
+    default:
+      return createOrchestrator({
+        toolsContext: options?.toolsContext as OrchestratorContext,
+        runtimeContext: options?.runtimeContext,
+      })
+  }
+}
 
-// ─── Type exports for frontend ───────────────────────────────────────────────
+// ─── Type exports ─────────────────────────────────────────────────────────────
 
-export type { InferAgentUIMessage as NimbusAgentMessage } from "ai";
+export type { InferAgentUIMessage as NimbusAgentMessage } from "ai"
