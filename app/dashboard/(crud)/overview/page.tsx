@@ -48,7 +48,6 @@ export default function OverviewPage() {
 
   useDashboardConfigStore.setState({
     title: "Overview",
-    description: "Your autonomous operations command center",
     breadcrumbs: [{ label: "Overview" }],
   })
 

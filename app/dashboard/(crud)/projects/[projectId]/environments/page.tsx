@@ -46,7 +46,6 @@ function EnvironmentsInner({ projectId }: { projectId: string }) {
 
   if (project) {
     useDashboardConfigStore.setState({
-      description: `${project.name} — ${project.environments?.length ?? 0} environment${(project.environments?.length ?? 0) !== 1 ? "s" : ""}`,
       actions: (
         <Button
           size="default"

@@ -71,7 +71,6 @@ function ActivityInner({ projectId }: { projectId: string }) {
 
   if (project) {
     useDashboardConfigStore.setState({
-      description: `${project.name} — Project activity`,
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Projects", href: "/dashboard/projects" },

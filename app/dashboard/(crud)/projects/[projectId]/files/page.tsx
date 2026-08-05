@@ -53,7 +53,6 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
 
   useDashboardConfigStore.setState({
     title: "Files",
-    description: "Manage files and artifacts for this project",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Projects", href: "/dashboard/projects" },

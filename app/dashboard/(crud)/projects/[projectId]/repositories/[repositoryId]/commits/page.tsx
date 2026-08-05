@@ -71,7 +71,6 @@ function CommitsInner({
   if (project && repository) {
     useDashboardConfigStore.setState({
       title: "Commits",
-      description: `Commit history for ${repository.name}`,
       actions: null,
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },

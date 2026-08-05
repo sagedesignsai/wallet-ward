@@ -26,7 +26,6 @@ export default function WorkspaceSessionPage({
 
   useDashboardConfigStore.setState({
     title: "Workspace",
-    description: "Agent collaboration surface",
     breadcrumbs: [{ label: "Workspace" }],
   })
 

@@ -39,7 +39,6 @@ function ProposalDetailInner({ proposalId }: { proposalId: string }) {
   if (proposal) {
     useDashboardConfigStore.setState({
       title: proposal.title,
-      description: "Review and approve agent-proposed action",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Proposals", href: "/dashboard/proposals" },

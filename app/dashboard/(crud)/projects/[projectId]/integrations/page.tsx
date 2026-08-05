@@ -60,7 +60,6 @@ function ProjectIntegrationsInner({ projectId }: { projectId: string }) {
 
   if (project) {
     useDashboardConfigStore.setState({
-      description: `${project.name} — integrations`,
       actions: (
         <Button size="sm" onClick={() => setConnectOpen(true)}>
           <PlusIcon className="size-3.5" />

@@ -234,7 +234,6 @@ export default function AgentsPage() {
 
   useDashboardConfigStore.setState({
     title: "Sessions",
-    description: "Agent sessions for the active project",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Sessions" },

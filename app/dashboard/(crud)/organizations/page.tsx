@@ -220,7 +220,6 @@ export default function OrganizationsPage() {
 
   useDashboardConfigStore.setState({
     title: "Organizations",
-    description: "Manage your team and permissions",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Organizations" },

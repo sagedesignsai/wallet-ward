@@ -211,7 +211,6 @@ function OrgMembersInner({ orgId }: { orgId: string }) {
   if (organization) {
     useDashboardConfigStore.setState({
       title: "Members",
-      description: `Manage team members for ${organization.name}`,
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Organizations", href: "/dashboard/organizations" },

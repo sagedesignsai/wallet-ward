@@ -41,7 +41,6 @@ export default function ProjectOnboardingPage() {
 
   useDashboardConfigStore.setState({
     title: "",
-    description: "",
     breadcrumbs: [],
   })
 

@@ -132,9 +132,6 @@ export default function GlobalSecretsPage() {
   const [expandedSecretId, setExpandedSecretId] = useState<string | null>(null)
 
   useDashboardConfigStore.setState({
-    description: activeProject
-      ? `Secrets in ${activeProject.name}`
-      : "Project secrets and keys",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Secrets & Keys" },

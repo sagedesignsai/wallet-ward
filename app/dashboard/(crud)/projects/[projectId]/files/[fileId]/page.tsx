@@ -160,7 +160,6 @@ function FileDetailInner({
   if (project && file) {
     useDashboardConfigStore.setState({
       title: file.name,
-      description: "File details",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Projects", href: "/dashboard/projects" },

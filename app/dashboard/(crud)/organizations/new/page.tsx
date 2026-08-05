@@ -33,7 +33,6 @@ export default function NewOrganizationPage() {
 
   useDashboardConfigStore.setState({
     title: "New Organization",
-    description: "Create a new organization for your team",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Organizations", href: "/dashboard/organizations" },

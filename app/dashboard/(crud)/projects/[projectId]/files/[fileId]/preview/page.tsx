@@ -115,7 +115,6 @@ function FilePreviewInner({
   if (project && file) {
     useDashboardConfigStore.setState({
       title: `${file.name} — Preview`,
-      description: "File preview",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Projects", href: "/dashboard/projects" },

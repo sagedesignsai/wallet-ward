@@ -39,7 +39,6 @@ export default function OrganizationOnboardingPage() {
 
   useDashboardConfigStore.setState({
     title: "",
-    description: "",
     breadcrumbs: [],
   })
 

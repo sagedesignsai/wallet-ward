@@ -45,9 +45,6 @@ export default function GlobalTasksPage() {
 
   useDashboardConfigStore.setState({
     title: "Tasks",
-    description: activeProject
-      ? `Tasks in ${activeProject.name}`
-      : "Project tasks",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Tasks" },

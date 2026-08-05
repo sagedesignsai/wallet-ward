@@ -331,14 +331,7 @@ export function DashboardHeader({
         <Separator orientation="vertical" />
 
         <div className="flex flex-1 items-center justify-between gap-4 overflow-hidden">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <Breadcrumbs items={config.breadcrumbs ?? []} />
-            {config.description && (
-              <span className="hidden truncate text-xs text-muted-foreground sm:inline">
-                {config.description}
-              </span>
-            )}
-          </div>
+          <Breadcrumbs items={config.breadcrumbs ?? []} />
 
           <div className="flex items-center gap-2">
             {config.actions}

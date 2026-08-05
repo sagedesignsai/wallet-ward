@@ -22,7 +22,6 @@ export default function OnboardingPage() {
 
   useDashboardConfigStore.setState({
     title: "",
-    description: "",
     breadcrumbs: [],
   })
 

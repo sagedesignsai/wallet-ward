@@ -74,7 +74,6 @@ function FileVersionsInner({
   if (project && file) {
     useDashboardConfigStore.setState({
       title: `${file.name} — Versions`,
-      description: "Version history for this file",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Projects", href: "/dashboard/projects" },

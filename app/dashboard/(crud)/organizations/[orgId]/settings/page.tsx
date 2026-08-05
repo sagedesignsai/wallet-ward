@@ -55,7 +55,6 @@ function SettingsInner({ orgId }: { orgId: string }) {
 
   if (organization) {
     useDashboardConfigStore.setState({
-      description: `Configure ${organization.name}`,
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Organizations", href: "/dashboard/organizations" },

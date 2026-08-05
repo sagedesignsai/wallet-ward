@@ -172,7 +172,6 @@ function RepositoryDetailInner({
   if (project && repository) {
     useDashboardConfigStore.setState({
       title: repository.name,
-      description: "Edit repository",
       actions: null,
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },

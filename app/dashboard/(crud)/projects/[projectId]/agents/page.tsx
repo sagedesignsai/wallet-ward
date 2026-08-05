@@ -72,7 +72,6 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
 
   if (project) {
     useDashboardConfigStore.setState({
-      description: `${project.name} — ${sessions.length} agent session${sessions.length !== 1 ? "s" : ""}`,
       actions: (
         <div className="flex gap-2">
           <Button

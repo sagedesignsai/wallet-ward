@@ -67,7 +67,6 @@ function OrgOverviewInner({ orgId }: { orgId: string }) {
   if (organization) {
     useDashboardConfigStore.setState({
       title: organization.name,
-      description: organization.slug,
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Organizations", href: "/dashboard/organizations" },

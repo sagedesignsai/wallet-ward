@@ -129,7 +129,6 @@ export default function GlobalIntegrationsPage() {
 
   useDashboardConfigStore.setState({
     title: "Integrations",
-    description: "All integrations across your projects",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Integrations" },

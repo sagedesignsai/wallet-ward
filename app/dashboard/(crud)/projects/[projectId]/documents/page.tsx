@@ -53,7 +53,6 @@ function DocumentsInner({ projectId }: { projectId: string }) {
 
   if (project) {
     useDashboardConfigStore.setState({
-      description: `${project.name} — ${documents.length} document${documents.length !== 1 ? "s" : ""}`,
       actions: (
         <Button onClick={() => setDialogOpen(true)}>
           <PlusIcon />

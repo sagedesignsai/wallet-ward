@@ -133,7 +133,6 @@ export default function AuditLogsPage() {
   const [search, setSearch] = useState("")
 
   useDashboardConfigStore.setState({
-    description: "Track all activity across your organization",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Audit Log" },

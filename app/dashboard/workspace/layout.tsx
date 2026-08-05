@@ -10,7 +10,6 @@ export default function WorkspaceLayout({
 }) {
   useDashboardConfigStore.setState({
     title: "Workspace",
-    description: "Agent collaboration surface",
     breadcrumbs: [{ label: "Workspace" }],
   })
 

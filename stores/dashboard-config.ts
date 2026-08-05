@@ -9,7 +9,6 @@ export type BreadcrumbItem = {
 
 export type DashboardConfig = {
   title?: string
-  description?: string
   breadcrumbs?: BreadcrumbItem[]
   actions?: React.ReactNode
 }
@@ -23,8 +22,8 @@ const DEFAULT_CONFIG: DashboardConfig = {
 }
 
 /**
- * Global store for the page-supplied header config (title, description,
- * breadcrumbs, actions, collapsibility).
+ * Global store for the page-supplied header config (title, breadcrumbs,
+ * actions).
  *
  * Pages write to it in their render body via `useDashboardConfigStore.setState(...)`
  * (no effects, no context), and `DashboardHeader` subscribes to it.

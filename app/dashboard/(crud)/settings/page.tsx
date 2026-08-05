@@ -28,7 +28,6 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>("profile")
 
   useDashboardConfigStore.setState({
-    description: "Manage your account and preferences",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Settings" },

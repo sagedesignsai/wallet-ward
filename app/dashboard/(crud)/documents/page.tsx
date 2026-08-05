@@ -62,9 +62,6 @@ export default function GlobalDocumentsPage() {
 
   useDashboardConfigStore.setState({
     title: "Documents",
-    description: activeProject
-      ? `Documents in ${activeProject.name}`
-      : "Project documents",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Documents" },

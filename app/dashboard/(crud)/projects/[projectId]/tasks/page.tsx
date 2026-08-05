@@ -74,7 +74,6 @@ function TasksInner({ projectId }: { projectId: string }) {
 
   if (project) {
     useDashboardConfigStore.setState({
-      description: `${project.name} — ${tasks.length} task${tasks.length !== 1 ? "s" : ""}`,
       actions: (
         <Button onClick={() => setDialogOpen(true)}>
           <PlusIcon />

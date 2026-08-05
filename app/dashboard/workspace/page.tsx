@@ -7,7 +7,6 @@ export default function WorkspacePage() {
     <WorkspaceLanding
       config={{
         title: "Workspace",
-        description: "Agent collaboration surface",
         breadcrumbs: [{ label: "Workspace" }],
       }}
     />

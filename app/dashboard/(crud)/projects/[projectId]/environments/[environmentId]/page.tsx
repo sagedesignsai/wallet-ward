@@ -157,7 +157,6 @@ function SecretsInner({
 
   if (project && environment) {
     useDashboardConfigStore.setState({
-      description: `Secrets in ${environment.name}`,
       actions: (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

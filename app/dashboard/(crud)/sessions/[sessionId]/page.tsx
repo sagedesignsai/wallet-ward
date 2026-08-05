@@ -39,7 +39,6 @@ function AgentSessionInner({ sessionId }: { sessionId: string }) {
   if (session) {
     useDashboardConfigStore.setState({
       title: session.name,
-      description: `${session.type} agent session`,
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Sessions", href: "/dashboard/sessions" },

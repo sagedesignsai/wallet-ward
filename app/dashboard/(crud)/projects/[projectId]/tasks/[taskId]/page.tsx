@@ -76,7 +76,6 @@ function TaskDetailInner({
   if (project && task) {
     useDashboardConfigStore.setState({
       title: task.title,
-      description: "Edit task",
       actions: (
         <div className="flex gap-2">
           <OpenInComputer

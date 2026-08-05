@@ -84,7 +84,6 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
   if (project) {
     useDashboardConfigStore.setState({
       title: project.name,
-      description: project.description ?? "No description",
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Projects", href: "/dashboard/projects" },

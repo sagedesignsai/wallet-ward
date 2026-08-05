@@ -46,7 +46,6 @@ export default function ProjectsPage() {
   const [createOpen, setCreateOpen] = useState(false)
 
   useDashboardConfigStore.setState({
-    description: "Manage your vault projects and their environments",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Projects" },

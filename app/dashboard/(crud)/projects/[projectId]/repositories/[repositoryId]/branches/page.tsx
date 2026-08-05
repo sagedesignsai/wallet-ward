@@ -65,7 +65,6 @@ function BranchesInner({
   if (project && repository) {
     useDashboardConfigStore.setState({
       title: "Branches",
-      description: `Manage branches for ${repository.name}`,
       actions: null,
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },

@@ -230,7 +230,6 @@ export default function ProposalsPage() {
 
   useDashboardConfigStore.setState({
     title: "Proposals",
-    description: "Review and approve agent-proposed actions",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Proposals" },

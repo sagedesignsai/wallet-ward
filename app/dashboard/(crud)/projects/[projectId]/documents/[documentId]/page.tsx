@@ -61,7 +61,6 @@ function DocumentDetailInner({
   if (project && document) {
     useDashboardConfigStore.setState({
       title: document.title,
-      description: "Edit document",
       actions: (
         <OpenInComputer
           showLabel

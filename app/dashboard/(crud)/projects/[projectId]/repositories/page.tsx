@@ -41,7 +41,6 @@ function ProjectRepositoriesInner({ projectId }: { projectId: string }) {
 
   useDashboardConfigStore.setState({
     title: "Repositories",
-    description: "Manage Git repositories for this project",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Projects", href: "/dashboard/projects" },
