@@ -1,4 +1,6 @@
 import { db } from "@/lib/db"
+import { notFound } from "@/lib/api/errors"
+import { getDecryptedToken } from "@/lib/services/integrations"
 import type { 
   Repository, 
   RepositoryProvider, 
@@ -176,40 +178,6 @@ export class RepositoryService {
   }
 
   /**
-   * Webhook CRUD
-   */
-  static async listWebhooks(repositoryId: string) {
-    return db.repositoryWebhook.findMany({
-      where: { repositoryId },
-      orderBy: { createdAt: "desc" },
-    })
-  }
-
-  static async createWebhook(
-    repositoryId: string,
-    input: { event: string; url: string; enabled?: boolean }
-  ) {
-    const secret = crypto.randomUUID()
-    return db.repositoryWebhook.create({
-      data: {
-        repositoryId,
-        event: input.event as any,
-        url: input.url,
-        secret,
-        enabled: input.enabled ?? true,
-      },
-    })
-  }
-
-  static async deleteWebhook(id: string) {
-    return db.repositoryWebhook.delete({ where: { id } })
-  }
-
-  static async getWebhook(id: string) {
-    return db.repositoryWebhook.findUnique({ where: { id } })
-  }
-
-  /**
    * Parse a GitHub URL to extract owner/repo
    */
   static parseGitHubUrl(url: string): { owner: string; repo: string } | null {
@@ -262,5 +230,166 @@ export class RepositoryService {
         {} as Record<string, number>
       ),
     }
+  }
+}
+
+// ─── GitHub live sync ─────────────────────────────────────────────────────────
+
+export type SyncRepositoryResult = {
+  synced: boolean
+  message: string
+  data?: {
+    defaultBranch: string
+    latestCommitSha: string
+    latestCommitMessage: string
+    latestCommitDate: string
+  }
+}
+
+const GITHUB_API_BASE = "https://api.github.com"
+
+function githubHeaders(token: string) {
+  return {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    "User-Agent": "flowspace-sync",
+  }
+}
+
+async function githubFetchJson(url: string, token: string): Promise<unknown> {
+  const res = await fetch(url, { headers: githubHeaders(token) })
+  if (!res.ok) {
+    const body = await res.text().catch(() => "")
+    const detail = body ? `: ${body.slice(0, 200)}` : ""
+    throw new Error(`GitHub API error (${res.status})${detail}`)
+  }
+  return res.json()
+}
+
+function sanitizeErrorMessage(error: unknown): string {
+  const message =
+    error instanceof Error && error.message
+      ? error.message
+      : "Unknown GitHub API error"
+  // The token is only ever sent in headers, so it cannot appear in an error
+  // message — redact anything that looks like a GitHub credential anyway.
+  return message
+    .replace(/gh[pousr]_[A-Za-z0-9]{20,}/gi, "[redacted]")
+    .slice(0, 500)
+}
+
+/**
+ * Live-sync a repository against GitHub: fetches the default branch and the
+ * latest commit and stores them on the repository row. Only GitHub is
+ * supported. GitHub/network failures never throw — the row is marked as
+ * errored and `{ synced: false, message }` is returned instead.
+ */
+export async function syncRepositoryWithGithub(
+  repositoryId: string,
+  organizationId: string
+): Promise<SyncRepositoryResult> {
+  // 1. Load the repository, scoped to the organization (via its project)
+  const repository = await db.repository.findFirst({
+    where: { id: repositoryId, project: { organizationId } },
+  })
+  if (!repository) {
+    throw notFound("Repository not found")
+  }
+
+  // 2. Mark as syncing
+  await RepositoryService.updateSyncStatus(repositoryId, "syncing")
+
+  // 3. Only GitHub is supported for live sync
+  const parsed = RepositoryService.parseGitHubUrl(repository.url)
+  if (repository.provider !== "github" || !parsed) {
+    await RepositoryService.updateSyncStatus(repositoryId, "error")
+    return {
+      synced: false,
+      message: "Live sync is only supported for GitHub repositories",
+    }
+  }
+
+  // 4. The project must have an enabled GitHub integration
+  const integration = await db.integration.findFirst({
+    where: {
+      projectId: repository.projectId,
+      provider: "github",
+      enabled: true,
+    },
+    include: { project: true },
+  })
+  if (!integration) {
+    await RepositoryService.updateSyncStatus(repositoryId, "error")
+    return {
+      synced: false,
+      message: "No GitHub integration connected to this project",
+    }
+  }
+
+  try {
+    // 5. Decrypt the integration token
+    const token = await getDecryptedToken(integration)
+
+    // 6. Fetch repo metadata to learn the default branch
+    const repoUrl = `${GITHUB_API_BASE}/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}`
+    const repoData = (await githubFetchJson(repoUrl, token)) as {
+      default_branch?: string
+    }
+    const defaultBranch = repoData.default_branch ?? "main"
+
+    // 7. Fetch the latest commit on the default branch
+    const commitsUrl = `${GITHUB_API_BASE}/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/commits?sha=${encodeURIComponent(defaultBranch)}&per_page=1`
+    const commits = (await githubFetchJson(commitsUrl, token)) as Array<{
+      sha: string
+      commit: {
+        message: string
+        author: { date: string }
+      }
+    }>
+    const latest = commits[0]
+    if (!latest) {
+      throw new Error("GitHub repository has no commits yet")
+    }
+
+    // 8. Persist the sync result (merge into existing metadata)
+    const existingMetadata =
+      repository.metadata &&
+      typeof repository.metadata === "object" &&
+      !Array.isArray(repository.metadata)
+        ? (repository.metadata as Record<string, unknown>)
+        : {}
+
+    await RepositoryService.updateSyncStatus(repositoryId, "synced", {
+      ...existingMetadata,
+      defaultBranch,
+      latestCommit: {
+        sha: latest.sha,
+        message: latest.commit.message,
+        date: latest.commit.author.date,
+      },
+      syncedVia: "github-api",
+    })
+
+    // Only replace the "main" placeholder branch with the real default branch;
+    // never clobber a branch the user chose explicitly.
+    if (repository.branch === "main" && defaultBranch !== "main") {
+      await RepositoryService.update(repositoryId, { branch: defaultBranch })
+    }
+
+    return {
+      synced: true,
+      message: "Repository synced successfully",
+      data: {
+        defaultBranch,
+        latestCommitSha: latest.sha,
+        latestCommitMessage: latest.commit.message,
+        latestCommitDate: latest.commit.author.date,
+      },
+    }
+  } catch (error) {
+    // 9. GitHub/network error — mark errored, keep lastSyncAt, never leak token
+    await RepositoryService.updateSyncStatus(repositoryId, "error")
+    return { synced: false, message: sanitizeErrorMessage(error) }
   }
 }

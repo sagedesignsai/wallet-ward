@@ -1,53 +1,38 @@
-import { NextRequest, NextResponse } from "next/server"
-import { RepositoryService } from "@/lib/services/repository-service"
-import { auth } from "@/lib/auth"
+import {
+  requireAuth,
+  requireOrganization,
+  requirePermission,
+} from "@/lib/api/auth"
+import { handleRouteError, json } from "@/lib/api/http"
+import { badRequest, conflict, notFound } from "@/lib/api/errors"
 import { db } from "@/lib/db"
+import { writeAuditLog } from "@/lib/services/audit"
+import { RepositoryService } from "@/lib/services/repository-service"
 import type { RepositoryProvider, RepositoryAccessType } from "@prisma/client"
+
+type Ctx = { params: Promise<{ projectId: string }> }
 
 /**
  * GET /api/v1/projects/:projectId/repositories
  * List all repositories for a project
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
-) {
+export async function GET(_request: Request, ctx: Ctx) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const { projectId } = await ctx.params
+    const authCtx = await requireAuth()
+    const orgCtx = await requireOrganization(authCtx)
+    requirePermission(orgCtx.memberRole, "project:read")
 
-    const { projectId } = await params
-
-    // Verify project access
     const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
+      where: { id: projectId, organizationId: orgCtx.organizationId },
     })
+    if (!project) throw notFound("Project not found")
 
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
+    const data = await RepositoryService.listByProjectWithMetadata(projectId)
 
-    const repositories =
-      await RepositoryService.listByProjectWithMetadata(projectId)
-
-    return NextResponse.json({ data: repositories })
+    return json({ data })
   } catch (error) {
-    console.error("Error fetching repositories:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch repositories" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }
 
@@ -55,53 +40,36 @@ export async function GET(
  * POST /api/v1/projects/:projectId/repositories
  * Create a new repository
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
-) {
+export async function POST(request: Request, ctx: Ctx) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const { projectId } = await ctx.params
+    const authCtx = await requireAuth()
+    const orgCtx = await requireOrganization(authCtx)
+    requirePermission(orgCtx.memberRole, "project:write")
 
-    const { projectId } = await params
-
-    // Verify project access
     const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
+      where: { id: projectId, organizationId: orgCtx.organizationId },
     })
+    if (!project) throw notFound("Project not found")
 
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
-
-    const body = await req.json()
+    const body = await request.json()
 
     // Validate required fields
     if (!body.name || !body.url || !body.provider) {
-      return NextResponse.json(
-        { error: "Missing required fields: name, url, provider" },
-        { status: 400 }
+      throw badRequest("Missing required fields: name, url, provider")
+    }
+
+    // Validate repository name (defense-in-depth against clone-tool injection)
+    if (!/^[A-Za-z0-9._-]{1,100}$/.test(body.name)) {
+      throw badRequest(
+        "Invalid repository name: only letters, numbers, dots, underscores, and hyphens are allowed (max 100 characters)"
       )
     }
 
     // Check if repository already exists
     const exists = await RepositoryService.existsInProject(projectId, body.url)
     if (exists) {
-      return NextResponse.json(
-        { error: "Repository with this URL already exists in project" },
-        { status: 409 }
-      )
+      throw conflict("Repository with this URL already exists in project")
     }
 
     const repository = await RepositoryService.create({
@@ -113,32 +81,26 @@ export async function POST(
       branch: body.branch || "main",
       accessType: (body.accessType as RepositoryAccessType) || "private",
       credentialId: body.credentialId,
-      createdById: session.user.id,
+      createdById: authCtx.userId,
     })
 
     // Log audit event
-    await db.auditLog.create({
-      data: {
-        organizationId: project.organizationId,
-        actorUserId: session.user.id,
-        action: "project_update",
-        resourceType: "repository",
-        resourceId: repository.id,
-        metadata: {
-          action: "create",
-          projectId,
-          repositoryName: repository.name,
-          provider: repository.provider,
-        },
+    await writeAuditLog({
+      ctx: orgCtx,
+      organizationId: orgCtx.organizationId,
+      action: "project_update",
+      resourceType: "repository",
+      resourceId: repository.id,
+      metadata: {
+        action: "create",
+        projectId,
+        repositoryName: repository.name,
+        provider: repository.provider,
       },
     })
 
-    return NextResponse.json({ data: repository }, { status: 201 })
+    return json({ data: repository }, { status: 201 })
   } catch (error) {
-    console.error("Error creating repository:", error)
-    return NextResponse.json(
-      { error: "Failed to create repository" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }

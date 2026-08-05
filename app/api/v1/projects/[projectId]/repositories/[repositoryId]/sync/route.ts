@@ -1,113 +1,47 @@
-import { NextRequest, NextResponse } from "next/server"
-import { RepositoryService } from "@/lib/services/repository-service"
-import { auth } from "@/lib/auth"
+import {
+  requireAuth,
+  requireOrganization,
+  requirePermission,
+} from "@/lib/api/auth"
+import { handleRouteError, json } from "@/lib/api/http"
+import { notFound } from "@/lib/api/errors"
 import { db } from "@/lib/db"
+import { syncRepositoryWithGithub } from "@/lib/services/repository-service"
+
+type Ctx = {
+  params: Promise<{ projectId: string; repositoryId: string }>
+}
 
 /**
  * POST /api/v1/projects/:projectId/repositories/:repositoryId/sync
- * Trigger a repository sync
+ * Trigger a live repository sync against GitHub
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ projectId: string; repositoryId: string }> }
-) {
+export async function POST(_request: Request, ctx: Ctx) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const { projectId, repositoryId } = await ctx.params
+    const authCtx = await requireAuth()
+    const orgCtx = await requireOrganization(authCtx)
+    requirePermission(orgCtx.memberRole, "project:write")
 
-    const { projectId, repositoryId } = await params
-
-    // Verify project access
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
-
-    // Verify repository exists and belongs to project
-    const repository = await RepositoryService.getById(repositoryId)
-    if (!repository || repository.projectId !== projectId) {
-      return NextResponse.json(
-        { error: "Repository not found" },
-        { status: 404 }
-      )
-    }
-
-    // Update sync status to syncing
-    await RepositoryService.updateSyncStatus(repositoryId, "syncing")
-
-    // Find GitHub integration for the project
-    const integration = await db.integration.findFirst({
+    // Explicitly verify the repository exists in this project AND this
+    // organization before syncing (defense-in-depth on top of the org
+    // scoping inside syncRepositoryWithGithub).
+    const repository = await db.repository.findFirst({
       where: {
+        id: repositoryId,
         projectId,
-        provider: "github",
-        enabled: true,
+        project: { organizationId: orgCtx.organizationId },
       },
     })
+    if (!repository) throw notFound("Repository not found")
 
-    // In a real implementation, this would clone/fetch the repo via GitHub API
-    // For now, simulate a successful sync
-    if (integration) {
-      // TODO: Call GitHub API to fetch latest changes using the integration token
-      // This would typically involve:
-      // 1. Decrypting the access token
-      // 2. Calling GitHub API to fetch refs/commits
-      // 3. Updating local repository metadata
-    }
-
-    // Update sync status to synced
-    await RepositoryService.updateSyncStatus(repositoryId, "synced")
-
-    // Log audit event
-    await db.auditLog.create({
-      data: {
-        organizationId: project.organizationId,
-        actorUserId: session.user.id,
-        action: "project_update",
-        resourceType: "repository",
-        resourceId: repositoryId,
-        metadata: {
-          action: "sync",
-          projectId,
-          repositoryName: repository.name,
-        },
-      },
-    })
-
-    // Fetch the updated repository to return the latest state
-    const updatedRepository = await RepositoryService.getById(repositoryId)
-
-    return NextResponse.json({ data: updatedRepository })
-  } catch (error) {
-    console.error("Error syncing repository:", error)
-
-    // Try to set sync status to error if we have enough context
-    try {
-      const { projectId, repositoryId } = await params
-      const repository = await RepositoryService.getById(repositoryId)
-      if (repository && repository.projectId === projectId) {
-        await RepositoryService.updateSyncStatus(repositoryId, "error")
-      }
-    } catch {
-      // Best effort error status update
-    }
-
-    return NextResponse.json(
-      { error: "Failed to sync repository" },
-      { status: 500 }
+    const result = await syncRepositoryWithGithub(
+      repositoryId,
+      orgCtx.organizationId!
     )
+
+    return json({ data: { synced: result.synced, message: result.message } })
+  } catch (error) {
+    return handleRouteError(error)
   }
 }

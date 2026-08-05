@@ -1,6 +1,12 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import {
+  requireAuth,
+  requireOrganization,
+  requirePermission,
+} from "@/lib/api/auth"
+import { handleRouteError, json } from "@/lib/api/http"
+import { badRequest, notFound } from "@/lib/api/errors"
 import { RepositoryService } from "@/lib/services/repository-service"
-import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getDecryptedToken } from "@/lib/services/integrations"
 
@@ -8,9 +14,42 @@ import { getDecryptedToken } from "@/lib/services/integrations"
  * Parse a GitHub URL to extract owner and repo
  */
 function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
-  const match = url.match(/github\.com\/([^/]+)\/([^/]+)/)
-  if (match) return { owner: match[1], repo: match[2].replace(/\.git$/, "") }
-  return null
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    return null
+  }
+  if (
+    parsed.hostname !== "github.com" &&
+    parsed.hostname !== "www.github.com"
+  ) {
+    return null
+  }
+  const parts = parsed.pathname
+    .replace(/^\/+/, "")
+    .replace(/\.git$/, "")
+    .split("/")
+    .filter(Boolean)
+  if (parts.length !== 2) return null
+  return { owner: parts[0], repo: parts[1] }
+}
+
+function githubError(message: string) {
+  return json(
+    { error: { code: "github_api_error", message } },
+    { status: 502 }
+  )
+}
+
+type GitHubContentItem = {
+  name: string
+  path: string
+  type: string
+  size: number | null
+  sha: string
+  download_url: string | null
+  html_url: string
 }
 
 /**
@@ -29,38 +68,21 @@ export async function GET(
   }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { projectId, repositoryId, path } = await params
+    const authCtx = await requireAuth()
+    const orgCtx = await requireOrganization(authCtx)
+    requirePermission(orgCtx.memberRole, "project:read")
 
-    // Verify project access
+    // Verify the project belongs to the active organization
     const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
+      where: { id: projectId, organizationId: orgCtx.organizationId },
     })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
+    if (!project) throw notFound("Project not found")
 
     // Verify repository exists and belongs to project
     const repository = await RepositoryService.getById(repositoryId)
     if (!repository || repository.projectId !== projectId) {
-      return NextResponse.json(
-        { error: "Repository not found" },
-        { status: 404 }
-      )
+      throw notFound("Repository not found")
     }
 
     // Build the file path from the catch-all segment
@@ -68,17 +90,13 @@ export async function GET(
 
     // Parse query params
     const url = new URL(req.url)
-    const ref = url.searchParams.get("ref") || repository.branch
+    const ref = url.searchParams.get("ref") || repository.branch || "main"
 
     // Parse GitHub URL
     const parsed = parseGitHubUrl(repository.url)
     if (!parsed) {
-      return NextResponse.json(
-        {
-          error:
-            "Unsupported repository URL. Only GitHub repositories are supported.",
-        },
-        { status: 400 }
+      throw badRequest(
+        "Unsupported repository URL. Only GitHub repositories are supported."
       )
     }
 
@@ -92,74 +110,63 @@ export async function GET(
       include: { project: true },
     })
 
-    if (integration) {
-      try {
-        const token = await getDecryptedToken(integration)
-
-        const endpoint = filePath
-          ? `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/contents/${encodeURIComponent(filePath)}?ref=${encodeURIComponent(ref)}`
-          : `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/contents?ref=${encodeURIComponent(ref)}`
-
-        const res = await fetch(endpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-          },
-        })
-
-        if (res.ok) {
-          const contents = await res.json()
-
-          // GitHub returns an array for directories, an object for single files
-          const items = Array.isArray(contents) ? contents : [contents]
-
-          return NextResponse.json({
-            data: items.map(
-              (item: {
-                name: string
-                path: string
-                type: string
-                size: number | null
-                sha: string
-                download_url: string | null
-                html_url: string
-              }) => ({
-                name: item.name,
-                path: item.path,
-                type: item.type, // "file", "dir", "symlink", "submodule"
-                size: item.size,
-                sha: item.sha,
-                downloadUrl: item.download_url,
-                htmlUrl: item.html_url,
-              })
-            ),
-            meta: {
-              path: filePath || "/",
-              ref,
-            },
-          })
-        }
-      } catch (error) {
-        console.error("GitHub API error fetching tree:", error)
-        // Fall through to fallback
-      }
+    if (!integration) {
+      return githubError(
+        "GitHub integration is not configured for this project"
+      )
     }
 
-    // Fallback: return empty array if API unavailable
-    return NextResponse.json({
-      data: [],
+    let res: Response
+    try {
+      const token = await getDecryptedToken(integration)
+
+      const endpoint = filePath
+        ? `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/contents/${encodeURIComponent(filePath)}?ref=${encodeURIComponent(ref)}`
+        : `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/contents?ref=${encodeURIComponent(ref)}`
+
+      res = await fetch(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      })
+    } catch (error) {
+      console.error("GitHub API error fetching tree:", error)
+      return githubError(
+        "GitHub API error — token may be revoked or lack access"
+      )
+    }
+
+    if (!res.ok) {
+      return githubError(
+        `GitHub API error: ${res.status} — token may be revoked or lack access`
+      )
+    }
+
+    const contents = (await res.json()) as
+      | GitHubContentItem
+      | GitHubContentItem[]
+
+    // GitHub returns an array for directories, an object for single files
+    const items = Array.isArray(contents) ? contents : [contents]
+
+    return json({
+      data: items.map((item) => ({
+        name: item.name,
+        path: item.path,
+        type: item.type, // "file", "dir", "symlink", "submodule"
+        size: item.size,
+        sha: item.sha,
+        downloadUrl: item.download_url,
+        htmlUrl: item.html_url,
+      })),
       meta: {
         path: filePath || "/",
         ref,
-        fallback: true,
       },
     })
   } catch (error) {
-    console.error("Error fetching repository tree:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch repository tree" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }
