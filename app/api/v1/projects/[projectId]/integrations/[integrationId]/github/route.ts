@@ -16,8 +16,12 @@ import {
 
 const githubQuerySchema = z.object({
   type: z.enum(["repos", "pulls", "commits"]),
-  owner: z.string().optional(),
-  repo: z.string().optional(),
+  // URLSearchParams.get() returns `null` for absent params, which
+  // z.string().optional() rejects. nullish accepts null (absent) and
+  // undefined, so `type=repos` works without owner/repo while pulls and
+  // commits still require them below.
+  owner: z.string().nullish(),
+  repo: z.string().nullish(),
 })
 
 type Ctx = { params: Promise<{ projectId: string; integrationId: string }> }
