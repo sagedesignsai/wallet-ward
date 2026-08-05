@@ -22,6 +22,7 @@ import { searchAuditLogsTool } from "@/lib/ai/tools/ops/search-audit-logs"
 import { getProjectsTool } from "@/lib/ai/tools/shared/get-projects"
 import { getRepositoriesTool } from "@/lib/ai/tools/shared/get-repositories"
 import { getProjectFilesTool } from "@/lib/ai/tools/shared/get-project-files"
+import { createArtifactTool } from "@/lib/ai/tools/shared/create-artifact"
 import { agentProxyTool } from "@/lib/ai/tools/shared/agent-proxy"
 import { proposeActionTool } from "@/lib/ai/tools/shared/propose-action"
 import { getPendingProposalsTool } from "@/lib/ai/tools/shared/get-pending-proposals"
@@ -39,6 +40,7 @@ export const contentAgentTools = {
   getProjects: getProjectsTool,
   getRepositories: getRepositoriesTool,
   getProjectFiles: getProjectFilesTool,
+  createArtifact: createArtifactTool,
   agentProxy: agentProxyTool,
   proposeAction: proposeActionTool,
   getPendingProposals: getPendingProposalsTool,

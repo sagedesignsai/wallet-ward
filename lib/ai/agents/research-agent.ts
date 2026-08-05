@@ -16,6 +16,7 @@ import { searchAuditLogsTool } from "@/lib/ai/tools/ops/search-audit-logs"
 import { getProjectsTool } from "@/lib/ai/tools/shared/get-projects"
 import { getRepositoriesTool } from "@/lib/ai/tools/shared/get-repositories"
 import { getProjectFilesTool } from "@/lib/ai/tools/shared/get-project-files"
+import { createArtifactTool } from "@/lib/ai/tools/shared/create-artifact"
 import { proposeActionTool } from "@/lib/ai/tools/shared/propose-action"
 import { getPendingProposalsTool } from "@/lib/ai/tools/shared/get-pending-proposals"
 
@@ -26,6 +27,7 @@ export const researchAgentTools = {
   getProjects: getProjectsTool,
   getRepositories: getRepositoriesTool,
   getProjectFiles: getProjectFilesTool,
+  createArtifact: createArtifactTool,
   proposeAction: proposeActionTool,
   getPendingProposals: getPendingProposalsTool,
 } as const

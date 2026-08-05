@@ -27,6 +27,7 @@ import { sendSlackNotificationTool } from "@/lib/ai/tools/ops/send-slack-notific
 import { getProjectsTool } from "@/lib/ai/tools/shared/get-projects"
 import { getRepositoriesTool } from "@/lib/ai/tools/shared/get-repositories"
 import { getProjectFilesTool } from "@/lib/ai/tools/shared/get-project-files"
+import { createArtifactTool } from "@/lib/ai/tools/shared/create-artifact"
 import { getSecretsTool } from "@/lib/ai/tools/shared/get-secrets"
 import { agentProxyTool } from "@/lib/ai/tools/shared/agent-proxy"
 import { proposeActionTool } from "@/lib/ai/tools/shared/propose-action"
@@ -54,6 +55,7 @@ export const codingAgentTools = {
   getProjects: getProjectsTool,
   getRepositories: getRepositoriesTool,
   getProjectFiles: getProjectFilesTool,
+  createArtifact: createArtifactTool,
   getSecrets: getSecretsTool,
   agentProxy: agentProxyTool,
   proposeAction: proposeActionTool,
