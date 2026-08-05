@@ -44,6 +44,17 @@ export async function POST(
       "project:write"
     )
 
+    // Coarse pre-filter BEFORE the multipart body is buffered — by the time
+    // fileField.size is readable, formData() has already parsed the whole
+    // request into memory. A self-hosted Node server has no default request
+    // body cap, so reject clearly-oversized bodies via Content-Length first.
+    // The 1 MB slack covers the multipart boundary + form-field overhead;
+    // the exact per-file check below stays authoritative.
+    const contentLength = Number(req.headers.get("content-length") ?? 0)
+    if (contentLength > MAX_FILE_SIZE + 1024 * 1024) {
+      throw new ApiError(413, "payload_too_large", "File exceeds maximum size")
+    }
+
     const formData = await req.formData()
     const fileField = formData.get("file") as File | null
 
@@ -51,9 +62,10 @@ export async function POST(
       throw badRequest("No file provided")
     }
 
-    // Enforce the size cap BEFORE buffering any bytes — a self-hosted Node
-    // server has no request body cap, so an unbounded arrayBuffer() read is
-    // an OOM risk.
+    // Authoritative per-file size check. formData() above has already buffered
+    // the body by this point, so this is a correctness check — the
+    // Content-Length pre-filter above is what prevents an OOM from an
+    // unbounded body read.
     if (fileField.size > MAX_FILE_SIZE) {
       throw new ApiError(413, "payload_too_large", "File exceeds maximum size")
     }
