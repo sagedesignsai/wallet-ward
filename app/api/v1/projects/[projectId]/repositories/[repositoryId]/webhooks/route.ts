@@ -3,7 +3,11 @@ import { db } from "@/lib/db"
 import { RepositoryService } from "@/lib/services/repository-service"
 import { getDecryptedToken } from "@/lib/services/integrations"
 import { getOrganizationDek } from "@/lib/services/encryption-keys"
-import { encryptString } from "@/lib/crypto"
+import {
+  decryptString,
+  encryptString,
+  type EncryptedPayload,
+} from "@/lib/crypto"
 import {
   requireAuth,
   requireOrganization,
@@ -32,6 +36,50 @@ const VALID_EVENTS = [
  */
 function generateWebhookSecret(): string {
   return `whsec_${crypto.randomBytes(32).toString("hex")}`
+}
+
+/**
+ * Parse a stored secret envelope. Returns null when the value is not a valid
+ * aes-256-gcm envelope (legacy plaintext secret).
+ */
+function parseEncryptedSecret(raw: string): EncryptedPayload | null {
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    if (
+      typeof parsed.ciphertext !== "string" ||
+      typeof parsed.iv !== "string" ||
+      typeof parsed.authTag !== "string" ||
+      parsed.algorithm !== "aes-256-gcm"
+    ) {
+      return null
+    }
+    return {
+      ciphertext: parsed.ciphertext,
+      iv: parsed.iv,
+      authTag: parsed.authTag,
+      algorithm: parsed.algorithm,
+    }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Return the plaintext HMAC secret for a stored webhook: decrypt the envelope
+ * with the org DEK, falling back to the raw value for legacy plaintext rows.
+ */
+async function decryptStoredSecret(
+  stored: string,
+  organizationId: string
+): Promise<string> {
+  const envelope = parseEncryptedSecret(stored)
+  if (!envelope) return stored
+  try {
+    const dek = await getOrganizationDek(organizationId)
+    return decryptString(envelope, dek)
+  } catch {
+    return stored
+  }
 }
 
 type Ctx = { params: Promise<{ projectId: string; repositoryId: string }> }
@@ -92,7 +140,9 @@ async function registerGitHubWebhook(input: {
     return {
       hookId: null,
       error:
-        error instanceof Error ? error.message : "could not decrypt GitHub token",
+        error instanceof Error
+          ? error.message
+          : "could not decrypt GitHub token",
     }
   }
 
@@ -207,7 +257,39 @@ export async function POST(req: NextRequest, ctx: Ctx) {
 
     // Validate event is a valid WebhookEvent enum value
     if (!VALID_EVENTS.includes(body.event)) {
-      throw badRequest(`Invalid event. Must be one of: ${VALID_EVENTS.join(", ")}`)
+      throw badRequest(
+        `Invalid event. Must be one of: ${VALID_EVENTS.join(", ")}`
+      )
+    }
+
+    // Idempotent creation: registering the same (repository, event, url)
+    // twice would create a duplicate GitHub hook. When an identical webhook
+    // already exists, return it — including its plaintext secret — instead
+    // of registering a second hook.
+    const existing = await db.repositoryWebhook.findFirst({
+      where: { repositoryId, event: body.event, url: body.url },
+    })
+    if (existing) {
+      const existingSecret = await decryptStoredSecret(
+        existing.secret,
+        orgCtx.organizationId
+      )
+      return json(
+        {
+          data: {
+            id: existing.id,
+            repositoryId: existing.repositoryId,
+            event: existing.event,
+            url: existing.url,
+            enabled: existing.enabled,
+            secret: existingSecret,
+            githubHookId: existing.githubHookId,
+            createdAt: existing.createdAt,
+            updatedAt: existing.updatedAt,
+          },
+        },
+        { status: 201 }
+      )
     }
 
     // Generate a unique HMAC secret for signature verification

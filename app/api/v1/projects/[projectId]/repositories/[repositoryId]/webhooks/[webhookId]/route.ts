@@ -28,7 +28,8 @@ function parseEncryptedSecret(raw: string): EncryptedPayload | null {
     if (
       typeof parsed.ciphertext !== "string" ||
       typeof parsed.iv !== "string" ||
-      typeof parsed.authTag !== "string"
+      typeof parsed.authTag !== "string" ||
+      parsed.algorithm !== "aes-256-gcm"
     ) {
       return null
     }
@@ -85,10 +86,10 @@ async function unregisterGitHubWebhook(input: {
   organizationId: string
   githubHookId: string | null
   storedSecret: string
-}): Promise<void> {
+}): Promise<{ skippedAmbiguous: boolean }> {
   try {
     const parsed = RepositoryService.parseGitHubUrl(input.repository.url)
-    if (!parsed) return
+    if (!parsed) return { skippedAmbiguous: false }
 
     const integration = await db.integration.findFirst({
       where: { projectId: input.projectId, provider: "github", enabled: true },
@@ -98,7 +99,7 @@ async function unregisterGitHubWebhook(input: {
       console.error(
         "GitHub webhook unregister: no enabled GitHub integration found"
       )
-      return
+      return { skippedAmbiguous: false }
     }
 
     let token: string
@@ -106,7 +107,7 @@ async function unregisterGitHubWebhook(input: {
       token = await getDecryptedToken(integration)
     } catch (error) {
       console.error("GitHub webhook unregister: failed to decrypt token", error)
-      return
+      return { skippedAmbiguous: false }
     }
 
     const baseUrl = `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/hooks`
@@ -128,7 +129,7 @@ async function unregisterGitHubWebhook(input: {
           `GitHub webhook unregister: failed to delete hook ${input.githubHookId} (${delRes.status})`
         )
       }
-      return
+      return { skippedAmbiguous: false }
     }
 
     // Legacy rows without a stored hook id: recover the plaintext secret
@@ -145,7 +146,7 @@ async function unregisterGitHubWebhook(input: {
       console.error(
         `GitHub webhook unregister: failed to list hooks (${hooksRes.status})`
       )
-      return
+      return { skippedAmbiguous: false }
     }
 
     const hooks = (await hooksRes.json()) as Array<{
@@ -179,14 +180,12 @@ async function unregisterGitHubWebhook(input: {
         "GitHub webhook unregister: ambiguous URL match (secret omitted), skipping GitHub deletion",
         { hookIds: urlMatches.map((hook) => hook.id) }
       )
-      return
+      return { skippedAmbiguous: true }
     }
 
     if (!target) {
-      console.error(
-        "GitHub webhook unregister: no matching GitHub hook found"
-      )
-      return
+      console.error("GitHub webhook unregister: no matching GitHub hook found")
+      return { skippedAmbiguous: false }
     }
 
     const delRes = await fetch(`${baseUrl}/${target.id}`, {
@@ -198,8 +197,10 @@ async function unregisterGitHubWebhook(input: {
         `GitHub webhook unregister: failed to delete hook ${target.id} (${delRes.status})`
       )
     }
+    return { skippedAmbiguous: false }
   } catch (error) {
     console.error("GitHub webhook unregister failed:", error)
+    return { skippedAmbiguous: false }
   }
 }
 
@@ -237,19 +238,45 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
     }
 
     // Unregister from GitHub first (best-effort — never blocks deletion)
+    let skippedAmbiguous = false
     if (repository.provider === "github") {
-      await unregisterGitHubWebhook({
+      const result = await unregisterGitHubWebhook({
         repository: { url: repository.url },
         projectId,
         organizationId: orgCtx.organizationId,
         githubHookId: webhook.githubHookId,
         storedSecret: webhook.secret,
       })
+      skippedAmbiguous = result.skippedAmbiguous
     }
 
     await db.repositoryWebhook.delete({
       where: { id: webhookId },
     })
+
+    // When the legacy path skipped the GitHub deletion because it could not
+    // tell which hook was ours, record it so the orphaned GitHub hook is
+    // discoverable. Same audit conventions as the POST route.
+    if (skippedAmbiguous) {
+      await db.auditLog.create({
+        data: {
+          organizationId: orgCtx.organizationId,
+          actorUserId: authCtx.userId,
+          action: "project_update",
+          resourceType: "repository_webhook",
+          resourceId: webhookId,
+          metadata: {
+            action: "delete_skipped_ambiguous",
+            projectId,
+            repositoryId,
+            repositoryName: repository.name,
+            event: webhook.event,
+            url: webhook.url,
+            webhookId,
+          },
+        },
+      })
+    }
 
     // Log audit event
     await db.auditLog.create({

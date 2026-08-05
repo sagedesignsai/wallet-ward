@@ -177,6 +177,17 @@ export async function POST(request: Request) {
       },
     ]
 
+    // 7a. Pad to a fixed candidate count so the verify loop's work is constant
+    //     for small candidate sets — an unknown repo (1 dummy) must be
+    //     indistinguishable by timing from a known repo (N real + 1 dummy).
+    const MIN_CANDIDATES = 8
+    while (candidates.length < MIN_CANDIDATES) {
+      candidates.push({
+        repositoryId: null as string | null,
+        secret: crypto.randomBytes(32).toString("hex"),
+      })
+    }
+
     // 8. Verify the HMAC: sha256(rawBody) keyed with each candidate secret.
     //    A delivery is trusted if ANY enabled webhook produces a matching
     //    signature; the first match wins.
@@ -267,7 +278,8 @@ function parseEncryptedSecret(raw: string): EncryptedPayload | null {
     if (
       typeof parsed.ciphertext !== "string" ||
       typeof parsed.iv !== "string" ||
-      typeof parsed.authTag !== "string"
+      typeof parsed.authTag !== "string" ||
+      parsed.algorithm !== "aes-256-gcm"
     ) {
       return null
     }
