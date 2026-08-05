@@ -21,7 +21,7 @@ import {
 } from "@phosphor-icons/react"
 import type { FileType, FileVisibility } from "@prisma/client"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useFile, useProjectFiles } from "@/hooks/use-project-files"
 import { Button } from "@/components/ui/button"
@@ -133,7 +133,6 @@ function FileDetailInner({
   fileId: string
 }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { file, isLoading, error } = useFile(projectId, fileId)
   const { updateFile, deleteFile } = useProjectFiles(projectId)
@@ -158,24 +157,22 @@ function FileDetailInner({
   }, [file])
 
   /* ---- dashboard config ---- */
-  useEffect(() => {
-    if (project && file) {
-      setConfig({
-        title: file.name,
-        description: "File details",
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          {
-            label: "Files",
-            href: `/dashboard/projects/${projectId}/files`,
-          },
-          { label: file.name },
-        ],
-      })
-    }
-  }, [project, file, setConfig, projectId])
+  if (project && file) {
+    useDashboardConfigStore.setState({
+      title: file.name,
+      description: "File details",
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        {
+          label: "Files",
+          href: `/dashboard/projects/${projectId}/files`,
+        },
+        { label: file.name },
+      ],
+    })
+  }
 
   /* ---- handlers ---- */
   const markDirty = () => setDirty(true)

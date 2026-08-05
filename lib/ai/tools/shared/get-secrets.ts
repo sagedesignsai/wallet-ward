@@ -13,7 +13,7 @@ export const getSecretsTool = tool({
   description:
     "Retrieve secrets from a project environment. Returns secret names and types only — never values. Use agentProxy to inject credentials server-side instead of reading raw values.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     environmentId: z.string().describe("The environment ID (e.g., prod, staging)"),
     filterByType: z
       .enum([
@@ -31,14 +31,16 @@ export const getSecretsTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, environmentId, filterByType }, { context }) => {
     try {
+      const resolvedProjectId = projectId ?? context.projectId
       const { prisma } = await import("@/lib/db")
 
       const secrets = await prisma.secret.findMany({
         where: {
-          projectId,
+          projectId: resolvedProjectId,
           environmentId,
           type: filterByType,
           project: { organizationId: context.organizationId },

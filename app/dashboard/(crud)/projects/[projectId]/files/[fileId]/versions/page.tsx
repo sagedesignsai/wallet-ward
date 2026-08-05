@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react"
 import Link from "next/link"
 import { WarningIcon, ArrowLeftIcon, ClockIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useFile } from "@/hooks/use-project-files"
 import { Button } from "@/components/ui/button"
@@ -57,7 +57,6 @@ function FileVersionsInner({
   projectId: string
   fileId: string
 }) {
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const {
     file,
@@ -72,28 +71,26 @@ function FileVersionsInner({
   const [confirmRestore, setConfirmRestore] = useState<FileVersion | null>(null)
 
   /* ---- dashboard config ---- */
-  useEffect(() => {
-    if (project && file) {
-      setConfig({
-        title: `${file.name} — Versions`,
-        description: "Version history for this file",
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          {
-            label: "Files",
-            href: `/dashboard/projects/${projectId}/files`,
-          },
-          {
-            label: file.name,
-            href: `/dashboard/projects/${projectId}/files/${fileId}`,
-          },
-          { label: "Versions" },
-        ],
-      })
-    }
-  }, [project, file, setConfig, projectId, fileId])
+  if (project && file) {
+    useDashboardConfigStore.setState({
+      title: `${file.name} — Versions`,
+      description: "Version history for this file",
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        {
+          label: "Files",
+          href: `/dashboard/projects/${projectId}/files`,
+        },
+        {
+          label: file.name,
+          href: `/dashboard/projects/${projectId}/files/${fileId}`,
+        },
+        { label: "Versions" },
+      ],
+    })
+  }
 
   /* ---- fetch versions ---- */
   useEffect(() => {
@@ -178,7 +175,7 @@ function FileVersionsInner({
   }
 
   const handleRequestRestore = (versionId: string) => {
-    const version = versions.find(v => v.id === versionId)
+    const version = versions.find((v) => v.id === versionId)
     if (version) setConfirmRestore(version)
   }
 

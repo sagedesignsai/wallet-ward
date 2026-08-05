@@ -149,7 +149,7 @@ export function ProposalDetail({
                 className="h-8 gap-1.5 text-xs"
                 asChild
               >
-                <Link href={`/dashboard/agents/${proposal.agentSessionId}`}>
+                <Link href={`/dashboard/sessions/${proposal.agentSessionId}`}>
                   <RobotIcon className="size-3.5" />
                   Agent Session
                 </Link>

@@ -12,7 +12,7 @@ export const jiraCreateIssueTool = tool({
   The tool will automatically use the connected Jira integration for the current project.`,
   
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID that has the Jira integration"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     summary: z.string().min(1).describe("Brief summary of the issue (required)"),
     description: z.string().optional().describe("Detailed description of the issue (supports Jira markdown)"),
     issueType: z.enum(["Task", "Bug", "Story", "Epic"]).default("Task").describe("Type of issue to create"),
@@ -24,9 +24,11 @@ export const jiraCreateIssueTool = tool({
 
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   
   execute: async (input, { context }) => {
+    const resolvedProjectId = input.projectId ?? context.projectId
     try {
       const { prisma } = await import("@/lib/db")
       const { getDecryptedToken } = await import("@/lib/services/integrations")
@@ -34,7 +36,7 @@ export const jiraCreateIssueTool = tool({
       // Find the Jira integration for this project
       const integration = await prisma.integration.findFirst({
         where: {
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           provider: "jira",
           enabled: true,
           project: { organizationId: context.organizationId },

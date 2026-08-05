@@ -1,13 +1,19 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import { FolderPlusIcon, ArrowLeftIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProjects } from "@/hooks/use-projects"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -23,7 +29,6 @@ function slugify(input: string): string {
 }
 
 export default function ProjectOnboardingPage() {
-  const { setConfig } = useDashboardConfig()
   const router = useRouter()
   const { createProject } = useProjects()
 
@@ -34,13 +39,11 @@ export default function ProjectOnboardingPage() {
 
   const slug = slugify(name)
 
-  useEffect(() => {
-    setConfig({
-      title: "",
-      description: "",
-      breadcrumbs: [],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "",
+    description: "",
+    breadcrumbs: [],
+  })
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -162,13 +165,15 @@ export default function ProjectOnboardingPage() {
 
               <div className="rounded-lg border border-border/40 bg-muted/20 p-3">
                 <p className="text-xs text-muted-foreground">
-                  💡 <span className="font-medium">Tip:</span> Each project can have multiple environments (dev, staging, production) with separate secrets.
+                  💡 <span className="font-medium">Tip:</span> Each project can
+                  have multiple environments (dev, staging, production) with
+                  separate secrets.
                 </p>
               </div>
             </form>
           </CardContent>
 
-          <CardFooter className="border-t border-border/40 gap-2">
+          <CardFooter className="gap-2 border-t border-border/40">
             <Button
               type="button"
               variant="outline"

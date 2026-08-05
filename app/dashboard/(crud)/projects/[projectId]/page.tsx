@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, use } from "react"
+import React, { use } from "react"
 import Link from "next/link"
 import {
   ArrowRightIcon,
@@ -19,9 +19,12 @@ import {
   FolderIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
-import { useAgentSessions, type AgentSessionDto } from "@/hooks/use-agent-sessions"
+import {
+  useAgentSessions,
+  type AgentSessionDto,
+} from "@/hooks/use-agent-sessions"
 import { useProposals } from "@/hooks/use-proposals"
 import { useProjectIntegrations } from "@/hooks/use-project-integrations"
 import { useSecrets } from "@/hooks/use-secrets"
@@ -64,7 +67,6 @@ export default function ProjectOverviewPage({
 }
 
 function ProjectOverviewInner({ projectId }: { projectId: string }) {
-  const { setConfig } = useDashboardConfig()
   const { project, isLoading, error } = useProject(projectId)
   const { sessions } = useAgentSessions({ projectId, limit: 5 })
   const { proposals } = useProposals({
@@ -79,19 +81,17 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
   const { repositories } = useRepositories(projectId)
   const { files } = useProjectFiles(projectId)
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        title: project.name,
-        description: project.description ?? "No description",
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name },
-        ],
-      })
-    }
-  }, [project, setConfig])
+  if (project) {
+    useDashboardConfigStore.setState({
+      title: project.name,
+      description: project.description ?? "No description",
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name },
+      ],
+    })
+  }
 
   // Loading skeleton
   if (isLoading) {
@@ -137,7 +137,8 @@ function ProjectOverviewInner({ projectId }: { projectId: string }) {
   }
 
   const environments = project.environments ?? []
-  const activeSessions = sessions?.filter((s: { status: string }) => s.status === "active") ?? []
+  const activeSessions =
+    sessions?.filter((s: { status: string }) => s.status === "active") ?? []
   const todoTasks = tasks.filter((t) => t.status === "todo")
   const inProgressTasks = tasks.filter((t) => t.status === "in_progress")
   const doneTasks = tasks.filter((t) => t.status === "done")

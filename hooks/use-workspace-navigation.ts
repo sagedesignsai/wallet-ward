@@ -66,13 +66,22 @@ export function useWorkspaceNavigation() {
      *
      * Creates a new agent session with the given type, then navigates
      * to the workspace deep-link for that session.
+     *
+     * Pass `options.projectId` to scope the session to a specific project;
+     * falls back to the globally active project when omitted.
      */
     const launchAgentInWorkspace = useCallback(
-        (agentType: NonNullable<ChatSession["agentType"]>) => {
-            const sessionId = launchAgent(agentType)
+        (
+            agentType: NonNullable<ChatSession["agentType"]>,
+            options?: { projectId?: string }
+        ) => {
+            const sessionId = launchAgent(
+                agentType,
+                options?.projectId ?? activeProjectId ?? undefined
+            )
             router.push(`/dashboard/workspace/${sessionId}`)
         },
-        [router, launchAgent]
+        [router, launchAgent, activeProjectId]
     )
 
     return { openWorkspace, launchAgentInWorkspace }

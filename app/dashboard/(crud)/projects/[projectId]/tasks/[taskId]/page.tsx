@@ -5,7 +5,7 @@ import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import { WarningIcon, ListChecksIcon, TrashIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useTask, type Task } from "@/hooks/use-tasks"
 import { OpenInComputer } from "@/components/workspace"
@@ -53,7 +53,6 @@ function TaskDetailInner({
   taskId: string
 }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { task, isLoading, isSaving, error, save, remove } = useTask(
     projectId,
@@ -74,43 +73,41 @@ function TaskDetailInner({
     }
   }, [task])
 
-  useEffect(() => {
-    if (project && task) {
-      setConfig({
-        title: task.title,
-        description: "Edit task",
-        actions: (
-          <div className="flex gap-2">
-            <OpenInComputer
-              showLabel
-              label="Open in Computer"
-              size="sm"
-              variant="outline"
-              tab={{
+  if (project && task) {
+    useDashboardConfigStore.setState({
+      title: task.title,
+      description: "Edit task",
+      actions: (
+        <div className="flex gap-2">
+          <OpenInComputer
+            showLabel
+            label="Open in Computer"
+            size="sm"
+            variant="outline"
+            tab={{
+              type: "task",
+              title: task.title,
+              content: {
                 type: "task",
                 title: task.title,
-                content: {
-                  type: "task",
-                  title: task.title,
-                  description: task.description ?? undefined,
-                  status: task.status,
-                  resourceId: task.id,
-                  projectId: task.projectId,
-                },
-              }}
-            />
-          </div>
-        ),
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          { label: "Tasks", href: `/dashboard/projects/${projectId}/tasks` },
-          { label: task.title },
-        ],
-      })
-    }
-  }, [project, task, setConfig, projectId])
+                description: task.description ?? undefined,
+                status: task.status,
+                resourceId: task.id,
+                projectId: task.projectId,
+              },
+            }}
+          />
+        </div>
+      ),
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        { label: "Tasks", href: `/dashboard/projects/${projectId}/tasks` },
+        { label: task.title },
+      ],
+    })
+  }
 
   const handleSave = async () => {
     const updated = await save({

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, use } from "react"
+import React, { use } from "react"
 import Link from "next/link"
 import {
   BuildingsIcon,
@@ -12,7 +12,7 @@ import {
   GearIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useOrgDetail } from "@/hooks/use-org-detail"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
@@ -62,22 +62,19 @@ export default function OrgOverviewPage({
 }
 
 function OrgOverviewInner({ orgId }: { orgId: string }) {
-  const { setConfig } = useDashboardConfig()
   const { organization, isLoading, error } = useOrgDetail(orgId)
 
-  useEffect(() => {
-    if (organization) {
-      setConfig({
-        title: organization.name,
-        description: organization.slug,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Organizations", href: "/dashboard/organizations" },
-          { label: organization.name },
-        ],
-      })
-    }
-  }, [organization, setConfig])
+  if (organization) {
+    useDashboardConfigStore.setState({
+      title: organization.name,
+      description: organization.slug,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Organizations", href: "/dashboard/organizations" },
+        { label: organization.name },
+      ],
+    })
+  }
 
   // Loading skeleton
   if (isLoading) {

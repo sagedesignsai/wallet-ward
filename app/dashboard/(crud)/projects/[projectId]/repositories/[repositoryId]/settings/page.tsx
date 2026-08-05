@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import {
@@ -13,7 +13,7 @@ import {
   GearIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useRepositories, useRepository } from "@/hooks/use-repositories"
 import { RepositoryForm } from "@/components/repositories/repository-form"
@@ -53,7 +53,6 @@ function RepositorySettingsInner({
   repositoryId: string
 }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { repository, isLoading, error } = useRepository(
     projectId,
@@ -64,32 +63,30 @@ function RepositorySettingsInner({
   const [isSaving, setIsSaving] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  useEffect(() => {
-    if (project && repository) {
-      setConfig({
-        title: "Settings",
-        description: `Configure ${repository.name}`,
-        actions: null,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          {
-            label: "Repositories",
-            href: `/dashboard/projects/${projectId}/repositories`,
-          },
-          {
-            label: repository.name,
-            href: `/dashboard/projects/${projectId}/repositories/${repositoryId}`,
-          },
-          { label: "Settings" },
-        ],
-      })
-    }
-  }, [project, repository, setConfig, projectId, repositoryId])
+  if (project && repository) {
+    useDashboardConfigStore.setState({
+      title: "Settings",
+      description: `Configure ${repository.name}`,
+      actions: null,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        {
+          label: "Repositories",
+          href: `/dashboard/projects/${projectId}/repositories`,
+        },
+        {
+          label: repository.name,
+          href: `/dashboard/projects/${projectId}/repositories/${repositoryId}`,
+        },
+        { label: "Settings" },
+      ],
+    })
+  }
 
   const handleUpdate = async (data: RepositoryFormOutput) => {
     setIsSaving(true)

@@ -10,7 +10,7 @@ import {
   TreeStructureIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useRepository } from "@/hooks/use-repositories"
 import { Button } from "@/components/ui/button"
@@ -51,7 +51,6 @@ function BranchesInner({
   projectId: string
   repositoryId: string
 }) {
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { repository, isLoading: repoLoading } = useRepository(
     projectId,
@@ -63,32 +62,30 @@ function BranchesInner({
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
 
-  useEffect(() => {
-    if (project && repository) {
-      setConfig({
-        title: "Branches",
-        description: `Manage branches for ${repository.name}`,
-        actions: null,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          {
-            label: "Repositories",
-            href: `/dashboard/projects/${projectId}/repositories`,
-          },
-          {
-            label: repository.name,
-            href: `/dashboard/projects/${projectId}/repositories/${repositoryId}`,
-          },
-          { label: "Branches" },
-        ],
-      })
-    }
-  }, [project, repository, setConfig, projectId, repositoryId])
+  if (project && repository) {
+    useDashboardConfigStore.setState({
+      title: "Branches",
+      description: `Manage branches for ${repository.name}`,
+      actions: null,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        {
+          label: "Repositories",
+          href: `/dashboard/projects/${projectId}/repositories`,
+        },
+        {
+          label: repository.name,
+          href: `/dashboard/projects/${projectId}/repositories/${repositoryId}`,
+        },
+        { label: "Branches" },
+      ],
+    })
+  }
 
   useEffect(() => {
     let cancelled = false

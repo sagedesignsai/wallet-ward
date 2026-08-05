@@ -10,7 +10,7 @@ export const sendSlackNotificationTool = tool({
   description:
     "Send a formatted notification card or message to a Slack channel via webhook or integration.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     channel: z.string().default("#engineering").describe("Slack channel name"),
     message: z.string().describe("Message text or summary"),
     webhookUrl: z.string().url().optional().describe("Optional incoming Slack webhook URL"),
@@ -18,6 +18,7 @@ export const sendSlackNotificationTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, channel, message, webhookUrl, agentType }, { context }) => {
     try {

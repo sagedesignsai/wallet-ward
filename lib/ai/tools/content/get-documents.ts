@@ -9,19 +9,21 @@ import { z } from "zod";
 export const getDocumentsTool = tool({
   description: "Retrieve documents from a project. Returns document titles and content.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     searchQuery: z.string().optional().describe("Optional: search within document titles/content"),
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, searchQuery }, { context }) => {
+    const resolvedProjectId = projectId ?? context.projectId;
     try {
       const { prisma } = await import("@/lib/db");
 
       const documents = await prisma.document.findMany({
         where: {
-          projectId,
+          projectId: resolvedProjectId,
           project: {
             organizationId: context.organizationId,
           },

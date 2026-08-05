@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import Link from "next/link"
 import {
   PlusIcon,
@@ -11,7 +11,7 @@ import {
   ListBulletsIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useAgentSessions } from "@/hooks/use-agent-sessions"
 import { useWorkspaceNavigation } from "@/hooks/use-workspace-navigation"
@@ -56,48 +56,47 @@ export default function ProjectAgentsPage({
 }
 
 function ProjectAgentsInner({ projectId }: { projectId: string }) {
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { sessions, isLoading, error, createSession, refetch } =
     useAgentSessions({ projectId, polling: true })
   const { launchAgentInWorkspace } = useWorkspaceNavigation()
   const { repositories } = useRepositories(projectId)
 
-  const [activeTab, setActiveTab] = useState<"sessions" | "workbench">("sessions")
+  const [activeTab, setActiveTab] = useState<"sessions" | "workbench">(
+    "sessions"
+  )
   const [dialogOpen, setDialogOpen] = useState(false)
   const [name, setName] = useState("")
   const [type, setType] = useState<AgentType>("coding")
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        description: `${project.name} — ${sessions.length} agent session${sessions.length !== 1 ? "s" : ""}`,
-        actions: (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => launchAgentInWorkspace("coding")}
-            >
-              <LightningIcon className="size-3.5" />
-              Quick Launch
-            </Button>
-            <Button size="sm" onClick={() => setDialogOpen(true)}>
-              <PlusIcon className="size-3.5" />
-              New Session
-            </Button>
-          </div>
-        ),
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          { label: "Agents" },
-        ],
-      })
-    }
-  }, [project, sessions.length, setConfig, projectId, launchAgentInWorkspace])
+  if (project) {
+    useDashboardConfigStore.setState({
+      description: `${project.name} — ${sessions.length} agent session${sessions.length !== 1 ? "s" : ""}`,
+      actions: (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => launchAgentInWorkspace("coding", { projectId })}
+          >
+            <LightningIcon className="size-3.5" />
+            Quick Launch
+          </Button>
+          <Button size="sm" onClick={() => setDialogOpen(true)}>
+            <PlusIcon className="size-3.5" />
+            New Session
+          </Button>
+        </div>
+      ),
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        { label: "Agents" },
+      ],
+    })
+  }
 
   const handleCreate = async () => {
     if (!name.trim()) return
@@ -112,7 +111,7 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
       setDialogOpen(false)
       setName("")
       setType("coding")
-      launchAgentInWorkspace(type)
+      launchAgentInWorkspace(type, { projectId })
     }
   }
 
@@ -151,7 +150,7 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
         <button
           onClick={() => setActiveTab("sessions")}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors",
+            "-mb-px flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors",
             activeTab === "sessions"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -163,7 +162,7 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
         <button
           onClick={() => setActiveTab("workbench")}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors",
+            "-mb-px flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors",
             activeTab === "workbench"
               ? "border-blue-500 text-blue-400"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -203,8 +202,11 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
 
           <p className="text-center text-[11px] text-muted-foreground">
             Full agent catalog in{" "}
-            <Link href="/dashboard/agents" className="text-primary hover:underline">
-              Agent Hub
+            <Link
+              href="/dashboard/sessions"
+              className="text-primary hover:underline"
+            >
+              Sessions
             </Link>
           </p>
         </>
@@ -272,4 +274,3 @@ function ProjectAgentsInner({ projectId }: { projectId: string }) {
     </div>
   )
 }
-

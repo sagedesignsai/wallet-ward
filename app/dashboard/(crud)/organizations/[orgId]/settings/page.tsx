@@ -8,7 +8,7 @@ import {
   CheckIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useOrgDetail } from "@/hooks/use-org-detail"
 import { DeleteOrgDialog } from "@/components/organizations/delete-org-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,7 +27,6 @@ export default function SettingsPage({ params }: SettingsPageProps) {
 }
 
 function SettingsInner({ orgId }: { orgId: string }) {
-  const { setConfig } = useDashboardConfig()
   const {
     organization,
     isLoading,
@@ -54,22 +53,20 @@ function SettingsInner({ orgId }: { orgId: string }) {
     }
   }, [organization])
 
-  useEffect(() => {
-    if (organization) {
-      setConfig({
-        description: `Configure ${organization.name}`,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Organizations", href: "/dashboard/organizations" },
-          {
-            label: organization.name,
-            href: `/dashboard/organizations/${orgId}`,
-          },
-          { label: "Settings" },
-        ],
-      })
-    }
-  }, [organization, orgId, setConfig])
+  if (organization) {
+    useDashboardConfigStore.setState({
+      description: `Configure ${organization.name}`,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Organizations", href: "/dashboard/organizations" },
+        {
+          label: organization.name,
+          href: `/dashboard/organizations/${orgId}`,
+        },
+        { label: "Settings" },
+      ],
+    })
+  }
 
   const handleSave = useCallback(
     async (e: React.FormEvent) => {

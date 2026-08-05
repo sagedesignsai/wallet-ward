@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import {
@@ -11,21 +10,18 @@ import {
   KeyIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 export default function OnboardingCompletePage() {
-  const { setConfig } = useDashboardConfig()
   const router = useRouter()
 
-  useEffect(() => {
-    setConfig({
-      title: "",
-      description: "",
-      breadcrumbs: [],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "",
+    description: "",
+    breadcrumbs: [],
+  })
 
   const handleGoToDashboard = () => {
     router.push("/dashboard")
@@ -39,7 +35,10 @@ export default function OnboardingCompletePage() {
           <div className="relative">
             <div className="absolute inset-0 animate-[pulse_3s_ease-in-out_infinite] rounded-full bg-emerald-500/20 blur-xl" />
             <div className="relative flex size-16 items-center justify-center rounded-full border-2 border-emerald-500/30 bg-emerald-500/10">
-              <CheckCircleIcon className="size-8 text-emerald-500" weight="fill" />
+              <CheckCircleIcon
+                className="size-8 text-emerald-500"
+                weight="fill"
+              />
             </div>
           </div>
           <div className="text-center">
@@ -54,7 +53,9 @@ export default function OnboardingCompletePage() {
 
         {/* What's Next */}
         <div className="w-full space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">What's next:</h2>
+          <h2 className="text-sm font-semibold text-foreground">
+            What's next:
+          </h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {[
               {
@@ -68,7 +69,7 @@ export default function OnboardingCompletePage() {
                 icon: SparkleIcon,
                 title: "Launch an Agent",
                 description: "Let AI handle repetitive tasks",
-                href: "/dashboard/agents",
+                href: "/dashboard/sessions",
                 color: "from-primary/20 to-primary/5",
               },
               {
@@ -89,7 +90,6 @@ export default function OnboardingCompletePage() {
               <Card
                 key={i}
                 className="group border border-border/40 transition-all hover:border-border/60 hover:bg-muted/40"
-
               >
                 <Link href={item.href}>
                   <CardContent className="p-4">
@@ -128,7 +128,10 @@ export default function OnboardingCompletePage() {
               "Audit trails & activity logs",
             ].map((feature, i) => (
               <div key={i} className="flex items-start gap-3">
-                <CheckCircleIcon className="mt-0.5 size-4 shrink-0 text-emerald-500" weight="fill" />
+                <CheckCircleIcon
+                  className="mt-0.5 size-4 shrink-0 text-emerald-500"
+                  weight="fill"
+                />
                 <span className="text-sm text-muted-foreground">{feature}</span>
               </div>
             ))}

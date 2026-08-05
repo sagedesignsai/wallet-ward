@@ -12,7 +12,7 @@ export const airtableCreateRecordTool = tool({
   The tool will automatically use the connected Airtable integration for the current project.`,
   
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID that has the Airtable integration"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     baseId: z.string().describe("Airtable base ID (starts with 'app')"),
     tableIdOrName: z.string().describe("Table ID or table name"),
     fields: z.record(z.string(), z.unknown()).describe("Record fields as key-value pairs (e.g., {'Name': 'John', 'Status': 'Active'})"),
@@ -20,9 +20,11 @@ export const airtableCreateRecordTool = tool({
 
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   
   execute: async (input, { context }) => {
+    const resolvedProjectId = input.projectId ?? context.projectId
     try {
       const { prisma } = await import("@/lib/db")
       const { getDecryptedToken } = await import("@/lib/services/integrations")
@@ -30,7 +32,7 @@ export const airtableCreateRecordTool = tool({
       // Find the Airtable integration for this project
       const integration = await prisma.integration.findFirst({
         where: {
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           provider: "airtable",
           enabled: true,
           project: { organizationId: context.organizationId },

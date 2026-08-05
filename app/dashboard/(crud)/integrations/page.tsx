@@ -11,7 +11,7 @@ import {
   GitBranchIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import {
   useGlobalIntegrations,
   type GlobalIntegration,
@@ -98,7 +98,6 @@ const HEALTH_CONFIG: Record<string, { label: string; className: string }> = {
 }
 
 export default function GlobalIntegrationsPage() {
-  const { setConfig } = useDashboardConfig()
   const router = useRouter()
   const {
     integrations,
@@ -128,45 +127,43 @@ export default function GlobalIntegrationsPage() {
   const [healthMap, setHealthMap] = useState<Record<string, HealthStatus>>({})
   const [healthLoading, setHealthLoading] = useState(false)
 
-  useEffect(() => {
-    setConfig({
-      title: "Integrations",
-      description: "All integrations across your projects",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Integrations" },
-      ],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "Integrations",
+    description: "All integrations across your projects",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Integrations" },
+    ],
+  })
 
   // Fetch health for all integrations
   useEffect(() => {
     if (integrations.length === 0) return
     let cancelled = false
 
-      ; (async () => {
-        setHealthLoading(true)
-        const results = await Promise.allSettled(
-          integrations.map(async (intg) => {
-            const res = await fetch(`/api/v1/integrations/${intg.id}/health`, {
-              credentials: "include",
-            })
-            if (!res.ok) throw new Error(`${res.status}`)
-            const body: { status: HealthStatus["status"]; message: string } =
-              await res.json()
-            return { id: intg.id, status: body.status, message: body.message }
+    ;(async () => {
+      setHealthLoading(true)
+      const results = await Promise.allSettled(
+        integrations.map(async (intg) => {
+          const res = await fetch(`/api/v1/integrations/${intg.id}/health`, {
+            credentials: "include",
           })
-        )
-        if (cancelled) return
-        const map: Record<string, HealthStatus> = {}
-        for (const r of results) {
-          if (r.status === "fulfilled") {
-            map[r.value.id] = { status: r.value.status, message: r.value.message }
-          }
+          if (!res.ok) throw new Error(`${res.status}`)
+          const body: { status: HealthStatus["status"]; message: string } =
+            await res.json()
+          return { id: intg.id, status: body.status, message: body.message }
+        })
+      )
+      if (cancelled) return
+      const map: Record<string, HealthStatus> = {}
+      for (const r of results) {
+        if (r.status === "fulfilled") {
+          map[r.value.id] = { status: r.value.status, message: r.value.message }
         }
-        setHealthMap(map)
-        setHealthLoading(false)
-      })()
+      }
+      setHealthMap(map)
+      setHealthLoading(false)
+    })()
 
     return () => {
       cancelled = true

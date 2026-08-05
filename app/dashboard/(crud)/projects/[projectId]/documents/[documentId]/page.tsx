@@ -5,7 +5,7 @@ import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import { WarningIcon, FileTextIcon, TrashIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useDocument } from "@/hooks/use-documents"
 import { OpenInComputer } from "@/components/workspace"
@@ -40,7 +40,6 @@ function DocumentDetailInner({
   documentId: string
 }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { document, isLoading, isSaving, error, save, remove } = useDocument(
     projectId,
@@ -59,44 +58,42 @@ function DocumentDetailInner({
     }
   }, [document])
 
-  useEffect(() => {
-    if (project && document) {
-      setConfig({
-        title: document.title,
-        description: "Edit document",
-        actions: (
-          <OpenInComputer
-            showLabel
-            label="Open in Computer"
-            size="sm"
-            variant="outline"
-            tab={{
+  if (project && document) {
+    useDashboardConfigStore.setState({
+      title: document.title,
+      description: "Edit document",
+      actions: (
+        <OpenInComputer
+          showLabel
+          label="Open in Computer"
+          size="sm"
+          variant="outline"
+          tab={{
+            type: "document",
+            title: document.title,
+            content: {
               type: "document",
               title: document.title,
-              content: {
-                type: "document",
-                title: document.title,
-                body: document.content ?? "",
-                resourceId: document.id,
-                projectId,
-                editable: true,
-              },
-            }}
-          />
-        ),
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          {
-            label: "Documents",
-            href: `/dashboard/projects/${projectId}/documents`,
-          },
-          { label: document.title },
-        ],
-      })
-    }
-  }, [project, document, setConfig, projectId])
+              body: document.content ?? "",
+              resourceId: document.id,
+              projectId,
+              editable: true,
+            },
+          }}
+        />
+      ),
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        {
+          label: "Documents",
+          href: `/dashboard/projects/${projectId}/documents`,
+        },
+        { label: document.title },
+      ],
+    })
+  }
 
   const handleSave = async () => {
     const updated = await save({

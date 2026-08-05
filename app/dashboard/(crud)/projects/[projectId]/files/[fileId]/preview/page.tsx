@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import {
@@ -18,7 +18,7 @@ import {
 } from "@phosphor-icons/react"
 import type { FileType } from "@prisma/client"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useFile } from "@/hooks/use-project-files"
 import { Button } from "@/components/ui/button"
@@ -107,34 +107,31 @@ function FilePreviewInner({
   fileId: string
 }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { file, isLoading, error } = useFile(projectId, fileId)
   const [shareOpen, setShareOpen] = useState(false)
 
   /* ---- dashboard config ---- */
-  useEffect(() => {
-    if (project && file) {
-      setConfig({
-        title: `${file.name} — Preview`,
-        description: "File preview",
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          {
-            label: "Files",
-            href: `/dashboard/projects/${projectId}/files`,
-          },
-          {
-            label: file.name,
-            href: `/dashboard/projects/${projectId}/files/${fileId}`,
-          },
-          { label: "Preview" },
-        ],
-      })
-    }
-  }, [project, file, setConfig, projectId, fileId])
+  if (project && file) {
+    useDashboardConfigStore.setState({
+      title: `${file.name} — Preview`,
+      description: "File preview",
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        {
+          label: "Files",
+          href: `/dashboard/projects/${projectId}/files`,
+        },
+        {
+          label: file.name,
+          href: `/dashboard/projects/${projectId}/files/${fileId}`,
+        },
+        { label: "Preview" },
+      ],
+    })
+  }
 
   /* ---- handlers ---- */
   const handleDownload = () => {

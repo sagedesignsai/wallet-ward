@@ -1,10 +1,10 @@
 "use client"
 
-import { use, useEffect } from "react"
+import { use } from "react"
 import Link from "next/link"
 import { WarningIcon, CheckCircleIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProposal } from "@/hooks/use-proposal"
 import { ProposalDetail } from "@/components/proposals/proposal-detail"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -27,7 +27,6 @@ export default function ProposalDetailPage({
 }
 
 function ProposalDetailInner({ proposalId }: { proposalId: string }) {
-  const { setConfig } = useDashboardConfig()
   const {
     proposal,
     isLoading,
@@ -37,19 +36,17 @@ function ProposalDetailInner({ proposalId }: { proposalId: string }) {
     rejectProposal,
   } = useProposal(proposalId)
 
-  useEffect(() => {
-    if (proposal) {
-      setConfig({
-        title: proposal.title,
-        description: "Review and approve agent-proposed action",
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Proposals", href: "/dashboard/proposals" },
-          { label: proposal.title },
-        ],
-      })
-    }
-  }, [proposal, setConfig])
+  if (proposal) {
+    useDashboardConfigStore.setState({
+      title: proposal.title,
+      description: "Review and approve agent-proposed action",
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Proposals", href: "/dashboard/proposals" },
+        { label: proposal.title },
+      ],
+    })
+  }
 
   if (isLoading) {
     return (

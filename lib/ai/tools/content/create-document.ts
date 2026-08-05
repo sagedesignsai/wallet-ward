@@ -9,22 +9,28 @@ import { z } from "zod";
 export const createDocumentTool = tool({
   description: "Create a new document in a project with a title and content (supports Markdown).",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     title: z.string().describe("Document title"),
     content: z.string().describe("Document content (Markdown supported)"),
   }),
   contextSchema: z.object({
     userId: z.string(),
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, title, content }, { context }) => {
+    const resolvedProjectId = projectId ?? context.projectId;
     try {
       const { prisma } = await import("@/lib/db");
+
+      if (!resolvedProjectId) {
+        throw new Error("Project not found or access denied");
+      }
 
       // Verify project belongs to org
       const project = await prisma.project.findFirst({
         where: {
-          id: projectId,
+          id: resolvedProjectId,
           organizationId: context.organizationId,
         },
       });
@@ -35,7 +41,7 @@ export const createDocumentTool = tool({
 
       const document = await prisma.document.create({
         data: {
-          projectId,
+          projectId: resolvedProjectId,
           title,
           content,
           createdById: context.userId,

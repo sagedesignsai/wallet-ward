@@ -29,7 +29,7 @@ export const agentProxyTool = tool({
   description:
     "Make an authenticated API call to an external service (GitHub, Slack, Vercel, Notion, Airtable, Trello, Jira, Ghost, etc.) through the secure vault proxy. Credentials are injected server-side — never exposed to the agent.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID that owns the integration"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     service: z
       .enum([
         "github",
@@ -60,15 +60,17 @@ export const agentProxyTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async (input, { context }) => {
     try {
+      const resolvedProjectId = input.projectId ?? context.projectId
       const { prisma } = await import("@/lib/db")
       const { getDecryptedToken } = await import("@/lib/services/integrations")
 
       const integration = await prisma.integration.findFirst({
         where: {
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           provider: input.service,
           enabled: true,
           project: { organizationId: context.organizationId },

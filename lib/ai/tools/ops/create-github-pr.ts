@@ -10,7 +10,7 @@ export const createGithubPullRequestTool = tool({
   description:
     "Create a Pull Request on a GitHub repository after code changes are ready.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     owner: z.string().describe("GitHub repository owner/organization"),
     repo: z.string().describe("GitHub repository name"),
     title: z.string().describe("Pull Request title"),
@@ -21,15 +21,17 @@ export const createGithubPullRequestTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, owner, repo, title, body, head, base, draft }, { context }) => {
+    const resolvedProjectId = projectId ?? context.projectId;
     try {
       const { prisma } = await import("@/lib/db");
 
       // Find active GitHub integration for this project
       const integration = await prisma.integration.findFirst({
         where: {
-          projectId,
+          projectId: resolvedProjectId,
           provider: "github",
           enabled: true,
           project: { organizationId: context.organizationId },

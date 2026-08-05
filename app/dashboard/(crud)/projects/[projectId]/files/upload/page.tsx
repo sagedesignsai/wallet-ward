@@ -1,11 +1,11 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import { WarningIcon } from "@phosphor-icons/react"
 import type { FileType, FileVisibility } from "@prisma/client"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { FileUpload } from "@/components/files/file-upload"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -30,31 +30,28 @@ export default function FileUploadPage({
 
 function FileUploadInner({ projectId }: { projectId: string }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project, isLoading: projectLoading } = useProject(projectId)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   /* ---- dashboard config ---- */
-  useEffect(() => {
-    setConfig({
-      title: "Upload File",
-      description: "Upload a new file to this project",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Projects", href: "/dashboard/projects" },
-        {
-          label: project?.name ?? "Project",
-          href: `/dashboard/projects/${projectId}`,
-        },
-        {
-          label: "Files",
-          href: `/dashboard/projects/${projectId}/files`,
-        },
-        { label: "Upload" },
-      ],
-    })
-  }, [project, setConfig, projectId])
+  useDashboardConfigStore.setState({
+    title: "Upload File",
+    description: "Upload a new file to this project",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Projects", href: "/dashboard/projects" },
+      {
+        label: project?.name ?? "Project",
+        href: `/dashboard/projects/${projectId}`,
+      },
+      {
+        label: "Files",
+        href: `/dashboard/projects/${projectId}/files`,
+      },
+      { label: "Upload" },
+    ],
+  })
 
   /* ---- handlers ---- */
   const handleSubmit = async (values: {

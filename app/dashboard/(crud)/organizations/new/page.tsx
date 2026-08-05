@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import { BuildingsIcon, ArrowLeftIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useOrganization } from "@/hooks/use-organization"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -22,7 +22,6 @@ function slugify(input: string): string {
 }
 
 export default function NewOrganizationPage() {
-  const { setConfig } = useDashboardConfig()
   const router = useRouter()
   const { createOrganization } = useOrganization()
 
@@ -32,17 +31,15 @@ export default function NewOrganizationPage() {
 
   const slug = slugify(name)
 
-  useEffect(() => {
-    setConfig({
-      title: "New Organization",
-      description: "Create a new organization for your team",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Organizations", href: "/dashboard/organizations" },
-        { label: "New" },
-      ],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "New Organization",
+    description: "Create a new organization for your team",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Organizations", href: "/dashboard/organizations" },
+      { label: "New" },
+    ],
+  })
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

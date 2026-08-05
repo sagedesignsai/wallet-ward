@@ -42,13 +42,26 @@ export async function POST(request: Request) {
       return Response.json({ error: "No active organization" }, { status: 400 })
     }
 
+    // Validate projectId ownership when provided
+    let project: { id: string } | null = null
+    if (projectId) {
+      project = await prisma.project.findFirst({
+        where: { id: projectId, organizationId: authContext.organizationId },
+        select: { id: true },
+      })
+      if (!project) {
+        return Response.json({ error: "Project not found in this organization" }, { status: 403 })
+      }
+    }
+
     // Manage AgentSession persistence (best-effort, non-critical)
     let agentSessionId: string | undefined
     if (agentType && authContext.organizationId) {
       agentSessionId = await resolveAgentSession(
         sessionId,
         agentType,
-        authContext.organizationId
+        authContext.organizationId,
+        projectId
       )
     }
 
@@ -56,7 +69,8 @@ export async function POST(request: Request) {
     const runtimeContext = buildRuntimeContext(
       authContext.organizationId,
       authContext.userId,
-      agentType
+      agentType,
+      projectId
     )
 
     // Build per-tool context map (each tool receives only its own typed slice)
@@ -64,7 +78,7 @@ export async function POST(request: Request) {
       agentType,
       authContext.organizationId,
       authContext.userId,
-      { agentSessionId }
+      { agentSessionId, projectId }
     )
 
     // Instantiate the correct agent — toolsContext and runtimeContext are
@@ -127,7 +141,8 @@ export async function POST(request: Request) {
 async function resolveAgentSession(
   sessionId: string | undefined,
   agentType: string,
-  organizationId: string
+  organizationId: string,
+  projectId: string | undefined
 ): Promise<string | undefined> {
   try {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
@@ -151,7 +166,7 @@ async function resolveAgentSession(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        projectId: project.id,
+        projectId: projectId ?? project.id,
         name: `${agentType} agent session`,
         type: agentType,
       }),

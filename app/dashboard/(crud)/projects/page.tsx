@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import {
   FolderIcon,
@@ -10,7 +10,7 @@ import {
   RocketIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProjects, type Project } from "@/hooks/use-projects"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TimeAgo } from "@/components/dashboard/time-ago"
@@ -38,7 +38,6 @@ function envBadgeVariant(slug: string): "default" | "secondary" | "outline" {
 }
 
 export default function ProjectsPage() {
-  const { setConfig } = useDashboardConfig()
   const router = useRouter()
   const { projects, isLoading, error, refetch, createProject, deleteProject } =
     useProjects()
@@ -46,25 +45,23 @@ export default function ProjectsPage() {
   const [search, setSearch] = useState("")
   const [createOpen, setCreateOpen] = useState(false)
 
-  useEffect(() => {
-    setConfig({
-      description: "Manage your vault projects and their environments",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Projects" },
-      ],
-      actions: (
-        <Button
-          size="default"
-          onClick={() => setCreateOpen(true)}
-          className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
-        >
-          <PlusIcon />
-          New Project
-        </Button>
-      ),
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    description: "Manage your vault projects and their environments",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Projects" },
+    ],
+    actions: (
+      <Button
+        size="default"
+        onClick={() => setCreateOpen(true)}
+        className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
+      >
+        <PlusIcon />
+        New Project
+      </Button>
+    ),
+  })
 
   const filtered = useMemo(() => {
     if (!search.trim()) return projects

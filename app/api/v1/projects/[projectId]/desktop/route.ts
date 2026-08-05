@@ -28,6 +28,7 @@ const ALLOWED_APP_IDS = new Set([
   "preview",
   "desktop",
   "web-terminal",
+  "coding-agent-app",
 ])
 
 /**

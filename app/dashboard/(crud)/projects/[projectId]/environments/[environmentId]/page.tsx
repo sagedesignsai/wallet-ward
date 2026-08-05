@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback, use } from "react"
+import { useState, useMemo, useCallback, use } from "react"
 import {
   KeyIcon,
   PlusIcon,
@@ -16,7 +16,7 @@ import {
   UploadSimpleIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useSecrets, type SecretWithValue } from "@/hooks/use-secrets"
 import { TimeAgo } from "@/components/dashboard/time-ago"
@@ -121,7 +121,6 @@ function SecretsInner({
   projectId: string
   environmentId: string
 }) {
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const {
     secrets,
@@ -156,143 +155,137 @@ function SecretsInner({
 
   const environment = project?.environments?.find((e) => e.id === environmentId)
 
-  useEffect(() => {
-    if (project && environment) {
-      setConfig({
-        description: `Secrets in ${environment.name}`,
-        actions: (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="default"
-                className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
-              >
-                <PlusIcon />
-                Add Secret
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="px-2 py-1.5">
-                <p className="text-xs font-semibold text-muted-foreground">
-                  Select Secret Type
-                </p>
+  if (project && environment) {
+    useDashboardConfigStore.setState({
+      description: `Secrets in ${environment.name}`,
+      actions: (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="default"
+              className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
+            >
+              <PlusIcon />
+              Add Secret
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-2 py-1.5">
+              <p className="text-xs font-semibold text-muted-foreground">
+                Select Secret Type
+              </p>
+            </div>
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem onSelect={() => handleSelectType("env_var")}>
+              <KeyIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">Environment Variable</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  App configuration
+                </span>
               </div>
-              <DropdownMenuSeparator />
+            </DropdownMenuItem>
 
-              <DropdownMenuItem onSelect={() => handleSelectType("env_var")}>
-                <KeyIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Environment Variable</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    App configuration
-                  </span>
-                </div>
-              </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleSelectType("password")}>
+              <LockKeyIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">Password</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  With strength indicator
+                </span>
+              </div>
+            </DropdownMenuItem>
 
-              <DropdownMenuItem onSelect={() => handleSelectType("password")}>
-                <LockKeyIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Password</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    With strength indicator
-                  </span>
-                </div>
-              </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleSelectType("api_token")}>
+              <ShieldCheckIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">API Token</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  Keys & access tokens
+                </span>
+              </div>
+            </DropdownMenuItem>
 
-              <DropdownMenuItem onSelect={() => handleSelectType("api_token")}>
-                <ShieldCheckIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">API Token</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    Keys & access tokens
-                  </span>
-                </div>
-              </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleSelectType("ssh_keypair")}>
+              <KeyIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">SSH Key</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  Public/private keypair
+                </span>
+              </div>
+            </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onSelect={() => handleSelectType("ssh_keypair")}
-              >
-                <KeyIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">SSH Key</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    Public/private keypair
-                  </span>
-                </div>
-              </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleSelectType("certificate")}>
+              <CertificateIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">Certificate</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  SSL/TLS certificates
+                </span>
+              </div>
+            </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onSelect={() => handleSelectType("certificate")}
-              >
-                <CertificateIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Certificate</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    SSL/TLS certificates
-                  </span>
-                </div>
-              </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleSelectType("json")}>
+              <FileJsIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">JSON</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  Config files & structured data
+                </span>
+              </div>
+            </DropdownMenuItem>
 
-              <DropdownMenuItem onSelect={() => handleSelectType("json")}>
-                <FileJsIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">JSON</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    Config files & structured data
-                  </span>
-                </div>
-              </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleSelectType("file")}>
+              <FileIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">File</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  Binary files & documents
+                </span>
+              </div>
+            </DropdownMenuItem>
 
-              <DropdownMenuItem onSelect={() => handleSelectType("file")}>
-                <FileIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">File</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    Binary files & documents
-                  </span>
-                </div>
-              </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleSelectType("note")}>
+              <NoteIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">Note</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  Secure text documentation
+                </span>
+              </div>
+            </DropdownMenuItem>
 
-              <DropdownMenuItem onSelect={() => handleSelectType("note")}>
-                <NoteIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Note</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    Secure text documentation
-                  </span>
-                </div>
-              </DropdownMenuItem>
+            <DropdownMenuSeparator />
 
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem onSelect={() => setBulkImportOpen(true)}>
-                <UploadSimpleIcon className="mr-2 size-3.5" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Bulk Import</span>
-                  <span className="text-[0.625rem] text-muted-foreground">
-                    Upload or paste .env file
-                  </span>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ),
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          {
-            label: "Environments",
-            href: `/dashboard/projects/${projectId}/environments`,
-          },
-          { label: environment.name },
-        ],
-      })
-    }
-  }, [project, environment, projectId, setConfig])
+            <DropdownMenuItem onSelect={() => setBulkImportOpen(true)}>
+              <UploadSimpleIcon className="mr-2 size-3.5" />
+              <div className="flex flex-col">
+                <span className="font-medium">Bulk Import</span>
+                <span className="text-[0.625rem] text-muted-foreground">
+                  Upload or paste .env file
+                </span>
+              </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        {
+          label: "Environments",
+          href: `/dashboard/projects/${projectId}/environments`,
+        },
+        { label: environment.name },
+      ],
+    })
+  }
 
   const handleReveal = useCallback(
     async (secretId: string): Promise<SecretWithValue | null> => {

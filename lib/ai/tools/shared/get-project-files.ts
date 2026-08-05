@@ -11,7 +11,7 @@ export const getProjectFilesTool = tool({
   description:
     "Retrieve files and artifacts from a project. Returns file names, types, sizes, versions, and metadata.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     type: z
       .enum(["artifact", "document", "config", "asset", "code", "data", "other"])
       .optional()
@@ -19,14 +19,16 @@ export const getProjectFilesTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, type }, { context }) => {
     try {
+      const resolvedProjectId = projectId ?? context.projectId
       const { prisma } = await import("@/lib/db")
 
       const files = await prisma.projectFile.findMany({
         where: {
-          projectId,
+          projectId: resolvedProjectId,
           project: { organizationId: context.organizationId },
           ...(type && { type }),
         },

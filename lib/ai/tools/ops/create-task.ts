@@ -9,22 +9,28 @@ import { z } from "zod";
 export const createTaskTool = tool({
   description: "Create a new task in a project with a title, description, and status.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     title: z.string().describe("Task title"),
     description: z.string().optional().describe("Task description (optional)"),
     status: z.enum(["todo", "in_progress", "done"]).default("todo").describe("Task status"),
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, title, description, status }, { context }) => {
+    const resolvedProjectId = projectId ?? context.projectId;
     try {
+      if (!resolvedProjectId) {
+        throw new Error("Project not found or access denied");
+      }
+
       const { prisma } = await import("@/lib/db");
 
       // Verify project belongs to org
       const project = await prisma.project.findFirst({
         where: {
-          id: projectId,
+          id: resolvedProjectId,
           organizationId: context.organizationId,
         },
       });
@@ -35,7 +41,7 @@ export const createTaskTool = tool({
 
       const task = await prisma.task.create({
         data: {
-          projectId,
+          projectId: resolvedProjectId,
           title,
           description,
           status,

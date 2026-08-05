@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import Link from "next/link"
 import {
   PlusIcon,
@@ -8,7 +8,7 @@ import {
   MagnifyingGlassIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useRepositories } from "@/hooks/use-repositories"
 import { RepositoryCard } from "@/components/repositories/repository-card"
 import { Button } from "@/components/ui/button"
@@ -34,23 +34,20 @@ export default function ProjectRepositoriesPage({
 }
 
 function ProjectRepositoriesInner({ projectId }: { projectId: string }) {
-  const { setConfig } = useDashboardConfig()
   const { repositories, isLoading, error, deleteRepository } =
     useRepositories(projectId)
   const [searchQuery, setSearchQuery] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<Repository | null>(null)
 
-  useEffect(() => {
-    setConfig({
-      title: "Repositories",
-      description: "Manage Git repositories for this project",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Projects", href: "/dashboard/projects" },
-        { label: "Repositories" },
-      ],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "Repositories",
+    description: "Manage Git repositories for this project",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Projects", href: "/dashboard/projects" },
+      { label: "Repositories" },
+    ],
+  })
 
   const filteredRepositories = repositories.filter(
     (repo) =>

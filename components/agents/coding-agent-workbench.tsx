@@ -17,6 +17,7 @@ import {
   CpuIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { messageBus } from "@/lib/desktop/message-bus";
 
 interface CodingAgentWorkbenchProps {
   projectId: string;
@@ -46,6 +47,21 @@ export function CodingAgentWorkbench({
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions]);
+
+  // Subscribe to tool-driven desktop events to adapt UI reactively
+  useEffect(() => {
+    const unsub = messageBus.getState().subscribeAll((msg) => {
+      if (msg.type === "agent:sandbox_ready") {
+        setActiveTab("terminal");
+      } else if (msg.type === "agent:tool_call_result") {
+        const payload = msg.payload as { tool?: string; previewUrl?: string };
+        if (payload?.previewUrl || payload?.tool === "getSandboxPreview") {
+          setActiveTab("preview");
+        }
+      }
+    });
+    return unsub;
+  }, []);
 
   const handleStartTask = async (e: React.FormEvent) => {
     e.preventDefault();

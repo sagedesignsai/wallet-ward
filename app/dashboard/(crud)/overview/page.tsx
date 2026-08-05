@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useMemo } from "react"
 import Link from "next/link"
 import {
   RobotIcon,
@@ -15,7 +15,7 @@ import {
 } from "@phosphor-icons/react"
 
 import { useSession } from "@/lib/auth-client"
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProjects } from "@/hooks/use-projects"
 import { useWorkspaceNavigation } from "@/hooks/use-workspace-navigation"
 import { useGlobalSecrets } from "@/hooks/use-global-secrets"
@@ -29,7 +29,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 export default function OverviewPage() {
-  const { setConfig } = useDashboardConfig()
   const { data: sessionData } = useSession()
   const { projects, isLoading: projectsLoading } = useProjects()
   const { secrets, isLoading: secretsLoading } = useGlobalSecrets()
@@ -47,13 +46,11 @@ export default function OverviewPage() {
   const recentLogs = useMemo(() => logs.slice(0, 3), [logs])
   const connectedCount = integrations.filter((i) => i.enabled).length
 
-  useEffect(() => {
-    setConfig({
-      title: "Overview",
-      description: "Your autonomous operations command center",
-      breadcrumbs: [{ label: "Overview" }],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "Overview",
+    description: "Your autonomous operations command center",
+    breadcrumbs: [{ label: "Overview" }],
+  })
 
   return (
     <div className="flex flex-col gap-6">
@@ -158,7 +155,7 @@ export default function OverviewPage() {
                 <CardTitle className="text-sm">Agent Activity</CardTitle>
               </div>
               <Button variant="ghost" size="sm" asChild className="h-7 text-xs">
-                <Link href="/dashboard/agents">View agents</Link>
+                <Link href="/dashboard/sessions">View sessions</Link>
               </Button>
             </div>
           </CardHeader>

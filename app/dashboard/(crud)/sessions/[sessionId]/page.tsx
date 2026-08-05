@@ -1,11 +1,11 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import { WarningIcon, RobotIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useAgentSession } from "@/hooks/use-agent-session"
 import { SessionHeader } from "@/components/agents/session-header"
 import { SessionActivity } from "@/components/agents/session-activity"
@@ -32,31 +32,28 @@ export default function AgentSessionPage({
 
 function AgentSessionInner({ sessionId }: { sessionId: string }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { session, pendingProposals, isLoading, error, deleteSession } =
     useAgentSession(sessionId)
   const [deleting, setDeleting] = useState(false)
 
-  useEffect(() => {
-    if (session) {
-      setConfig({
-        title: session.name,
-        description: `${session.type} agent session`,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Agent Hub", href: "/dashboard/agents" },
-          { label: session.name },
-        ],
-      })
-    }
-  }, [session, setConfig])
+  if (session) {
+    useDashboardConfigStore.setState({
+      title: session.name,
+      description: `${session.type} agent session`,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Sessions", href: "/dashboard/sessions" },
+        { label: session.name },
+      ],
+    })
+  }
 
   const handleDelete = async () => {
     if (!confirm("Delete this agent session?")) return
     setDeleting(true)
     const ok = await deleteSession()
     setDeleting(false)
-    if (ok) router.push("/dashboard/agents")
+    if (ok) router.push("/dashboard/sessions")
   }
 
   if (isLoading) {
@@ -88,7 +85,7 @@ function AgentSessionInner({ sessionId }: { sessionId: string }) {
           </EmptyDescription>
         </EmptyHeader>
         <Button variant="outline" size="sm" asChild className="mt-4">
-          <Link href="/dashboard/agents">Back to Agent Hub</Link>
+          <Link href="/dashboard/sessions">Back to Sessions</Link>
         </Button>
       </Empty>
     )

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, use } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import { GearIcon, WarningIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,7 +27,6 @@ export default function SettingsPage({ params }: SettingsPageProps) {
 
 function SettingsInner({ projectId }: { projectId: string }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project, isLoading, error, refetch, updateProject, deleteProject } =
     useProject(projectId)
 
@@ -50,22 +49,20 @@ function SettingsInner({ projectId }: { projectId: string }) {
     }
   }, [project])
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        description: `Configure ${project.name}`,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          { label: "Settings" },
-        ],
-      })
-    }
-  }, [project, projectId, setConfig])
+  if (project) {
+    useDashboardConfigStore.setState({
+      description: `Configure ${project.name}`,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        { label: "Settings" },
+      ],
+    })
+  }
 
   const handleSave = useCallback(
     async (e: React.FormEvent) => {

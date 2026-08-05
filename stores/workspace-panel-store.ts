@@ -57,7 +57,7 @@ export interface ChatSession {
   /** Optional project context */
   projectId?: string
   environmentId?: string
-  /** Agent type if launched from Agent Hub */
+  /** Agent type if launched from the workspace */
   agentType?: "coding" | "content" | "ops" | "research"
 }
 
@@ -115,7 +115,11 @@ interface WorkspacePanelStore {
   syncSessionMessages: (sessionId: string, messages: UIMessage[]) => void
 
   // Agent
-  launchAgent: (agentType: string) => string
+  launchAgent: (
+    agentType: string,
+    projectId?: string,
+    environmentId?: string
+  ) => string
 
   // Workspace mode
   setWorkspaceMode: (mode: "chat" | "canvas") => void
@@ -188,10 +192,10 @@ export const useWorkspacePanelStore = create<WorkspacePanelStore>()(
         })),
 
       // ─── Agent ────────────────────────────────────────────────────────────
-      launchAgent: (agentType) => {
+      launchAgent: (agentType, projectId?, environmentId?) => {
         const session = createSession(
-          undefined,
-          undefined,
+          projectId,
+          environmentId,
           agentType as ChatSession["agentType"]
         )
         set((s) => ({

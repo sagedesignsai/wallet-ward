@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import Link from "next/link"
 import {
   PlusIcon,
@@ -9,7 +9,7 @@ import {
   FunnelIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProjectFiles } from "@/hooks/use-project-files"
 import { FileCard } from "@/components/files/file-card"
 import { Button } from "@/components/ui/button"
@@ -42,7 +42,6 @@ export default function ProjectFilesPage({
 }
 
 function ProjectFilesInner({ projectId }: { projectId: string }) {
-  const { setConfig } = useDashboardConfig()
   const [searchQuery, setSearchQuery] = useState("")
   const [typeFilter, setTypeFilter] = useState<FileType | "all">("all")
   const [deleteTarget, setDeleteTarget] = useState<ProjectFile | null>(null)
@@ -52,17 +51,15 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
     typeFilter !== "all" ? { type: typeFilter } : undefined
   )
 
-  useEffect(() => {
-    setConfig({
-      title: "Files",
-      description: "Manage files and artifacts for this project",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Projects", href: "/dashboard/projects" },
-        { label: "Files" },
-      ],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "Files",
+    description: "Manage files and artifacts for this project",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Projects", href: "/dashboard/projects" },
+      { label: "Files" },
+    ],
+  })
 
   const filteredFiles = files.filter(
     (file) =>
@@ -113,7 +110,9 @@ function ProjectFilesInner({ projectId }: { projectId: string }) {
           </div>
           <Select
             value={typeFilter}
-            onValueChange={(value: string) => setTypeFilter(value as FileType | "all")}
+            onValueChange={(value: string) =>
+              setTypeFilter(value as FileType | "all")
+            }
           >
             <SelectTrigger className="h-9 w-[140px]">
               <FunnelIcon className="mr-2 size-4" />

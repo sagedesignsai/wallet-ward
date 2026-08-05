@@ -9,25 +9,22 @@ import {
   CheckCircleIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useOrganization } from "@/hooks/use-organization"
 import { useProjects } from "@/hooks/use-projects"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 export default function OnboardingPage() {
-  const { setConfig } = useDashboardConfig()
   const router = useRouter()
   const { organizations, isLoading: orgsLoading } = useOrganization()
   const { projects, isLoading: projectsLoading } = useProjects()
 
-  useEffect(() => {
-    setConfig({
-      title: "",
-      description: "",
-      breadcrumbs: [],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "",
+    description: "",
+    breadcrumbs: [],
+  })
 
   // If user already has org and project, skip onboarding
   useEffect(() => {
@@ -77,15 +74,18 @@ export default function OnboardingPage() {
               icon: FolderIcon,
               step: "Step 2",
               title: "Create Project",
-              description:
-                "Projects organize your secrets and environments",
+              description: "Projects organize your secrets and environments",
               color: "from-violet-500/20 to-violet-500/5",
             },
           ].map((item, i) => (
             <Card
               key={i}
               className="border border-border/40 bg-gradient-to-br"
-              style={{ backgroundImage: `linear-gradient(to bottom right, var(--color-1), var(--color-2))` } as any}
+              style={
+                {
+                  backgroundImage: `linear-gradient(to bottom right, var(--color-1), var(--color-2))`,
+                } as any
+              }
             >
               <CardContent className="p-6">
                 <div className="flex items-start gap-3">
@@ -140,11 +140,7 @@ export default function OnboardingPage() {
           className="w-full gap-2 font-semibold shadow-lg shadow-primary/20 sm:w-auto"
         >
           <span>Let's Get Started</span>
-          <svg
-            viewBox="0 0 20 20"
-            fill="none"
-            className="h-4 w-4"
-          >
+          <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
             <path
               d="M4 10h12M10 4l6 6-6 6"
               stroke="currentColor"

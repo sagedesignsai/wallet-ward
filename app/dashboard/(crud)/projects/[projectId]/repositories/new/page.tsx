@@ -1,11 +1,11 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import { GitBranchIcon, WarningIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useRepositories } from "@/hooks/use-repositories"
 import { RepositoryForm } from "@/components/repositories/repository-form"
@@ -32,27 +32,27 @@ export default function NewRepositoryPage({
 
 function NewRepositoryInner({ projectId }: { projectId: string }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project, isLoading: projectLoading } = useProject(projectId)
   const { createRepository } = useRepositories(projectId)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    setConfig({
-      title: "New Repository",
-      description: "Connect a Git repository to this project",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Projects", href: "/dashboard/projects" },
-        { label: project?.name ?? "Project", href: `/dashboard/projects/${projectId}` },
-        {
-          label: "Repositories",
-          href: `/dashboard/projects/${projectId}/repositories`,
-        },
-        { label: "New" },
-      ],
-    })
-  }, [projectId, project?.name, setConfig])
+  useDashboardConfigStore.setState({
+    title: "New Repository",
+    description: "Connect a Git repository to this project",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Projects", href: "/dashboard/projects" },
+      {
+        label: project?.name ?? "Project",
+        href: `/dashboard/projects/${projectId}`,
+      },
+      {
+        label: "Repositories",
+        href: `/dashboard/projects/${projectId}/repositories`,
+      },
+      { label: "New" },
+    ],
+  })
 
   if (projectLoading) {
     return (

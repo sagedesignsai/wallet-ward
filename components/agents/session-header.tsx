@@ -63,7 +63,7 @@ export function SessionHeader({
             className="h-8 gap-1.5 text-xs"
             asChild
           >
-            <Link href={`/dashboard/agents/${session.id}#sandbox`}>
+            <Link href={`/dashboard/sessions/${session.id}#sandbox`}>
               <CloudIcon className="size-3.5" />
               Sandbox
             </Link>

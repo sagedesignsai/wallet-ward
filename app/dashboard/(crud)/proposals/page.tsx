@@ -14,7 +14,7 @@ import {
   ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProjects } from "@/hooks/use-projects"
 import { useProposals } from "@/hooks/use-proposals"
 import { ApprovalCard } from "@/components/proposals/approval-card"
@@ -188,7 +188,6 @@ function StatPill({
 }
 
 export default function ProposalsPage() {
-  const { setConfig } = useDashboardConfig()
   const searchParams = useSearchParams()
   const { projects, isLoading: isProjectsLoading } = useProjects()
 
@@ -229,16 +228,14 @@ export default function ProposalsPage() {
     }
   }, [highlightId, proposals])
 
-  useEffect(() => {
-    setConfig({
-      title: "Proposals",
-      description: "Review and approve agent-proposed actions",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Proposals" },
-      ],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "Proposals",
+    description: "Review and approve agent-proposed actions",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Proposals" },
+    ],
+  })
 
   const pending = useMemo(
     () => proposals.filter((p) => p.status === "awaiting_approval"),

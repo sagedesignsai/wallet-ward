@@ -13,6 +13,7 @@ import { TerminalApp } from "@/components/apps/terminal"
 import { ArtifactApp } from "@/components/apps/artifact"
 import { TaskApp } from "@/components/apps/task"
 import { SecretApp } from "@/components/apps/secret"
+import { CodingAgentApp } from "@/components/apps/coding-agent"
 import {
   CodeIcon,
   FileTextIcon,
@@ -24,11 +25,13 @@ import {
   GlobeIcon,
   DesktopIcon,
   TerminalWindowIcon,
+  CpuIcon,
 } from "@phosphor-icons/react"
 import type {
   PreviewContent,
   DesktopContent,
   WebTerminalContent,
+  OpencodeWorkspaceContent,
 } from "@/types/desktop/content"
 
 /**
@@ -251,6 +254,23 @@ export function registerSystemApps() {
       return payload.data as { url: string; token?: string }
     },
   })
+
+  // Coding Agent Workbench App
+  register({
+    id: "coding-agent-app",
+    name: "Coding Agent",
+    icon: CpuIcon,
+    description: "Pair programming interface with OpenCode subagent & Daytona cloud sandboxes",
+    category: "Agents",
+    defaultSize: { width: 1100, height: 750 },
+    resizable: true,
+    minimizable: true,
+    maximizable: true,
+    singleInstance: true,
+    dedupeKey: (c) => (c as OpencodeWorkspaceContent).sandboxId,
+    component: CodingAgentApp,
+    permissions: ["fs:read", "fs:write", "terminal:execute", "sandbox:manage"],
+  })
 }
 
 /**
@@ -262,4 +282,5 @@ export const SYSTEM_APP_IDS = {
   IMAGE_VIEWER: "image-viewer",
   FILE_MANAGER: "file-manager",
   TERMINAL: "terminal",
+  CODING_AGENT: "coding-agent-app",
 } as const

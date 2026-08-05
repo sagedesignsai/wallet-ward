@@ -17,19 +17,22 @@ export interface AgentRuntimeContext {
   organizationId: string
   userId: string
   agentType?: string
+  projectId?: string
   timestamp: string
 }
 
 export function buildRuntimeContext(
   organizationId: string,
   userId: string,
-  agentType?: string
+  agentType?: string,
+  projectId?: string
 ): AgentRuntimeContext {
   return {
     requestId: crypto.randomUUID(),
     organizationId,
     userId,
     agentType,
+    projectId,
     timestamp: new Date().toISOString(),
   }
 }
@@ -38,12 +41,14 @@ export function buildRuntimeContext(
 
 interface SharedContext {
   organizationId: string
+  projectId?: string
 }
 
 interface SharedWithUserContext {
   organizationId: string
   userId: string
   agentSessionId?: string
+  projectId?: string
 }
 
 // ─── Coding agent context ─────────────────────────────────────────────────────
@@ -53,11 +58,12 @@ export function buildCodingAgentContext(
   userId: string,
   options?: { projectId?: string; agentSessionId?: string }
 ) {
-  const shared: SharedContext = { organizationId }
+  const shared: SharedContext = { organizationId, projectId: options?.projectId }
   const sharedWithUser: SharedWithUserContext = {
     organizationId,
     userId,
     agentSessionId: options?.agentSessionId,
+    projectId: options?.projectId,
   }
 
   return {
@@ -95,13 +101,14 @@ export type CodingAgentContext = ReturnType<typeof buildCodingAgentContext>
 export function buildOpsAgentContext(
   organizationId: string,
   userId: string,
-  options?: { agentSessionId?: string }
+  options?: { projectId?: string; agentSessionId?: string }
 ) {
-  const shared: SharedContext = { organizationId }
+  const shared: SharedContext = { organizationId, projectId: options?.projectId }
   const sharedWithUser: SharedWithUserContext = {
     organizationId,
     userId,
     agentSessionId: options?.agentSessionId,
+    projectId: options?.projectId,
   }
 
   return {
@@ -129,13 +136,14 @@ export type OpsAgentContext = ReturnType<typeof buildOpsAgentContext>
 export function buildContentAgentContext(
   organizationId: string,
   userId: string,
-  options?: { agentSessionId?: string }
+  options?: { projectId?: string; agentSessionId?: string }
 ) {
-  const shared: SharedContext = { organizationId }
+  const shared: SharedContext = { organizationId, projectId: options?.projectId }
   const sharedWithUser: SharedWithUserContext = {
     organizationId,
     userId,
     agentSessionId: options?.agentSessionId,
+    projectId: options?.projectId,
   }
 
   return {
@@ -165,13 +173,14 @@ export type ContentAgentContext = ReturnType<typeof buildContentAgentContext>
 export function buildResearchAgentContext(
   organizationId: string,
   userId: string,
-  options?: { agentSessionId?: string }
+  options?: { projectId?: string; agentSessionId?: string }
 ) {
-  const shared: SharedContext = { organizationId }
+  const shared: SharedContext = { organizationId, projectId: options?.projectId }
   const sharedWithUser: SharedWithUserContext = {
     organizationId,
     userId,
     agentSessionId: options?.agentSessionId,
+    projectId: options?.projectId,
   }
 
   return {
@@ -193,13 +202,14 @@ export type ResearchAgentContext = ReturnType<typeof buildResearchAgentContext>
 export function buildOrchestratorContext(
   organizationId: string,
   userId: string,
-  options?: { agentSessionId?: string }
+  options?: { projectId?: string; agentSessionId?: string }
 ) {
-  const shared: SharedContext = { organizationId }
+  const shared: SharedContext = { organizationId, projectId: options?.projectId }
   const sharedWithUser: SharedWithUserContext = {
     organizationId,
     userId,
     agentSessionId: options?.agentSessionId,
+    projectId: options?.projectId,
   }
 
   return {
@@ -222,7 +232,7 @@ export function buildAgentContext(
   agentType: string | undefined,
   organizationId: string,
   userId: string,
-  options?: { agentSessionId?: string }
+  options?: { projectId?: string; agentSessionId?: string }
 ) {
   switch (agentType) {
     case "coding":

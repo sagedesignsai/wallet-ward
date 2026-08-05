@@ -80,7 +80,7 @@ export function AgentSessionRow({
 
   return (
     <Link
-      href={`/dashboard/agents/${session.id}`}
+      href={`/dashboard/sessions/${session.id}`}
       className={cn(
         "group flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/30",
         className

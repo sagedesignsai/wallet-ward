@@ -1,12 +1,12 @@
 "use client"
 
-import { Rnd } from "react-rnd"
+import { Rnd, type RndDragCallback, type RndResizeCallback } from "react-rnd"
 import { useWindowManager } from "@/stores/desktop/window-manager.store"
 import { useAppRegistry } from "@/stores/desktop/app-registry.store"
 import { cn } from "@/lib/utils"
 import { XIcon, MinusIcon, SquareIcon } from "@phosphor-icons/react"
 import { useCallback, useState } from "react"
-import type { DesktopWindow, WindowState } from "@/types/desktop/window"
+import type { DesktopWindow } from "@/types/desktop/window"
 import { IframeAppShell } from "./IframeAppShell"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { useDesktopState } from "@/stores/desktop/desktop-state.store"
@@ -27,18 +27,13 @@ export function WindowFrame({ window }: WindowFrameProps) {
   // are disabled and it renders full-screen (accounting for the bottom taskbar).
   const isMobile = useMediaQuery("(max-width: 1023px)")
 
-  if (!appManifest) return null
-
-  const AppComponent = appManifest.component
-  const isIframe = appManifest.kind === "iframe"
-
   const handleDragStart = useCallback(() => {
     setIsDragging(true)
     focusWindow(window.id)
   }, [window.id, focusWindow])
 
-  const handleDragStop = useCallback(
-    (e: any, d: { x: number; y: number }) => {
+  const handleDragStop: RndDragCallback = useCallback(
+    (e, d) => {
       setIsDragging(false)
       updateWindow(window.id, { x: d.x, y: d.y })
     },
@@ -49,8 +44,8 @@ export function WindowFrame({ window }: WindowFrameProps) {
     setIsResizing(true)
   }, [])
 
-  const handleResizeStop = useCallback(
-    (e: any, direction: string, ref: HTMLElement, delta: any, position: { x: number; y: number }) => {
+  const handleResizeStop: RndResizeCallback = useCallback(
+    (e, direction, ref, delta, position) => {
       setIsResizing(false)
       updateWindow(window.id, {
         x: position.x,
@@ -89,11 +84,17 @@ export function WindowFrame({ window }: WindowFrameProps) {
     isMobile ? "size-10" : "size-6"
   )
 
+  if (!appManifest) return null
+
+  const AppComponent = appManifest.component
+  const isIframe = appManifest.kind === "iframe"
+
   return (
     <Rnd
-      position={isMobile ? { x: 0, y: 0 } : { x: window.x, y: window.y }}
+      className="pointer-events-auto"
+      position={isMobile || isMaximized ? { x: 0, y: 0 } : { x: window.x, y: window.y }}
       size={
-        isMobile
+        isMobile || isMaximized
           ? {
               width: "100%",
               height: showTaskbar ? "calc(100% - 48px)" : "100%",
@@ -136,7 +137,13 @@ export function WindowFrame({ window }: WindowFrameProps) {
             <span className="truncate text-xs font-medium">{window.title}</span>
           </div>
 
-          <div className="flex items-center gap-0.5">
+          <div
+            className="flex items-center gap-0.5"
+            onMouseDown={(e) => {
+              focusWindow(window.id)
+              e.stopPropagation()
+            }}
+          >
             {window.minimizable && (
               <button
                 onClick={handleMinimize}

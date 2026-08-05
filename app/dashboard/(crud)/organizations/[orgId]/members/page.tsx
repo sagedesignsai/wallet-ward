@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState, useCallback, use } from "react"
+import React, { useMemo, useState, useCallback, use } from "react"
 import {
   UsersIcon,
   UsersThreeIcon,
@@ -14,7 +14,7 @@ import {
 } from "@phosphor-icons/react"
 
 import { cn } from "@/lib/utils"
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useOrgDetail } from "@/hooks/use-org-detail"
 import { useAuth } from "@/hooks/use-auth"
 import { useMembers, type Member, type Invitation } from "@/hooks/use-members"
@@ -193,7 +193,6 @@ export default function OrgMembersPage({
 }
 
 function OrgMembersInner({ orgId }: { orgId: string }) {
-  const { setConfig } = useDashboardConfig()
   const { user } = useAuth()
   const { organization, isLoading: orgLoading } = useOrgDetail(orgId)
 
@@ -209,23 +208,21 @@ function OrgMembersInner({ orgId }: { orgId: string }) {
     refetch: refetchMembers,
   } = useMembers(orgId)
 
-  useEffect(() => {
-    if (organization) {
-      setConfig({
-        title: "Members",
-        description: `Manage team members for ${organization.name}`,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Organizations", href: "/dashboard/organizations" },
-          {
-            label: organization.name,
-            href: `/dashboard/organizations/${orgId}`,
-          },
-          { label: "Members" },
-        ],
-      })
-    }
-  }, [organization, orgId, setConfig])
+  if (organization) {
+    useDashboardConfigStore.setState({
+      title: "Members",
+      description: `Manage team members for ${organization.name}`,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Organizations", href: "/dashboard/organizations" },
+        {
+          label: organization.name,
+          href: `/dashboard/organizations/${orgId}`,
+        },
+        { label: "Members" },
+      ],
+    })
+  }
 
   const isOwnerOrAdmin = useMemo(() => {
     if (!user?.id || members.length === 0) return false

@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useMemo, useState, useCallback } from "react"
+import { useMemo, useState, useCallback } from "react"
 import {
   ClipboardTextIcon as EmptyIcon,
   ArrowClockwiseIcon,
   WarningIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import {
   useAuditLogs,
   type AuditLog,
@@ -124,7 +124,6 @@ function groupByDate(logs: AuditLog[]): DateGroup[] {
 // ---------------------------------------------------------------------------
 
 export default function AuditLogsPage() {
-  const { setConfig } = useDashboardConfig()
   const { logs, isLoading, isLoadingMore, hasMore, error, loadMore, refetch } =
     useAuditLogs()
 
@@ -133,15 +132,13 @@ export default function AuditLogsPage() {
   const [actorType, setActorType] = useState<ActorFilter>("all")
   const [search, setSearch] = useState("")
 
-  useEffect(() => {
-    setConfig({
-      description: "Track all activity across your organization",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Audit Log" },
-      ],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    description: "Track all activity across your organization",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Audit Log" },
+    ],
+  })
 
   // Filtered logs
   const filtered = useMemo(() => {

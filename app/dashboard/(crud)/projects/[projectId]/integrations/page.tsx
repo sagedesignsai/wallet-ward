@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useState } from "react"
 import {
   PlugIcon,
   PlusIcon,
@@ -9,7 +9,7 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useProjectIntegrations } from "@/hooks/use-project-integrations"
 import { ConnectGitHubDialog } from "@/components/dashboard/connect-github-dialog"
@@ -47,7 +47,6 @@ export default function ProjectIntegrationsPage({
 }
 
 function ProjectIntegrationsInner({ projectId }: { projectId: string }) {
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const {
     integrations,
@@ -59,25 +58,23 @@ function ProjectIntegrationsInner({ projectId }: { projectId: string }) {
   } = useProjectIntegrations(projectId)
   const [connectOpen, setConnectOpen] = useState(false)
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        description: `${project.name} — integrations`,
-        actions: (
-          <Button size="sm" onClick={() => setConnectOpen(true)}>
-            <PlusIcon className="size-3.5" />
-            Connect GitHub
-          </Button>
-        ),
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          { label: "Integrations" },
-        ],
-      })
-    }
-  }, [project, setConfig, projectId])
+  if (project) {
+    useDashboardConfigStore.setState({
+      description: `${project.name} — integrations`,
+      actions: (
+        <Button size="sm" onClick={() => setConnectOpen(true)}>
+          <PlusIcon className="size-3.5" />
+          Connect GitHub
+        </Button>
+      ),
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        { label: "Integrations" },
+      ],
+    })
+  }
 
   const handleToggle = async (id: string, enabled: boolean) => {
     const ok = await setEnabled(id, enabled)

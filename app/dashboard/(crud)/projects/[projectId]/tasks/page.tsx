@@ -1,11 +1,11 @@
 "use client"
 
-import React, { useEffect, useState, useCallback, useMemo, use } from "react"
+import React, { useState, useCallback, useMemo, use } from "react"
 import Link from "next/link"
 import { useRouter } from "nextjs-toploader/app"
 import { ListChecksIcon, PlusIcon, WarningIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useTasks, type Task } from "@/hooks/use-tasks"
 import { TimeAgo } from "@/components/dashboard/time-ago"
@@ -64,7 +64,6 @@ export default function TasksPage({
 
 function TasksInner({ projectId }: { projectId: string }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { tasks, isLoading, error, createTask, updateTaskStatus } =
     useTasks(projectId)
@@ -73,28 +72,26 @@ function TasksInner({ projectId }: { projectId: string }) {
   const [description, setDescription] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        description: `${project.name} — ${tasks.length} task${tasks.length !== 1 ? "s" : ""}`,
-        actions: (
-          <Button onClick={() => setDialogOpen(true)}>
-            <PlusIcon />
-            New Task
-          </Button>
-        ),
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          { label: "Tasks" },
-        ],
-      })
-    }
-  }, [project, tasks.length, setConfig, projectId])
+  if (project) {
+    useDashboardConfigStore.setState({
+      description: `${project.name} — ${tasks.length} task${tasks.length !== 1 ? "s" : ""}`,
+      actions: (
+        <Button onClick={() => setDialogOpen(true)}>
+          <PlusIcon />
+          New Task
+        </Button>
+      ),
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        { label: "Tasks" },
+      ],
+    })
+  }
 
   const grouped = useMemo(() => {
     const groups: Record<Task["status"], Task[]> = {

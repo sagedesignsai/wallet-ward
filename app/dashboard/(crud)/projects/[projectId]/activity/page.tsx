@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState, useCallback, use } from "react"
+import React, { useMemo, useState, useCallback, use } from "react"
 import {
   ClockCounterClockwiseIcon,
   FileTextIcon,
@@ -8,7 +8,7 @@ import {
   WarningIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useAuditLogs, type AuditLog } from "@/hooks/use-audit-logs"
 import { TimeAgo } from "@/components/dashboard/time-ago"
@@ -65,27 +65,24 @@ export default function ActivityPage({
 }
 
 function ActivityInner({ projectId }: { projectId: string }) {
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { logs, isLoading, error } = useAuditLogs()
   const [filter, setFilter] = useState<string>("all")
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        description: `${project.name} — Project activity`,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          { label: "Activity" },
-        ],
-      })
-    }
-  }, [project, setConfig])
+  if (project) {
+    useDashboardConfigStore.setState({
+      description: `${project.name} — Project activity`,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        { label: "Activity" },
+      ],
+    })
+  }
 
   const filtered = useMemo(() => {
     // Filter to only project-related document/task actions

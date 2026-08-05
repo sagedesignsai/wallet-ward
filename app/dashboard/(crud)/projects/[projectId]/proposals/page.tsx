@@ -15,7 +15,7 @@ import {
   ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useProposals } from "@/hooks/use-proposals"
 import { ApprovalCard } from "@/components/proposals/approval-card"
@@ -157,7 +157,6 @@ export default function ProjectProposalsPage({
 }
 
 function ProjectProposalsInner({ projectId }: { projectId: string }) {
-  const { setConfig } = useDashboardConfig()
   const searchParams = useSearchParams()
   const { project } = useProject(projectId)
   const initialStatus = searchParams.get("status") ?? "all"
@@ -188,19 +187,17 @@ function ProjectProposalsInner({ projectId }: { projectId: string }) {
     }
   }, [highlightId, proposals])
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        description: `${project.name} — action proposals`,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          { label: "Proposals" },
-        ],
-      })
-    }
-  }, [project, setConfig, projectId])
+  if (project) {
+    useDashboardConfigStore.setState({
+      description: `${project.name} — action proposals`,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        { label: "Proposals" },
+      ],
+    })
+  }
 
   const pending = useMemo(
     () => proposals.filter((p) => p.status === "awaiting_approval"),

@@ -9,19 +9,21 @@ import { z } from "zod";
 export const getTasksTool = tool({
   description: "Retrieve tasks from a project. Can filter by status.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     status: z.enum(["todo", "in_progress", "done"]).optional().describe("Optional: filter by status"),
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, status }, { context }) => {
+    const resolvedProjectId = projectId ?? context.projectId;
     try {
       const { prisma } = await import("@/lib/db");
 
       const tasks = await prisma.task.findMany({
         where: {
-          projectId,
+          projectId: resolvedProjectId,
           status,
           project: {
             organizationId: context.organizationId,

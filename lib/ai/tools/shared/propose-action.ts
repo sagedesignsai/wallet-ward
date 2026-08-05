@@ -11,7 +11,7 @@ export const proposeActionTool = tool({
   description:
     "Propose a high-risk action for human review and approval before executing (Human-in-the-Loop control). Always use this before deploying, deleting, publishing, or rotating secrets.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     title: z
       .string()
       .describe("Action title (e.g., 'Deploy Next.js app to Production')"),
@@ -35,6 +35,7 @@ export const proposeActionTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
     userId: z.string(),
     agentSessionId: z.string().optional(),
   }),
@@ -43,6 +44,7 @@ export const proposeActionTool = tool({
     { context }
   ) => {
     try {
+      const resolvedProjectId = projectId ?? context.projectId
       const { createProposal } = await import("@/lib/services/proposals")
 
       const proposal = await createProposal({
@@ -50,7 +52,7 @@ export const proposeActionTool = tool({
           userId: context.userId,
           organizationId: context.organizationId,
         } as any,
-        projectId,
+        projectId: resolvedProjectId,
         agentSessionId: context.agentSessionId,
         title,
         description,

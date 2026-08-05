@@ -1,8 +1,12 @@
 "use client"
 
-import { useAgentSessions, type AgentSessionDto } from "@/hooks/use-agent-sessions"
+import {
+  useAgentSessions,
+  type AgentSessionDto,
+} from "@/hooks/use-agent-sessions"
 import { usePendingApprovals } from "@/hooks/use-pending-approvals"
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
+import { useProjectStore } from "@/stores/project-store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,14 +18,13 @@ import {
   ClockIcon,
   CheckCircleIcon,
   WarningCircleIcon,
-  PlusIcon,
   CodeIcon,
   PencilSimpleIcon,
   GearIcon,
   MagnifyingGlassIcon,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -164,8 +167,10 @@ function LaunchAgentButton() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
-  const { setConfig } = useDashboardConfig()
-  const { sessions, isLoading: sessionsLoading } = useAgentSessions()
+  const activeProjectId = useProjectStore((s) => s.activeProjectId)
+  const { sessions, isLoading: sessionsLoading } = useAgentSessions({
+    projectId: activeProjectId ?? undefined,
+  })
   const {
     proposals,
     count: proposalCount,
@@ -173,7 +178,8 @@ export default function AgentsPage() {
     refresh: refreshProposals,
   } = usePendingApprovals()
 
-  const activeSessions = sessions?.filter((s: { status: string }) => s.status === "active") ?? []
+  const activeSessions =
+    sessions?.filter((s: { status: string }) => s.status === "running") ?? []
   const completedToday =
     sessions?.filter((s: { status: string; updatedAt: string | Date }) => {
       if (s.status !== "completed") return false
@@ -226,17 +232,15 @@ export default function AgentsPage() {
     }
   }
 
-  useEffect(() => {
-    setConfig({
-      title: "Agent Hub",
-      description: "Manage your autonomous AI agents and their operations",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Agent Hub" },
-      ],
-      actions: <LaunchAgentButton />,
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "Sessions",
+    description: "Agent sessions for the active project",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Sessions" },
+    ],
+    actions: <LaunchAgentButton />,
+  })
 
   return (
     <div className="space-y-6">

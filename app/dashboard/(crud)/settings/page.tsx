@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { UserIcon, ShieldCheckIcon, KeyIcon } from "@phosphor-icons/react"
 import { useSession } from "@/lib/auth-client"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SegmentedControl } from "@/components/ui/segmented-control"
 import { ProfileForm } from "@/components/settings/profile-form"
@@ -24,19 +24,16 @@ const TABS = [
 /* ------------------------------------------------------------------ */
 
 export default function SettingsPage() {
-  const { setConfig } = useDashboardConfig()
   const { data: sessionData, isPending } = useSession()
   const [activeTab, setActiveTab] = useState<string>("profile")
 
-  useEffect(() => {
-    setConfig({
-      description: "Manage your account and preferences",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Settings" },
-      ],
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    description: "Manage your account and preferences",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Settings" },
+    ],
+  })
 
   const user = sessionData?.user
   const session = sessionData?.session

@@ -33,10 +33,7 @@ import { RiskBadge } from "./risk-badge"
 import { TimeAgo } from "@/components/dashboard/time-ago"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import type {
-  ProposalStatus,
-  ProposalRiskLevel,
-} from "@prisma/client"
+import type { ProposalStatus, ProposalRiskLevel } from "@prisma/client"
 
 // ─── DTO ──────────────────────────────────────────────────────────────────────
 
@@ -380,7 +377,7 @@ export function ApprovalCard({
               <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
                 session:{" "}
                 <Link
-                  href={`/dashboard/agents/${proposal.agentSessionId}`}
+                  href={`/dashboard/sessions/${proposal.agentSessionId}`}
                   className="underline underline-offset-2 transition-colors hover:text-foreground"
                 >
                   {proposal.agentSessionId.slice(0, 12)}…

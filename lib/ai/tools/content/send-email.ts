@@ -11,7 +11,7 @@ export const sendEmailTool = tool({
   description:
     "Send an email via Gmail integration. The project must have a Gmail integration connected. Supports plain text and HTML emails with optional CC and BCC recipients.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID that owns the Gmail integration"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     to: z.array(z.string().email()).min(1).describe("Array of recipient email addresses"),
     subject: z.string().min(1).describe("Email subject line"),
     body: z.string().min(1).describe("Plain text email body"),
@@ -21,8 +21,10 @@ export const sendEmailTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async (input, { context }) => {
+    const resolvedProjectId = input.projectId ?? context.projectId
     try {
       const { prisma } = await import("@/lib/db")
       const { getDecryptedToken, refreshTokenIfNeeded } = await import(
@@ -32,7 +34,7 @@ export const sendEmailTool = tool({
       // Find the Gmail integration for this project
       const integration = await prisma.integration.findFirst({
         where: {
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           provider: "gmail",
           enabled: true,
           project: {

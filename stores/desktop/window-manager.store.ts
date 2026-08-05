@@ -17,7 +17,12 @@ const CASCADE_OFFSET = 30
  * Content types whose windows carry signed URLs/tokens that must never be
  * persisted. Used as a fallback when the app registry isn't populated yet.
  */
-const IFRAME_APP_IDS = new Set<WindowContent["type"]>(["preview", "desktop", "web-terminal"])
+const IFRAME_APP_IDS = new Set<WindowContent["type"]>([
+  "preview",
+  "desktop",
+  "web-terminal",
+  "opencode-workspace",
+])
 
 /**
  * Strip signed URL/token fields from an iframe window before persistence.

@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useMemo } from "react"
 import {
   ListChecksIcon,
   FolderIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProjectStore } from "@/stores/project-store"
 import { useGlobalTasks } from "@/hooks/use-global-tasks"
 import { StatCard } from "@/components/dashboard/stat-card"
@@ -18,7 +18,6 @@ import {
 } from "@/components/dashboard/global-tasks"
 
 export default function GlobalTasksPage() {
-  const { setConfig } = useDashboardConfig()
   const activeProjectId = useProjectStore((s) => s.activeProjectId)
   const {
     tasks: allTasks,
@@ -44,18 +43,16 @@ export default function GlobalTasksPage() {
     return allTasks.filter((t) => t.projectId === activeProjectId)
   }, [allTasks, activeProjectId])
 
-  useEffect(() => {
-    setConfig({
-      title: "Tasks",
-      description: activeProject
-        ? `Tasks in ${activeProject.name}`
-        : "Project tasks",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Tasks" },
-      ],
-    })
-  }, [setConfig, activeProject])
+  useDashboardConfigStore.setState({
+    title: "Tasks",
+    description: activeProject
+      ? `Tasks in ${activeProject.name}`
+      : "Project tasks",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Tasks" },
+    ],
+  })
 
   const distinctProjects = useMemo(() => {
     const set = new Set<string>()

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState, useMemo, useCallback, use } from "react"
+import React, { useState, useMemo, useCallback, use } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import {
   StackSimpleIcon,
@@ -8,7 +8,7 @@ import {
   ArrowRightIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import type { ProjectEnvironment } from "@/hooks/use-projects"
 import { TimeAgo } from "@/components/dashboard/time-ago"
@@ -40,37 +40,34 @@ export default function EnvironmentsPage({
 
 function EnvironmentsInner({ projectId }: { projectId: string }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project, isLoading, error, refetch } = useProject(projectId)
   const [search, setSearch] = useState("")
   const [createOpen, setCreateOpen] = useState(false)
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        description: `${project.name} — ${project.environments?.length ?? 0} environment${(project.environments?.length ?? 0) !== 1 ? "s" : ""}`,
-        actions: (
-          <Button
-            size="default"
-            onClick={() => setCreateOpen(true)}
-            className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
-          >
-            <PlusIcon />
-            New Environment
-          </Button>
-        ),
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          { label: "Environments" },
-        ],
-      })
-    }
-  }, [project, projectId, setConfig])
+  if (project) {
+    useDashboardConfigStore.setState({
+      description: `${project.name} — ${project.environments?.length ?? 0} environment${(project.environments?.length ?? 0) !== 1 ? "s" : ""}`,
+      actions: (
+        <Button
+          size="default"
+          onClick={() => setCreateOpen(true)}
+          className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
+        >
+          <PlusIcon />
+          New Environment
+        </Button>
+      ),
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        { label: "Environments" },
+      ],
+    })
+  }
 
   const environments = project?.environments ?? []
 

@@ -11,18 +11,20 @@ export const getRepositoriesTool = tool({
   description:
     "Retrieve Git repositories connected to a project. Returns repository names, providers, sync status, and URLs.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId }, { context }) => {
     try {
+      const resolvedProjectId = projectId ?? context.projectId
       const { prisma } = await import("@/lib/db")
 
       const repositories = await prisma.repository.findMany({
         where: {
-          projectId,
+          projectId: resolvedProjectId,
           project: { organizationId: context.organizationId },
         },
         select: {

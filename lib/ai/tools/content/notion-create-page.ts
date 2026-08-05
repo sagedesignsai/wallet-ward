@@ -12,7 +12,7 @@ export const notionCreatePageTool = tool({
   The tool will automatically use the connected Notion integration for the current project.`,
   
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID that has the Notion integration"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     parentId: z.string().describe("Parent page or database ID where the page will be created"),
     title: z.string().min(1).describe("Title of the page"),
     content: z.string().optional().describe("Content to add to the page (plain text, will be converted to blocks)"),
@@ -21,9 +21,11 @@ export const notionCreatePageTool = tool({
 
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   
   execute: async (input, { context }) => {
+    const resolvedProjectId = input.projectId ?? context.projectId
     try {
       const { prisma } = await import("@/lib/db")
       const { getDecryptedToken } = await import("@/lib/services/integrations")
@@ -31,7 +33,7 @@ export const notionCreatePageTool = tool({
       // Find the Notion integration for this project
       const integration = await prisma.integration.findFirst({
         where: {
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           provider: "notion",
           enabled: true,
           project: { organizationId: context.organizationId },

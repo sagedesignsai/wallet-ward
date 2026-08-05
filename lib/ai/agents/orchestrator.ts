@@ -69,6 +69,7 @@ const delegateToAgentTool = tool({
     organizationId: z.string(),
     userId: z.string(),
     agentSessionId: z.string().optional(),
+    projectId: z.string().optional(),
   }),
   execute: async function* ({ agentType, task, projectId }, { context, abortSignal }) {
     // Build the specialist with its own org-scoped toolsContext.
@@ -78,12 +79,14 @@ const delegateToAgentTool = tool({
       organizationId: context.organizationId,
       userId: context.userId,
       agentSessionId: context.agentSessionId,
+      projectId: context.projectId ?? projectId,
     })
 
     // Build a context message including org and project scope
+    const resolvedProjectId = context.projectId ?? projectId
     const contextNote = [
       `Organization ID: ${context.organizationId}`,
-      projectId ? `Project ID: ${projectId}` : null,
+      resolvedProjectId ? `Project ID: ${resolvedProjectId}` : null,
     ]
       .filter(Boolean)
       .join("\n")
@@ -124,14 +127,18 @@ const delegateToAgentTool = tool({
  */
 function createSpecialistAgent(
   agentType: DelegateAgentType,
-  ctx: { organizationId: string; userId: string; agentSessionId?: string }
+  ctx: { organizationId: string; userId: string; agentSessionId?: string; projectId?: string }
 ): ToolLoopAgent<never, any> {
   const runtimeContext: AgentRuntimeContext = buildRuntimeContext(
     ctx.organizationId,
     ctx.userId,
-    agentType
+    agentType,
+    ctx.projectId
   )
-  const session = { agentSessionId: ctx.agentSessionId }
+  const session = {
+    agentSessionId: ctx.agentSessionId,
+    projectId: ctx.projectId,
+  }
 
   switch (agentType) {
     case "coding":

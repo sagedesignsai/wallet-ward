@@ -34,6 +34,7 @@ export const opencodeSubagentTool = tool({
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async (
     { taskDescription, projectId, repositoryUrl, branchName = "main", envVars },
@@ -44,10 +45,11 @@ export const opencodeSubagentTool = tool({
     try {
       // 1. Resolve project details if projectId is supplied
       let projectName = "coding-task-workspace";
-      if (projectId) {
+      const resolvedProjectId = projectId ?? context.projectId;
+      if (resolvedProjectId) {
         const { prisma } = await import("@/lib/db");
         const project = await prisma.project.findUnique({
-          where: { id: projectId },
+          where: { id: resolvedProjectId },
           select: { name: true, slug: true },
         });
         if (project) {

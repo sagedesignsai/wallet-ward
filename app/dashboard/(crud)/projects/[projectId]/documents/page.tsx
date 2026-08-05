@@ -1,11 +1,11 @@
 "use client"
 
-import React, { useEffect, useState, useCallback, use } from "react"
+import React, { useState, useCallback, use } from "react"
 import Link from "next/link"
 import { useRouter } from "nextjs-toploader/app"
 import { FileTextIcon, PlusIcon, WarningIcon } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useDocuments, type Document } from "@/hooks/use-documents"
 import { TimeAgo } from "@/components/dashboard/time-ago"
@@ -43,7 +43,6 @@ export default function DocumentsPage({
 
 function DocumentsInner({ projectId }: { projectId: string }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { documents, isLoading, error, createDocument } =
     useDocuments(projectId)
@@ -52,28 +51,26 @@ function DocumentsInner({ projectId }: { projectId: string }) {
   const [content, setContent] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (project) {
-      setConfig({
-        description: `${project.name} — ${documents.length} document${documents.length !== 1 ? "s" : ""}`,
-        actions: (
-          <Button onClick={() => setDialogOpen(true)}>
-            <PlusIcon />
-            New Document
-          </Button>
-        ),
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          { label: "Documents" },
-        ],
-      })
-    }
-  }, [project, documents.length, setConfig, projectId])
+  if (project) {
+    useDashboardConfigStore.setState({
+      description: `${project.name} — ${documents.length} document${documents.length !== 1 ? "s" : ""}`,
+      actions: (
+        <Button onClick={() => setDialogOpen(true)}>
+          <PlusIcon />
+          New Document
+        </Button>
+      ),
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        { label: "Documents" },
+      ],
+    })
+  }
 
   const handleCreate = useCallback(async () => {
     if (!title.trim()) return

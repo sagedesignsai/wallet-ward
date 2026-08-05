@@ -42,7 +42,9 @@ export function DashboardSidebar() {
   const NAV_GROUPS = [
     {
       label: "Overview",
-      items: [{ label: "Overview", href: "/dashboard/overview", icon: HouseIcon }],
+      items: [
+        { label: "Overview", href: "/dashboard/overview", icon: HouseIcon },
+      ],
     },
     {
       label: "⚡ Autonomous",
@@ -53,11 +55,9 @@ export function DashboardSidebar() {
           icon: SquaresFourIcon,
         },
         {
-          label: "Agent Hub",
-          href: "/dashboard/agents",
+          label: "Sessions",
+          href: "/dashboard/sessions",
           icon: RobotIcon,
-          badge: "New",
-          badgeVariant: "primary" as const,
         },
         {
           label: "Proposals",
@@ -110,7 +110,7 @@ export function DashboardSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <Logomark size={28} animated={false} />
+                <Logomark size={40} animated={false} />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold text-sidebar-foreground">
                     Flowspace

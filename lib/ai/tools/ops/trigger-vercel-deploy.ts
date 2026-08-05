@@ -11,17 +11,19 @@ export const triggerVercelDeployTool = tool({
   description:
     "Trigger a build and deployment on Vercel for a project. Restricted to coding and ops agents.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     deployHookUrl: z.string().url().optional().describe("Optional Vercel Deploy Hook URL"),
     branch: z.string().default("main").describe("Target git branch to deploy"),
     environment: z.enum(["production", "preview"]).default("preview").describe("Target environment"),
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, deployHookUrl, branch, environment }, { context }) => {
+    const resolvedProjectId = projectId ?? context.projectId;
     try {
-      let deployedUrl = `https://${projectId}-${environment}.vercel.app`;
+      let deployedUrl = `https://${resolvedProjectId}-${environment}.vercel.app`;
       
       if (deployHookUrl) {
         // Trigger deploy hook via HTTP fetch
@@ -35,7 +37,7 @@ export const triggerVercelDeployTool = tool({
         success: true,
         message: `Deployment triggered on Vercel (${environment} environment, branch: ${branch})`,
         deployment: {
-          projectId,
+          projectId: resolvedProjectId,
           branch,
           environment,
           url: deployedUrl,

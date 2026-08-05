@@ -17,6 +17,10 @@ export type AppEventType =
   | "clipboard:paste"
   | "notification:show"
   | "settings:change"
+  | "agent:tool_call_start"
+  | "agent:tool_call_result"
+  | "agent:sandbox_ready"
+  | "agent:action_proposed"
 
 export interface AppMessage {
   /** Source app ID */

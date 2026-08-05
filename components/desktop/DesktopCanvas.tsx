@@ -15,7 +15,6 @@ export interface DesktopCanvasProps {
 
 export function DesktopCanvas({ className }: DesktopCanvasProps) {
   const windows = useWindowManager((s) => s.windows)
-  const focusedWindowId = useWindowManager((s) => s.focusedWindowId)
   const settings = useDesktopState((s) => s.settings)
   const contextMenu = useDesktopState((s) => s.contextMenu)
   const closeContextMenu = useDesktopState((s) => s.closeContextMenu)
@@ -57,9 +56,7 @@ export function DesktopCanvas({ className }: DesktopCanvasProps) {
       {/* Floating windows */}
       <div className="absolute inset-0 pointer-events-none">
         {visibleWindows.map((window) => (
-          <div key={window.id} className="pointer-events-auto">
-            <WindowFrame window={window} />
-          </div>
+          <WindowFrame key={window.id} window={window} />
         ))}
       </div>
 

@@ -8,7 +8,7 @@ import {
   PlusIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useRepository } from "@/hooks/use-repositories"
 import { BranchSelector } from "@/components/repositories/branch-selector"
@@ -55,7 +55,6 @@ function CommitsInner({
   searchParams: Promise<{ branch?: string }>
 }) {
   const sp = use(searchParams)
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { repository, isLoading: repoLoading } = useRepository(
     projectId,
@@ -69,32 +68,30 @@ function CommitsInner({
   const [error, setError] = useState<string | null>(null)
   const [nextCursor, setNextCursor] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (project && repository) {
-      setConfig({
-        title: "Commits",
-        description: `Commit history for ${repository.name}`,
-        actions: null,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          {
-            label: project.name,
-            href: `/dashboard/projects/${projectId}`,
-          },
-          {
-            label: "Repositories",
-            href: `/dashboard/projects/${projectId}/repositories`,
-          },
-          {
-            label: repository.name,
-            href: `/dashboard/projects/${projectId}/repositories/${repositoryId}`,
-          },
-          { label: "Commits" },
-        ],
-      })
-    }
-  }, [project, repository, setConfig, projectId, repositoryId])
+  if (project && repository) {
+    useDashboardConfigStore.setState({
+      title: "Commits",
+      description: `Commit history for ${repository.name}`,
+      actions: null,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        {
+          label: project.name,
+          href: `/dashboard/projects/${projectId}`,
+        },
+        {
+          label: "Repositories",
+          href: `/dashboard/projects/${projectId}/repositories`,
+        },
+        {
+          label: repository.name,
+          href: `/dashboard/projects/${projectId}/repositories/${repositoryId}`,
+        },
+        { label: "Commits" },
+      ],
+    })
+  }
 
   // Set default branch once repository loads
   useEffect(() => {

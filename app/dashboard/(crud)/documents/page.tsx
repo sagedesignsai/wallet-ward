@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useMemo } from "react"
 import { useRouter } from "nextjs-toploader/app"
 import Link from "next/link"
 import {
@@ -10,7 +10,7 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProjectStore } from "@/stores/project-store"
 import {
   useGlobalDocuments,
@@ -34,7 +34,6 @@ import {
 } from "@/components/ui/empty"
 
 export default function GlobalDocumentsPage() {
-  const { setConfig } = useDashboardConfig()
   const router = useRouter()
   const activeProjectId = useProjectStore((s) => s.activeProjectId)
   const {
@@ -61,18 +60,16 @@ export default function GlobalDocumentsPage() {
     return allDocuments.filter((d) => d.projectId === activeProjectId)
   }, [allDocuments, activeProjectId])
 
-  useEffect(() => {
-    setConfig({
-      title: "Documents",
-      description: activeProject
-        ? `Documents in ${activeProject.name}`
-        : "Project documents",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Documents" },
-      ],
-    })
-  }, [setConfig, activeProject])
+  useDashboardConfigStore.setState({
+    title: "Documents",
+    description: activeProject
+      ? `Documents in ${activeProject.name}`
+      : "Project documents",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Documents" },
+    ],
+  })
 
   const distinctProjects = useMemo(() => {
     const set = new Set<string>()

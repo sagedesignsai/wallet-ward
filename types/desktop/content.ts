@@ -104,6 +104,19 @@ export interface WebTerminalContent {
   sandboxName: string
 }
 
+export interface OpencodeWorkspaceContent {
+  type: "opencode-workspace"
+  /** Signed preview URL of the OpenCode server (port 4096) inside the sandbox. */
+  url: string
+  token: string
+  sandboxId: string
+  /** Project the session belongs to (dispatch mode when absent). */
+  projectId?: string
+  /** OpenCode conversation session id (auto-created when absent). */
+  sessionId?: string
+  title?: string
+}
+
 export type WindowContent =
   | CodeContent
   | DocumentContent
@@ -116,6 +129,7 @@ export type WindowContent =
   | FileTreeContent
   | DesktopContent
   | WebTerminalContent
+  | OpencodeWorkspaceContent
 
 /** Back-compat alias for the Computer panel content union */
 export type ComputerContent = WindowContent

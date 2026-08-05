@@ -23,7 +23,7 @@ import {
 } from "@phosphor-icons/react"
 import type { RepositoryProvider } from "@prisma/client"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { useRepositories, useRepository } from "@/hooks/use-repositories"
 import { Button } from "@/components/ui/button"
@@ -144,7 +144,6 @@ function RepositoryDetailInner({
   repositoryId: string
 }) {
   const router = useRouter()
-  const { setConfig } = useDashboardConfig()
   const { project } = useProject(projectId)
   const { repository, isLoading, error } = useRepository(
     projectId,
@@ -170,25 +169,23 @@ function RepositoryDetailInner({
     }
   }, [repository])
 
-  useEffect(() => {
-    if (project && repository) {
-      setConfig({
-        title: repository.name,
-        description: "Edit repository",
-        actions: null,
-        breadcrumbs: [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Projects", href: "/dashboard/projects" },
-          { label: project.name, href: `/dashboard/projects/${projectId}` },
-          {
-            label: "Repositories",
-            href: `/dashboard/projects/${projectId}/repositories`,
-          },
-          { label: repository.name },
-        ],
-      })
-    }
-  }, [project, repository, setConfig, projectId])
+  if (project && repository) {
+    useDashboardConfigStore.setState({
+      title: repository.name,
+      description: "Edit repository",
+      actions: null,
+      breadcrumbs: [
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: project.name, href: `/dashboard/projects/${projectId}` },
+        {
+          label: "Repositories",
+          href: `/dashboard/projects/${projectId}/repositories`,
+        },
+        { label: repository.name },
+      ],
+    })
+  }
 
   const handleSave = async () => {
     setIsSaving(true)

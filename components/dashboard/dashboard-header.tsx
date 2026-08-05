@@ -18,7 +18,7 @@ import {
 import { useAuth } from "@/hooks/use-auth"
 import { useOrganization } from "@/hooks/use-organization"
 import { useProjects } from "@/hooks/use-projects"
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useAgentSessions } from "@/hooks/use-agent-sessions"
 import { useProjectStore } from "@/stores/project-store"
 import { cn } from "@/lib/utils"
@@ -137,11 +137,11 @@ function OrgSwitcher() {
 
   const initials = activeOrganization?.name
     ? activeOrganization.name
-      .split(/\s+/)
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
+        .split(/\s+/)
+        .map((w) => w[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
     : "??"
 
   return (
@@ -208,7 +208,8 @@ function OrgSwitcher() {
 
 function AgentStatusIndicator() {
   const { sessions } = useAgentSessions()
-  const activeSessions = sessions?.filter((s: { status: string }) => s.status === "active") ?? []
+  const activeSessions =
+    sessions?.filter((s: { status: string }) => s.status === "active") ?? []
 
   if (activeSessions.length === 0) return null
 
@@ -227,12 +228,16 @@ function AgentStatusIndicator() {
   )
 }
 
-export function DashboardHeader() {
-  const { config } = useDashboardConfig()
+export function DashboardHeader({
+  collapsible: collapsibleProp = false,
+}: {
+  collapsible?: boolean
+}) {
+  const config = useDashboardConfigStore()
   const { user, signOut } = useAuth()
   const router = useRouter()
   const isMobile = useMediaQuery("(max-width: 1023px)")
-  const collapsible = config.collapsibleHeader && !isMobile
+  const collapsible = collapsibleProp && !isMobile
   const [isHeaderVisible, setIsHeaderVisible] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -249,11 +254,11 @@ export function DashboardHeader() {
 
   const userInitials = user?.name
     ? user.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
     : "WW"
 
   const handleMouseEnter = () => {
@@ -297,24 +302,25 @@ export function DashboardHeader() {
       {/* Hover trigger zone - only shown when header is collapsible and hidden */}
       {collapsible && !isHeaderVisible && (
         <div
-          className="fixed top-0 left-0 right-0 z-40 h-1.5 cursor-pointer transition-all duration-200"
+          className="fixed top-0 right-0 left-0 z-40 h-1.5 cursor-pointer transition-all duration-200"
           onMouseEnter={handleMouseEnter}
           style={{
-            background: 'linear-gradient(to bottom, var(--primary) 0%, transparent 100%)',
+            background:
+              "linear-gradient(to bottom, var(--primary) 0%, transparent 100%)",
             opacity: 0.3,
           }}
         />
       )}
-      
+
       <header
         className={cn(
           "z-30 flex h-12 shrink-0 items-center gap-2 border-b border-border/60 bg-background/90 px-4 backdrop-blur-md transition-all duration-200 ease-out",
           collapsible
             ? cn(
-                "absolute top-0 left-0 right-0 w-full",
+                "absolute top-0 right-0 left-0 w-full",
                 isHeaderVisible
                   ? "translate-y-0 opacity-100"
-                  : "-translate-y-full opacity-0 pointer-events-none"
+                  : "pointer-events-none -translate-y-full opacity-0"
               )
             : "sticky top-0"
         )}

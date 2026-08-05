@@ -11,22 +11,24 @@ import { z } from "zod";
 export const cloneRepositoryTool = tool({
   description: "Clone a connected Git repository into a running Daytona sandbox. After cloning, use executeCommand to browse and modify files. Requires an existing sandbox.",
   inputSchema: z.object({
-    projectId: z.string().describe("The project ID"),
+    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
     repositoryId: z.string().describe("The repository ID from getRepositories"),
     sandboxId: z.string().describe("The sandbox ID to clone into"),
   }),
   contextSchema: z.object({
     organizationId: z.string(),
+    projectId: z.string().optional(),
   }),
   execute: async ({ projectId, repositoryId, sandboxId }, { context }) => {
     try {
+      const resolvedProjectId = projectId ?? context.projectId
       const { prisma } = await import("@/lib/db");
 
       // Verify repository exists and belongs to project
       const repository = await prisma.repository.findFirst({
         where: {
           id: repositoryId,
-          projectId,
+          projectId: resolvedProjectId,
           project: { organizationId: context.organizationId },
         },
       });

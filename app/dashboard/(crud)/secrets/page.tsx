@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback } from "react"
 import Link from "next/link"
 import {
   KeyIcon,
@@ -16,7 +16,7 @@ import {
   FolderOpenIcon,
 } from "@phosphor-icons/react"
 
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProjectStore } from "@/stores/project-store"
 import {
   useGlobalSecrets,
@@ -97,7 +97,6 @@ function typeLabel(type: string): string {
 }
 
 export default function GlobalSecretsPage() {
-  const { setConfig } = useDashboardConfig()
   const activeProjectId = useProjectStore((s) => s.activeProjectId)
   const {
     secrets: allSecrets,
@@ -132,17 +131,15 @@ export default function GlobalSecretsPage() {
   >({})
   const [expandedSecretId, setExpandedSecretId] = useState<string | null>(null)
 
-  useEffect(() => {
-    setConfig({
-      description: activeProject
-        ? `Secrets in ${activeProject.name}`
-        : "Project secrets and keys",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Secrets & Keys" },
-      ],
-    })
-  }, [setConfig, activeProject])
+  useDashboardConfigStore.setState({
+    description: activeProject
+      ? `Secrets in ${activeProject.name}`
+      : "Project secrets and keys",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Secrets & Keys" },
+    ],
+  })
 
   const handleReveal = useCallback(
     async (secretId: string): Promise<GlobalSecretWithValue | null> => {

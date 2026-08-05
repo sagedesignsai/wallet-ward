@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback } from "react"
 import Link from "next/link"
 import {
   UsersIcon,
@@ -17,7 +17,7 @@ import {
 } from "@phosphor-icons/react"
 
 import { cn } from "@/lib/utils"
-import { useDashboardConfig } from "@/hooks/use-dashboard-config"
+import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useAuth } from "@/hooks/use-auth"
 import { useOrganization, type Organization } from "@/hooks/use-organization"
 import { useMembers, type Member, type Invitation } from "@/hooks/use-members"
@@ -188,7 +188,6 @@ function InvitationRow({
 // --- Main Page ---
 
 export default function OrganizationsPage() {
-  const { setConfig } = useDashboardConfig()
   const { user } = useAuth()
   const {
     organizations,
@@ -219,28 +218,26 @@ export default function OrganizationsPage() {
     )
   }, [activeOrganization])
 
-  useEffect(() => {
-    setConfig({
-      title: "Organizations",
-      description: "Manage your team and permissions",
-      breadcrumbs: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Organizations" },
-      ],
-      actions: (
-        <Button
-          size="default"
-          asChild
-          className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
-        >
-          <Link href="/dashboard/organizations/new">
-            <PlusIcon />
-            New Organization
-          </Link>
-        </Button>
-      ),
-    })
-  }, [setConfig])
+  useDashboardConfigStore.setState({
+    title: "Organizations",
+    description: "Manage your team and permissions",
+    breadcrumbs: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Organizations" },
+    ],
+    actions: (
+      <Button
+        size="default"
+        asChild
+        className="shadow-md shadow-primary/10 transition-shadow hover:shadow-lg hover:shadow-primary/20"
+      >
+        <Link href="/dashboard/organizations/new">
+          <PlusIcon />
+          New Organization
+        </Link>
+      </Button>
+    ),
+  })
 
   const handleSwitch = useCallback(
     async (orgId: string) => {
