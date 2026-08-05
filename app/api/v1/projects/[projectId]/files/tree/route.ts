@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { FileService } from "@/lib/services/file-service"
-import { auth } from "@/lib/auth"
-import { db } from "@/lib/db"
+import { requireProjectAccess } from "@/lib/api/project-access"
+import { handleRouteError, json } from "@/lib/api/http"
 
 type TreeNode = {
   name: string
@@ -19,33 +19,12 @@ export async function GET(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { projectId } = await params
     const { searchParams } = new URL(req.url)
 
     const rootPath = searchParams.get("path") || "/"
 
-    // Verify project access
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
+    await requireProjectAccess(projectId, "project:read")
 
     const files = await FileService.listByProject(projectId, {
       path: rootPath,
@@ -98,12 +77,8 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({ data: tree })
+    return json({ data: tree })
   } catch (error) {
-    console.error("Error fetching file tree:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch file tree" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }

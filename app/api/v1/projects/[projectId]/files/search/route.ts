@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { FileService } from "@/lib/services/file-service"
-import { auth } from "@/lib/auth"
-import { db } from "@/lib/db"
+import { requireProjectAccess } from "@/lib/api/project-access"
+import { badRequest } from "@/lib/api/errors"
+import { handleRouteError, json } from "@/lib/api/http"
 import type { FileType } from "@prisma/client"
 
 /**
@@ -13,11 +14,6 @@ export async function GET(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { projectId } = await params
     const { searchParams } = new URL(req.url)
 
@@ -26,41 +22,18 @@ export async function GET(
     const tags = searchParams.get("tags")?.split(",")
 
     if (!q) {
-      return NextResponse.json(
-        { error: "Search query 'q' is required" },
-        { status: 400 }
-      )
+      throw badRequest("Search query 'q' is required")
     }
 
-    // Verify project access
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
+    await requireProjectAccess(projectId, "project:read")
 
     const files = await FileService.search(projectId, q, {
       type: type || undefined,
       tags: tags || undefined,
     })
 
-    return NextResponse.json({ data: files })
+    return json({ data: files })
   } catch (error) {
-    console.error("Error searching files:", error)
-    return NextResponse.json(
-      { error: "Failed to search files" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }

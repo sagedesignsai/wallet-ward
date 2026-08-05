@@ -19,7 +19,6 @@ export {
   buildObjectKey,
   buildVersionKey,
   normaliseFilename,
-  extractProjectId,
   isValidProjectStorageKey,
   keyToDisplayPath,
 } from "./r2-keys"

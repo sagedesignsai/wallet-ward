@@ -64,15 +64,6 @@ export function buildVersionKey(
   return `${projectId}/v${version}-${uniqueId}/${safe}`
 }
 
-/**
- * Extract the project ID prefix from an R2 object key.
- * Returns null if the key does not follow the expected format.
- */
-export function extractProjectId(key: string): string | null {
-  const parts = key.split("/")
-  return parts.length >= 3 ? (parts[0] ?? null) : null
-}
-
 const UUID_SEGMENT =
   "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 

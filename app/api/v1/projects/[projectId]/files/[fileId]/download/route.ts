@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import { FileService } from "@/lib/services/file-service"
-import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { FileService } from "@/lib/services/file-service"
+import { getPresignedDownloadUrl } from "@/lib/storage"
+import { requireProjectAccess } from "@/lib/api/project-access"
+import { handleRouteError } from "@/lib/api/http"
+import { notFound } from "@/lib/api/errors"
 
 /**
  * GET /api/v1/projects/:projectId/files/:fileId/download
@@ -12,44 +15,49 @@ export async function GET(
   { params }: { params: Promise<{ projectId: string; fileId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { projectId, fileId } = await params
-
-    // Verify project access
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
+    const { ctx, project } = await requireProjectAccess(
+      projectId,
+      "project:read"
+    )
 
     // Verify file exists and belongs to project
     const file = await FileService.getById(fileId)
     if (!file || file.projectId !== projectId) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 })
+      throw notFound("File not found")
     }
 
-    // If file has a URL, redirect to it
+    // R2-backed files store their object key in storageId — sign a
+    // time-limited download URL so private objects are never exposed by key.
+    if (file.storageId) {
+      const { downloadUrl } = await getPresignedDownloadUrl(file.storageId)
+
+      // Audit log the download
+      await db.auditLog.create({
+        data: {
+          organizationId: project.organizationId,
+          actorUserId: ctx.userId,
+          action: "project_update",
+          resourceType: "file",
+          resourceId: fileId,
+          metadata: {
+            action: "download",
+            projectId,
+            fileName: file.name,
+          },
+        },
+      })
+
+      return NextResponse.redirect(downloadUrl)
+    }
+
+    // Legacy/externally-hosted files redirect to their stored URL
     if (file.url) {
       // Audit log the download
       await db.auditLog.create({
         data: {
           organizationId: project.organizationId,
-          actorUserId: session.user.id,
+          actorUserId: ctx.userId,
           action: "project_update",
           resourceType: "file",
           resourceId: fileId,
@@ -64,16 +72,9 @@ export async function GET(
       return NextResponse.redirect(file.url)
     }
 
-    // Otherwise, file is not available for download
-    return NextResponse.json(
-      { error: "File not available for download" },
-      { status: 404 }
-    )
+    // No storage object and no stored URL — nothing to download
+    throw notFound("File not available for download")
   } catch (error) {
-    console.error("Error downloading file:", error)
-    return NextResponse.json(
-      { error: "Failed to download file" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }

@@ -248,52 +248,6 @@ export class FileService {
   }
 
   /**
-   * Restore file to specific version.
-   * Uses the source version's original storageId (R2 key).
-   * Prefer restoreVersionWithKey() when you have copied the R2 object first.
-   */
-  static async restoreVersion(
-    fileId: string,
-    versionId: string,
-    createdById?: string
-  ): Promise<ProjectFile> {
-    const version = await db.projectFile.findUnique({
-      where: { id: versionId },
-    })
-
-    if (!version) {
-      throw new Error("Version not found")
-    }
-
-    const current = await db.projectFile.findUnique({
-      where: { id: fileId },
-    })
-
-    if (!current) {
-      throw new Error("File not found")
-    }
-
-    return db.projectFile.create({
-      data: {
-        projectId: version.projectId,
-        name: version.name,
-        path: version.path,
-        type: version.type,
-        mimeType: version.mimeType,
-        size: version.size,
-        storageId: version.storageId,
-        url: version.url,
-        tags: version.tags,
-        metadata: version.metadata as any,
-        visibility: version.visibility,
-        createdById: createdById,
-        parentId: fileId,
-        version: current.version + 1,
-      },
-    })
-  }
-
-  /**
    * Restore file to a specific version using a pre-copied R2 object key.
    * The caller is responsible for copying the R2 object before calling this.
    *

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { FileService } from "@/lib/services/file-service"
-import { auth } from "@/lib/auth"
-import { db } from "@/lib/db"
+import { requireProjectAccess } from "@/lib/api/project-access"
+import { handleRouteError, json } from "@/lib/api/http"
 
 /**
  * GET /api/v1/projects/:projectId/files/folder?path=/some/prefix
@@ -22,37 +22,17 @@ export async function GET(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { projectId } = await params
     const { searchParams } = new URL(req.url)
     const path = searchParams.get("path") || "/"
 
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: { members: { where: { userId: session.user.id } } },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
+    await requireProjectAccess(projectId, "project:read")
 
     const files = await FileService.listByProject(projectId, { path })
 
-    return NextResponse.json({ data: files })
+    return json({ data: files })
   } catch (error) {
-    console.error("[files/folder GET] Error listing folder contents:", error)
-    return NextResponse.json(
-      { error: "Failed to list folder contents" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }
 
