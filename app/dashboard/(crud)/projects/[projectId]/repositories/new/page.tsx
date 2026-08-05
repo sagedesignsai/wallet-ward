@@ -9,6 +9,7 @@ import {
   GitForkIcon,
   GithubLogoIcon,
   MagnifyingGlassIcon,
+  PlugIcon,
   WarningIcon,
 } from "@phosphor-icons/react"
 
@@ -205,43 +206,68 @@ function NewRepositoryInner({ projectId }: { projectId: string }) {
         <span>Connect a Git repository to sync code and track changes.</span>
       </div>
 
-      {!integrationsLoading && githubIntegrations.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-card p-3">
-          <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-            <GithubLogoIcon className="size-4 shrink-0" />
-            <span>
-              Pick a repository from your connected GitHub account and pre-fill
-              the form below.
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {githubIntegrations.length > 1 && (
-              <Select
-                value={selectedIntegrationId ?? undefined}
-                onValueChange={setSelectedIntegrationId}
+      {!integrationsLoading &&
+        (githubIntegrations.length > 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-card p-3">
+            <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+              <GithubLogoIcon className="size-4 shrink-0" />
+              <span>
+                Pick a repository from your connected GitHub account and
+                pre-fill the form below.
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {githubIntegrations.length > 1 && (
+                <Select
+                  value={selectedIntegrationId ?? undefined}
+                  onValueChange={setSelectedIntegrationId}
+                >
+                  <SelectTrigger className="w-44" aria-label="GitHub account">
+                    <SelectValue placeholder="Select account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {githubIntegrations.map((integration) => (
+                      <SelectItem key={integration.id} value={integration.id}>
+                        {integration.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Button
+                onClick={() => setImportOpen(true)}
+                disabled={!selectedIntegrationId}
               >
-                <SelectTrigger className="w-44" aria-label="GitHub account">
-                  <SelectValue placeholder="Select account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {githubIntegrations.map((integration) => (
-                    <SelectItem key={integration.id} value={integration.id}>
-                      {integration.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+                <GithubLogoIcon className="size-3.5" weight="fill" />
+                Import from GitHub
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  router.push(`/dashboard/projects/${projectId}/integrations`)
+                }
+              >
+                <PlugIcon className="size-3.5" />
+                Manage integrations
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-card p-3">
+            <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+              <GithubLogoIcon className="size-4 shrink-0" />
+              <span>Connect a GitHub account to import repositories.</span>
+            </div>
             <Button
-              onClick={() => setImportOpen(true)}
-              disabled={!selectedIntegrationId}
+              onClick={() =>
+                router.push(`/dashboard/projects/${projectId}/integrations`)
+              }
             >
               <GithubLogoIcon className="size-3.5" weight="fill" />
-              Import from GitHub
+              Connect GitHub account
             </Button>
           </div>
-        </div>
-      )}
+        ))}
 
       <RepositoryForm
         onSubmit={handleSubmit}
