@@ -2,6 +2,8 @@ import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { RepositoryService } from "@/lib/services/repository-service"
 import { getDecryptedToken } from "@/lib/services/integrations"
+import { getOrganizationDek } from "@/lib/services/encryption-keys"
+import { encryptString } from "@/lib/crypto"
 import {
   requireAuth,
   requireOrganization,
@@ -58,17 +60,18 @@ async function loadProjectAndRepository(
 }
 
 /**
- * Register a webhook on GitHub. Returns null on success, or an error reason.
+ * Register a webhook on GitHub. Returns the created hook's GitHub id (null
+ * when unavailable) plus an error reason (null on success).
  */
 async function registerGitHubWebhook(input: {
   repository: { url: string }
   projectId: string
   event: string
   secret: string
-}): Promise<string | null> {
+}): Promise<{ hookId: number | null; error: string | null }> {
   const parsed = RepositoryService.parseGitHubUrl(input.repository.url)
   if (!parsed) {
-    return "could not parse repository URL"
+    return { hookId: null, error: "could not parse repository URL" }
   }
 
   const integration = await db.integration.findFirst({
@@ -76,14 +79,21 @@ async function registerGitHubWebhook(input: {
     include: { project: true },
   })
   if (!integration) {
-    return "no enabled GitHub integration found for this project"
+    return {
+      hookId: null,
+      error: "no enabled GitHub integration found for this project",
+    }
   }
 
   let token: string
   try {
     token = await getDecryptedToken(integration)
   } catch (error) {
-    return error instanceof Error ? error.message : "could not decrypt GitHub token"
+    return {
+      hookId: null,
+      error:
+        error instanceof Error ? error.message : "could not decrypt GitHub token",
+    }
   }
 
   const res = await fetch(
@@ -113,10 +123,16 @@ async function registerGitHubWebhook(input: {
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "")
-    return `GitHub API error (${res.status})${detail ? `: ${detail}` : ""}`
+    return {
+      hookId: null,
+      error: `GitHub API error (${res.status})${detail ? `: ${detail}` : ""}`,
+    }
   }
 
-  return null
+  // GitHub returns the created hook, including its id — capture it so later
+  // deletion can target the hook by id instead of list-and-match.
+  const created = (await res.json().catch(() => null)) as { id?: number } | null
+  return { hookId: created?.id ?? null, error: null }
 }
 
 /**
@@ -141,8 +157,9 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
       orderBy: { createdAt: "desc" },
     })
 
-    // Never expose the HMAC secret to project:read members (e.g. viewers).
-    // The secret is only returned to the creator in the POST response.
+    // Never expose the HMAC secret or the GitHub hook id to project:read
+    // members (e.g. viewers). The secret is only returned to the creator in
+    // the POST response; githubHookId is an internal handle for deletion.
     const data = webhooks.map((webhook) => ({
       id: webhook.id,
       repositoryId: webhook.repositoryId,
@@ -196,12 +213,18 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     // Generate a unique HMAC secret for signature verification
     const secret = generateWebhookSecret()
 
-    const webhook = await db.repositoryWebhook.create({
+    // Encrypt the secret at rest with the org DEK (envelope format). GitHub
+    // receives the PLAINTEXT secret in the registration config; only the
+    // encrypted envelope is persisted.
+    const dek = await getOrganizationDek(orgCtx.organizationId)
+    const encryptedSecret = JSON.stringify(encryptString(secret, dek))
+
+    let webhook = await db.repositoryWebhook.create({
       data: {
         repositoryId,
         event: body.event,
         url: body.url,
-        secret,
+        secret: encryptedSecret,
         enabled: body.enabled !== undefined ? body.enabled : true,
       },
     })
@@ -209,16 +232,26 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     // Register the hook with GitHub. On failure, roll back the inert DB row —
     // never leave rows that GitHub does not know about.
     if (repository.provider === "github") {
-      const reason = await registerGitHubWebhook({
+      const result = await registerGitHubWebhook({
         repository: { url: repository.url },
         projectId,
         event: webhook.event,
         secret,
       })
 
-      if (reason) {
+      if (result.error) {
         await db.repositoryWebhook.delete({ where: { id: webhook.id } })
-        throw badRequest(`Failed to register webhook with GitHub: ${reason}`)
+        throw badRequest(
+          `Failed to register webhook with GitHub: ${result.error}`
+        )
+      }
+
+      // Store the GitHub hook id so deletion is by-id (no list-and-match).
+      if (result.hookId != null) {
+        webhook = await db.repositoryWebhook.update({
+          where: { id: webhook.id },
+          data: { githubHookId: String(result.hookId) },
+        })
       }
     }
 
@@ -241,7 +274,24 @@ export async function POST(req: NextRequest, ctx: Ctx) {
       },
     })
 
-    return json({ data: webhook }, { status: 201 })
+    // Return the creator-facing DTO. The HMAC secret is only returned here
+    // (in plaintext) — the stored value is the encrypted envelope.
+    return json(
+      {
+        data: {
+          id: webhook.id,
+          repositoryId: webhook.repositoryId,
+          event: webhook.event,
+          url: webhook.url,
+          enabled: webhook.enabled,
+          secret,
+          githubHookId: webhook.githubHookId,
+          createdAt: webhook.createdAt,
+          updatedAt: webhook.updatedAt,
+        },
+      },
+      { status: 201 }
+    )
   } catch (error) {
     return handleRouteError(error)
   }

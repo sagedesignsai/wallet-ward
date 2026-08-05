@@ -447,6 +447,7 @@ model RepositoryWebhook {
   url          String
   secret       String
   enabled      Boolean      @default(true)
+  githubHookId String?      @map("github_hook_id")
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
 

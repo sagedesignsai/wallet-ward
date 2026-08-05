@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   GithubLogoIcon,
   GitlabLogoIcon,
@@ -61,6 +61,7 @@ export function RepositoryForm({
   onCancel,
   isSubmitting = false,
   initialValues,
+  isEditing: isEditingProp,
 }: RepositoryFormProps) {
   const [name, setName] = useState(initialValues?.name ?? "")
   const [url, setUrl] = useState(initialValues?.url ?? "")
@@ -76,7 +77,23 @@ export function RepositoryForm({
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const isEditing = !!initialValues?.url
+  // Sync form state when `initialValues` change after mount (e.g. a repository
+  // picked from the GitHub import dialog pre-fills the form).
+  useEffect(() => {
+    if (!initialValues) return
+    if (initialValues.name !== undefined) setName(initialValues.name)
+    if (initialValues.url !== undefined) setUrl(initialValues.url)
+    if (initialValues.description !== undefined)
+      setDescription(initialValues.description)
+    if (initialValues.provider !== undefined)
+      setProvider(initialValues.provider)
+    if (initialValues.branch !== undefined) setBranch(initialValues.branch)
+    if (initialValues.accessType !== undefined)
+      setAccessType(initialValues.accessType)
+    setErrors({})
+  }, [initialValues])
+
+  const isEditing = isEditingProp ?? !!initialValues?.url
 
   const validate = useCallback(() => {
     const newErrors: Record<string, string> = {}

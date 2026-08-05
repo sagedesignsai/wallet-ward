@@ -2,6 +2,8 @@ import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { RepositoryService } from "@/lib/services/repository-service"
 import { getDecryptedToken } from "@/lib/services/integrations"
+import { getOrganizationDek } from "@/lib/services/encryption-keys"
+import { decryptString, type EncryptedPayload } from "@/lib/crypto"
 import {
   requireAuth,
   requireOrganization,
@@ -15,6 +17,52 @@ const WEBHOOK_CALLBACK_URL = `${
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 }/api/webhooks/github`
 
+/**
+ * Parse a stored webhook secret. New rows store an encrypted envelope JSON
+ * string; legacy rows store the raw plaintext (whsec_...). Returns null when
+ * the value is not an envelope.
+ */
+function parseEncryptedSecret(raw: string): EncryptedPayload | null {
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    if (
+      typeof parsed.ciphertext !== "string" ||
+      typeof parsed.iv !== "string" ||
+      typeof parsed.authTag !== "string"
+    ) {
+      return null
+    }
+    return {
+      ciphertext: parsed.ciphertext,
+      iv: parsed.iv,
+      authTag: parsed.authTag,
+      algorithm: "aes-256-gcm",
+    }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Decrypt a stored webhook secret with the org DEK. Falls back to the raw
+ * stored value for legacy plaintext rows (or any undecryptable value).
+ */
+async function decryptWebhookSecret(
+  raw: string,
+  organizationId: string
+): Promise<string> {
+  const payload = parseEncryptedSecret(raw)
+  if (!payload) {
+    return raw
+  }
+  try {
+    const dek = await getOrganizationDek(organizationId)
+    return decryptString(payload, dek)
+  } catch {
+    return raw
+  }
+}
+
 type Ctx = {
   params: Promise<{
     projectId: string
@@ -26,11 +74,17 @@ type Ctx = {
 /**
  * Best-effort: remove the GitHub hook before deleting the local row.
  * Never throws — failures are logged and the DB row is still deleted.
+ *
+ * Preferred path: the stored githubHookId lets us delete by id directly.
+ * Legacy rows without one fall back to list-and-match using the decrypted
+ * secret (handles both encrypted-envelope and legacy-plaintext storage).
  */
 async function unregisterGitHubWebhook(input: {
   repository: { url: string }
   projectId: string
-  webhookSecret: string
+  organizationId: string
+  githubHookId: string | null
+  storedSecret: string
 }): Promise<void> {
   try {
     const parsed = RepositoryService.parseGitHubUrl(input.repository.url)
@@ -55,17 +109,38 @@ async function unregisterGitHubWebhook(input: {
       return
     }
 
-    const hooksRes = await fetch(
-      `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/hooks`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github+json",
-          "User-Agent": "Flowspace",
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
+    const baseUrl = `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/hooks`
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "User-Agent": "Flowspace",
+      "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+    // Preferred path: delete the hook by id — no list-and-match needed.
+    if (input.githubHookId) {
+      const delRes = await fetch(`${baseUrl}/${input.githubHookId}`, {
+        method: "DELETE",
+        headers,
+      })
+      if (!delRes.ok && delRes.status !== 404) {
+        console.error(
+          `GitHub webhook unregister: failed to delete hook ${input.githubHookId} (${delRes.status})`
+        )
       }
+      return
+    }
+
+    // Legacy rows without a stored hook id: recover the plaintext secret
+    // (encrypted envelope or legacy plaintext) for exact matching.
+    const webhookSecret = await decryptWebhookSecret(
+      input.storedSecret,
+      input.organizationId
     )
+
+    const hooksRes = await fetch(baseUrl, {
+      headers,
+    })
     if (!hooksRes.ok) {
       console.error(
         `GitHub webhook unregister: failed to list hooks (${hooksRes.status})`
@@ -84,7 +159,7 @@ async function unregisterGitHubWebhook(input: {
       (hook) => hook.config?.url === WEBHOOK_CALLBACK_URL
     )
     const exactMatch = urlMatches.find(
-      (hook) => hook.config?.secret === input.webhookSecret
+      (hook) => hook.config?.secret === webhookSecret
     )
 
     let target: { id: number } | undefined
@@ -114,18 +189,10 @@ async function unregisterGitHubWebhook(input: {
       return
     }
 
-    const delRes = await fetch(
-      `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/hooks/${target.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github+json",
-          "User-Agent": "Flowspace",
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      }
-    )
+    const delRes = await fetch(`${baseUrl}/${target.id}`, {
+      method: "DELETE",
+      headers,
+    })
     if (!delRes.ok && delRes.status !== 404) {
       console.error(
         `GitHub webhook unregister: failed to delete hook ${target.id} (${delRes.status})`
@@ -174,7 +241,9 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
       await unregisterGitHubWebhook({
         repository: { url: repository.url },
         projectId,
-        webhookSecret: webhook.secret,
+        organizationId: orgCtx.organizationId,
+        githubHookId: webhook.githubHookId,
+        storedSecret: webhook.secret,
       })
     }
 
