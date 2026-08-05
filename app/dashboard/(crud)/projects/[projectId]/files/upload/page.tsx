@@ -1,19 +1,13 @@
 "use client"
 
-import { use, useState } from "react"
+import { use } from "react"
 import { useRouter } from "nextjs-toploader/app"
-import { WarningIcon } from "@phosphor-icons/react"
-import type { FileType, FileVisibility } from "@prisma/client"
 
 import { useDashboardConfigStore } from "@/stores/dashboard-config"
 import { useProject } from "@/hooks/use-project"
 import { FileUpload } from "@/components/files/file-upload"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
-
-/* ------------------------------------------------------------------ */
-/*  Page wrapper (unwrap params)                                      */
-/* ------------------------------------------------------------------ */
 
 export default function FileUploadPage({
   params,
@@ -24,20 +18,12 @@ export default function FileUploadPage({
   return <FileUploadInner projectId={projectId} />
 }
 
-/* ------------------------------------------------------------------ */
-/*  Inner component                                                    */
-/* ------------------------------------------------------------------ */
-
 function FileUploadInner({ projectId }: { projectId: string }) {
   const router = useRouter()
   const { project, isLoading: projectLoading } = useProject(projectId)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  /* ---- dashboard config ---- */
   useDashboardConfigStore.setState({
     title: "Upload File",
-    description: "Upload a new file to this project",
     breadcrumbs: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Projects", href: "/dashboard/projects" },
@@ -45,62 +31,20 @@ function FileUploadInner({ projectId }: { projectId: string }) {
         label: project?.name ?? "Project",
         href: `/dashboard/projects/${projectId}`,
       },
-      {
-        label: "Files",
-        href: `/dashboard/projects/${projectId}/files`,
-      },
+      { label: "Files", href: `/dashboard/projects/${projectId}/files` },
       { label: "Upload" },
     ],
   })
 
-  /* ---- handlers ---- */
-  const handleSubmit = async (values: {
-    file: File | null
-    name: string
-    type: FileType
-    tags: string[]
-    visibility: FileVisibility
-  }) => {
-    if (!values.file) return
-
-    setIsSubmitting(true)
-    setError(null)
-
-    try {
-      const formData = new FormData()
-      formData.append("file", values.file)
-      formData.append("name", values.name)
-      formData.append("type", values.type)
-      formData.append("tags", values.tags.join(","))
-      formData.append("visibility", values.visibility)
-
-      const res = await fetch(`/api/v1/projects/${projectId}/files/upload`, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      })
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => null)
-        throw new Error(body?.error ?? "Upload failed")
-      }
-
-      toast.success("File uploaded successfully")
-      router.push(`/dashboard/projects/${projectId}/files`)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Upload failed"
-      setError(message)
-      toast.error(message)
-    } finally {
-      setIsSubmitting(false)
-    }
+  const handleSuccess = (fileId: string) => {
+    toast.success("File uploaded successfully")
+    router.push(`/dashboard/projects/${projectId}/files/${fileId}`)
   }
 
   const handleCancel = () => {
     router.push(`/dashboard/projects/${projectId}/files`)
   }
 
-  /* ---- loading (project still loading) ---- */
   if (projectLoading) {
     return (
       <div className="max-w-2xl space-y-4">
@@ -111,20 +55,11 @@ function FileUploadInner({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-5">
-      {/* Error banner */}
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-          <WarningIcon className="size-3.5 shrink-0" />
-          {error}
-        </div>
-      )}
-
-      {/* Upload form */}
+    <div className="max-w-2xl">
       <FileUpload
-        onSubmit={handleSubmit}
+        projectId={projectId}
+        onSuccess={handleSuccess}
         onCancel={handleCancel}
-        isSubmitting={isSubmitting}
       />
     </div>
   )

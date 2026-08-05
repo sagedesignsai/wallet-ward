@@ -4,93 +4,18 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 
 /**
- * POST /api/v1/projects/:projectId/files/folder
- * Create a virtual folder (placeholder file record with type "other")
- */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
-) {
-  try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const { projectId } = await params
-
-    // Verify project access
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
-
-    const body = await req.json()
-
-    if (!body.name || !body.path) {
-      return NextResponse.json(
-        { error: "Missing required fields: name, path" },
-        { status: 400 }
-      )
-    }
-
-    // Create a placeholder file record representing a virtual folder
-    const folder = await FileService.create({
-      projectId,
-      name: body.name,
-      path: body.path,
-      type: "other",
-      mimeType: "application/x-directory",
-      size: 0,
-      storageId: crypto.randomUUID(),
-      tags: [],
-      visibility: "private",
-      metadata: { isFolder: true },
-      createdById: session.user.id,
-    })
-
-    // Audit log the folder creation
-    await db.auditLog.create({
-      data: {
-        organizationId: project.organizationId,
-        actorUserId: session.user.id,
-        action: "project_update",
-        resourceType: "file",
-        resourceId: folder.id,
-        metadata: {
-          action: "create_folder",
-          projectId,
-          folderName: folder.name,
-          folderPath: folder.path,
-        },
-      },
-    })
-
-    return NextResponse.json({ data: folder }, { status: 201 })
-  } catch (error) {
-    console.error("Error creating folder:", error)
-    return NextResponse.json(
-      { error: "Failed to create folder" },
-      { status: 500 }
-    )
-  }
-}
-
-/**
- * GET /api/v1/projects/:projectId/files/folder
- * List folder contents (files matching a path prefix)
+ * GET /api/v1/projects/:projectId/files/folder?path=/some/prefix
+ *
+ * List files whose path starts with the given prefix.
+ * Folders are not stored as DB records — they are inferred from file paths.
+ * This endpoint is the primary way to browse a virtual directory.
+ *
+ * Query params:
+ *   path  string  (optional, default "/") — the directory prefix to list
+ *
+ * POST /files/folder has been intentionally removed.
+ * Folders are path-as-structure: a "folder" exists as long as any file's
+ * path starts with that prefix. No placeholder records are needed or stored.
  */
 export async function GET(
   req: NextRequest,
@@ -104,19 +29,13 @@ export async function GET(
 
     const { projectId } = await params
     const { searchParams } = new URL(req.url)
-
     const path = searchParams.get("path") || "/"
 
-    // Verify project access
     const project = await db.project.findUnique({
       where: { id: projectId },
       include: {
         organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
+          include: { members: { where: { userId: session.user.id } } },
         },
       },
     })
@@ -125,16 +44,29 @@ export async function GET(
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    const files = await FileService.listByProject(projectId, {
-      path,
-    })
+    const files = await FileService.listByProject(projectId, { path })
 
     return NextResponse.json({ data: files })
   } catch (error) {
-    console.error("Error listing folder contents:", error)
+    console.error("[files/folder GET] Error listing folder contents:", error)
     return NextResponse.json(
       { error: "Failed to list folder contents" },
       { status: 500 }
     )
   }
+}
+
+/**
+ * POST is no longer supported.
+ * Folders do not exist as DB records — they are derived from file paths.
+ * To "create" a folder, upload any file with a path under that prefix.
+ */
+export async function POST() {
+  return NextResponse.json(
+    {
+      error:
+        "Creating folder records is not supported. Folders are derived from file paths. Upload a file with the desired path prefix instead.",
+    },
+    { status: 410 }
+  )
 }

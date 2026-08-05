@@ -1,9 +1,9 @@
 import { db } from "@/lib/db"
-import type { 
-  ProjectFile, 
-  FileType, 
+import type {
+  ProjectFile,
+  FileType,
   FileVisibility,
-  FileShare 
+  FileShare,
 } from "@prisma/client"
 
 export type CreateFileInput = {
@@ -116,7 +116,9 @@ export class FileService {
   /**
    * Get file by ID with versions
    */
-  static async getByIdWithVersions(id: string): Promise<FileWithVersions | null> {
+  static async getByIdWithVersions(
+    id: string
+  ): Promise<FileWithVersions | null> {
     return db.projectFile.findUnique({
       where: { id },
       include: {
@@ -189,7 +191,10 @@ export class FileService {
   /**
    * Update file
    */
-  static async update(id: string, input: UpdateFileInput): Promise<ProjectFile> {
+  static async update(
+    id: string,
+    input: UpdateFileInput
+  ): Promise<ProjectFile> {
     return db.projectFile.update({
       where: { id },
       data: input as any,
@@ -236,17 +241,16 @@ export class FileService {
   static async getVersions(fileId: string): Promise<ProjectFile[]> {
     return db.projectFile.findMany({
       where: {
-        OR: [
-          { id: fileId },
-          { parentId: fileId },
-        ],
+        OR: [{ id: fileId }, { parentId: fileId }],
       },
       orderBy: { version: "desc" },
     })
   }
 
   /**
-   * Restore file to specific version
+   * Restore file to specific version.
+   * Uses the source version's original storageId (R2 key).
+   * Prefer restoreVersionWithKey() when you have copied the R2 object first.
    */
   static async restoreVersion(
     fileId: string,
@@ -279,6 +283,60 @@ export class FileService {
         size: version.size,
         storageId: version.storageId,
         url: version.url,
+        tags: version.tags,
+        metadata: version.metadata as any,
+        visibility: version.visibility,
+        createdById: createdById,
+        parentId: fileId,
+        version: current.version + 1,
+      },
+    })
+  }
+
+  /**
+   * Restore file to a specific version using a pre-copied R2 object key.
+   * The caller is responsible for copying the R2 object before calling this.
+   *
+   * This overload exists so the restore route can supply a freshly-copied
+   * storageKey rather than re-using the source version's key, keeping all
+   * versions as independent objects in R2.
+   */
+  static async restoreVersionWithKey(
+    fileId: string,
+    versionId: string,
+    newStorageKey: string,
+    createdById?: string,
+    url?: string
+  ): Promise<ProjectFile> {
+    const version = await db.projectFile.findUnique({
+      where: { id: versionId },
+    })
+
+    if (!version) {
+      throw new Error("Version not found")
+    }
+
+    const current = await db.projectFile.findUnique({
+      where: { id: fileId },
+    })
+
+    if (!current) {
+      throw new Error("File not found")
+    }
+
+    return db.projectFile.create({
+      data: {
+        projectId: version.projectId,
+        name: version.name,
+        path: version.path,
+        type: version.type,
+        mimeType: version.mimeType,
+        size: version.size,
+        storageId: newStorageKey,
+        // Do not carry over the source version's stored url (it may be a dead
+        // or private presigned URL). The caller can pass an explicit override;
+        // otherwise the restored row starts with a null url.
+        url: url ?? undefined,
         tags: version.tags,
         metadata: version.metadata as any,
         visibility: version.visibility,

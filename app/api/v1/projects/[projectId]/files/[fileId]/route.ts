@@ -1,98 +1,56 @@
-import { NextRequest, NextResponse } from "next/server"
-import { FileService } from "@/lib/services/file-service"
-import { auth } from "@/lib/auth"
+import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
+import { FileService } from "@/lib/services/file-service"
+import { deleteObject } from "@/lib/storage"
+import { requireProjectAccess } from "@/lib/api/project-access"
+import { handleRouteError, json } from "@/lib/api/http"
+import { notFound } from "@/lib/api/errors"
 import type { FileType, FileVisibility } from "@prisma/client"
 
 /**
  * GET /api/v1/projects/:projectId/files/:fileId
- * Get a specific file
+ * Get a specific file (with version list and counts)
  */
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string; fileId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { projectId, fileId } = await params
-
-    // Verify project access
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
+    await requireProjectAccess(projectId, "project:read")
 
     const file = await FileService.getByIdWithVersions(fileId)
-
     if (!file || file.projectId !== projectId) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 })
+      throw notFound("File not found")
     }
 
-    return NextResponse.json({ data: file })
+    return json({ data: file })
   } catch (error) {
-    console.error("Error fetching file:", error)
-    return NextResponse.json({ error: "Failed to fetch file" }, { status: 500 })
+    return handleRouteError(error)
   }
 }
 
 /**
  * PATCH /api/v1/projects/:projectId/files/:fileId
- * Update a file
+ * Update file metadata (name, path, type, tags, visibility)
  */
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string; fileId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { projectId, fileId } = await params
+    const { ctx, project } = await requireProjectAccess(
+      projectId,
+      "project:write"
+    )
 
-    // Verify project access
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
-
-    // Verify file exists and belongs to project
     const existingFile = await FileService.getById(fileId)
     if (!existingFile || existingFile.projectId !== projectId) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 })
+      throw notFound("File not found")
     }
 
     const body = await req.json()
-
     const file = await FileService.update(fileId, {
       name: body.name,
       path: body.path,
@@ -102,11 +60,10 @@ export async function PATCH(
       visibility: body.visibility as FileVisibility,
     })
 
-    // Log audit event
     await db.auditLog.create({
       data: {
         organizationId: project.organizationId,
-        actorUserId: session.user.id,
+        actorUserId: ctx.userId,
         action: "project_update",
         resourceType: "file",
         resourceId: file.id,
@@ -119,63 +76,47 @@ export async function PATCH(
       },
     })
 
-    return NextResponse.json({ data: file })
+    return json({ data: file })
   } catch (error) {
-    console.error("Error updating file:", error)
-    return NextResponse.json(
-      { error: "Failed to update file" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }
 
 /**
  * DELETE /api/v1/projects/:projectId/files/:fileId
- * Delete a file
+ *
+ * Deletes the R2 object first, then removes the DB record.
+ * If the R2 delete fails, the DB record is preserved so the operator can
+ * retry or manually clean up storage. This prevents ghost DB records that
+ * point to non-existent objects.
  */
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string; fileId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { projectId, fileId } = await params
+    const { ctx, project } = await requireProjectAccess(
+      projectId,
+      "project:write"
+    )
 
-    // Verify project access
-    const project = await db.project.findUnique({
-      where: { id: projectId },
-      include: {
-        organization: {
-          include: {
-            members: {
-              where: { userId: session.user.id },
-            },
-          },
-        },
-      },
-    })
-
-    if (!project || project.organization.members.length === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
-    }
-
-    // Verify file exists and belongs to project
     const existingFile = await FileService.getById(fileId)
     if (!existingFile || existingFile.projectId !== projectId) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 })
+      throw notFound("File not found")
     }
 
+    // Step 1: Delete R2 object. R2 is idempotent on missing keys (returns 204),
+    // so if the object was already gone this is safe.
+    await deleteObject(existingFile.storageId)
+
+    // Step 2: Delete DB record (cascades to FileShare)
     await FileService.delete(fileId)
 
-    // Log audit event
     await db.auditLog.create({
       data: {
         organizationId: project.organizationId,
-        actorUserId: session.user.id,
+        actorUserId: ctx.userId,
         action: "project_update",
         resourceType: "file",
         resourceId: fileId,
@@ -183,16 +124,13 @@ export async function DELETE(
           action: "delete",
           projectId,
           fileName: existingFile.name,
+          storageKey: existingFile.storageId,
         },
       },
     })
 
-    return NextResponse.json({ success: true })
+    return json({ data: { ok: true } })
   } catch (error) {
-    console.error("Error deleting file:", error)
-    return NextResponse.json(
-      { error: "Failed to delete file" },
-      { status: 500 }
-    )
+    return handleRouteError(error)
   }
 }

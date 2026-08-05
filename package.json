@@ -19,6 +19,8 @@
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.14",
     "@ai-sdk/react": "^4.0.40",
+    "@aws-sdk/client-s3": "3.840.0",
+    "@aws-sdk/s3-request-presigner": "3.840.0",
     "@base-ui/react": "^1.6.0",
     "@better-auth/api-key": "^1.6.23",
     "@daytona/sdk": "^0.200.1",

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import type { ProjectFile, FileType, FileVisibility } from "@prisma/client"
+import { apiErrorMessage } from "@/lib/utils"
 
 export type FileWithMetadata = ProjectFile & {
   _count?: {
@@ -65,43 +66,6 @@ export function useProjectFiles(
     fetchFiles()
   }, [fetchFiles])
 
-  const createFile = useCallback(
-    async (data: {
-      name: string
-      path: string
-      type: FileType
-      mimeType: string
-      size: number
-      storageId: string
-      url?: string
-      tags?: string[]
-      metadata?: Record<string, unknown>
-      visibility?: FileVisibility
-    }): Promise<ProjectFile | null> => {
-      try {
-        const res = await fetch(`/api/v1/projects/${projectId}/files`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(data),
-        })
-
-        if (!res.ok) {
-          const error = await res.json()
-          throw new Error(error.error || "Failed to create file")
-        }
-
-        const body: FileResponse = await res.json()
-        setFiles((prev) => [body.data, ...prev])
-        return body.data
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to create file.")
-        return null
-      }
-    },
-    [projectId]
-  )
-
   const updateFile = useCallback(
     async (
       fileId: string,
@@ -130,9 +94,7 @@ export function useProjectFiles(
         }
 
         const body: FileResponse = await res.json()
-        setFiles((prev) =>
-          prev.map((f) => (f.id === fileId ? body.data : f))
-        )
+        setFiles((prev) => prev.map((f) => (f.id === fileId ? body.data : f)))
         return body.data
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to update file.")
@@ -170,14 +132,133 @@ export function useProjectFiles(
     [projectId, files]
   )
 
+  /**
+   * Two-step presigned upload helper.
+   *
+   * 1. Calls POST /files/presign  → gets { uploadUrl, storageKey }
+   * 2. PUTs the file bytes directly to R2 via XHR (supports progress events)
+   * 3. Calls POST /files/confirm  → writes the ProjectFile DB record
+   *
+   * @param file       - The File object to upload
+   * @param meta       - Metadata for the ProjectFile record
+   * @param onProgress - Optional progress callback (0–100)
+   */
+  const presignAndUpload = useCallback(
+    async (
+      file: File,
+      meta: {
+        name?: string
+        path?: string
+        type?: FileType
+        tags?: string[]
+        visibility?: FileVisibility
+        parentId?: string
+      },
+      onProgress?: (pct: number) => void
+    ): Promise<ProjectFile | null> => {
+      try {
+        // Step 1: Get presigned PUT URL from the server
+        const presignRes = await fetch(
+          `/api/v1/projects/${projectId}/files/presign`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              filename: file.name,
+              mimeType: file.type || "application/octet-stream",
+              size: file.size,
+            }),
+          }
+        )
+
+        if (!presignRes.ok) {
+          const body = await presignRes.json().catch(() => null)
+          throw new Error(apiErrorMessage(body, "Failed to get upload URL"))
+        }
+
+        const { data: presignData } = await presignRes.json()
+        const { uploadUrl, storageKey } = presignData
+
+        // Step 2: PUT file bytes directly to R2 (bypasses Next.js server)
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+
+          if (onProgress) {
+            xhr.upload.addEventListener("progress", (ev) => {
+              if (ev.lengthComputable) {
+                onProgress(Math.round((ev.loaded / ev.total) * 100))
+              }
+            })
+          }
+
+          xhr.addEventListener("load", () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve()
+            } else {
+              reject(new Error(`Storage upload failed (HTTP ${xhr.status})`))
+            }
+          })
+
+          xhr.addEventListener("error", () =>
+            reject(new Error("Network error during upload"))
+          )
+
+          xhr.open("PUT", uploadUrl)
+          xhr.setRequestHeader(
+            "Content-Type",
+            file.type || "application/octet-stream"
+          )
+          xhr.send(file)
+        })
+
+        onProgress?.(100)
+
+        // Step 3: Confirm — server verifies object exists in R2 and writes DB
+        const confirmRes = await fetch(
+          `/api/v1/projects/${projectId}/files/confirm`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              storageKey,
+              name: meta.name ?? file.name,
+              path: meta.path ?? `/${file.name}`,
+              type: meta.type ?? "other",
+              mimeType: file.type || "application/octet-stream",
+              size: file.size,
+              tags: meta.tags ?? [],
+              visibility: meta.visibility ?? "private",
+              ...(meta.parentId ? { parentId: meta.parentId } : {}),
+            }),
+          }
+        )
+
+        if (!confirmRes.ok) {
+          const body = await confirmRes.json().catch(() => null)
+          throw new Error(apiErrorMessage(body, "Failed to save file record"))
+        }
+
+        const { data: newFile }: FileResponse = await confirmRes.json()
+        setFiles((prev) => [newFile, ...prev])
+        return newFile
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to upload file.")
+        return null
+      }
+    },
+    [projectId]
+  )
+
   return {
     files,
     isLoading,
     error,
     refetch,
-    createFile,
     updateFile,
     deleteFile,
+    presignAndUpload,
   }
 }
 
@@ -224,7 +305,9 @@ export function useFile(projectId: string, fileId: string) {
     }
 
     fetchFile()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [projectId, fileId])
 
   return { file, isLoading, error }
