@@ -11,7 +11,10 @@ export const proposeActionTool = tool({
   description:
     "Propose a high-risk action for human review and approval before executing (Human-in-the-Loop control). Always use this before deploying, deleting, publishing, or rotating secrets.",
   inputSchema: z.object({
-    projectId: z.string().optional().describe("The project ID. Defaults to the active project if omitted"),
+    projectId: z
+      .string()
+      .optional()
+      .describe("The project ID. Defaults to the active project if omitted"),
     title: z
       .string()
       .describe("Action title (e.g., 'Deploy Next.js app to Production')"),
@@ -40,11 +43,25 @@ export const proposeActionTool = tool({
     agentSessionId: z.string().optional(),
   }),
   execute: async (
-    { projectId, title, description, riskLevel, targetSystem, actionType, payload },
+    {
+      projectId,
+      title,
+      description,
+      riskLevel,
+      targetSystem,
+      actionType,
+      payload,
+    },
     { context }
   ) => {
     try {
       const resolvedProjectId = projectId ?? context.projectId
+      if (!resolvedProjectId) {
+        throw new Error(
+          "proposeActionTool: a projectId is required (pass it explicitly or run within a project context)"
+        )
+      }
+
       const { createProposal } = await import("@/lib/services/proposals")
 
       const proposal = await createProposal({
@@ -73,7 +90,9 @@ export const proposeActionTool = tool({
     } catch (error) {
       console.error("[propose-action error]", error)
       throw new Error(
-        error instanceof Error ? error.message : "Failed to create action proposal."
+        error instanceof Error
+          ? error.message
+          : "Failed to create action proposal."
       )
     }
   },
