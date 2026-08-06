@@ -6,6 +6,15 @@ import {
   getWebTerminalUrl,
   deleteSandbox,
 } from "@/lib/daytona";
+import {
+  agentActorCtx,
+  bestEffortAuditWrite,
+} from "@/lib/ai/telemetry";
+
+// NOTE: the domain `sandbox_create` row written inside this tool's execute
+// layers on top of the generic `tool_call` row written by withToolTelemetry —
+// both are emitted per invocation BY DESIGN (§4 of GOVERNED_OUTPUT_PIPELINE.md);
+// do not collapse them into a single row.
 
 export const opencodeSubagentTool = tool({
   description:
@@ -62,6 +71,21 @@ export const opencodeSubagentTool = tool({
       const sandbox = await createSandbox(sandboxName, "typescript", envVars);
       sandboxId = sandbox.id;
 
+      // Best-effort audit log — never fail provisioning, and never swallow
+      // failures silently (audit evidence must not vanish without trace).
+      bestEffortAuditWrite({
+        ctx: agentActorCtx,
+        organizationId: context.organizationId,
+        action: "sandbox_create",
+        resourceType: "sandbox",
+        resourceId: sandbox.id,
+        metadata: {
+          sandboxName: sandbox.name,
+          language: "typescript",
+          source: "opencode-subagent-tool",
+        },
+      });
+
       // 3. Obtain web terminal and preview links
       let previewUrl: string | undefined;
       let terminalUrl: string | undefined;
@@ -96,6 +120,18 @@ export const opencodeSubagentTool = tool({
       if (sandboxId) {
         try {
           await deleteSandbox(sandboxId);
+          // Best-effort audit log for the cleanup deletion.
+          bestEffortAuditWrite({
+            ctx: agentActorCtx,
+            organizationId: context.organizationId,
+            action: "sandbox_delete",
+            resourceType: "sandbox",
+            resourceId: sandboxId,
+            metadata: {
+              reason: "cleanup",
+              source: "opencode-subagent-tool",
+            },
+          });
         } catch {
           // ignore cleanup failure; the original error is more useful
         }

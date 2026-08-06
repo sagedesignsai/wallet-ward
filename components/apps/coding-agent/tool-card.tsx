@@ -34,7 +34,8 @@ function StatusIcon({ status }: { status: string }) {
 }
 
 export function ToolCard({ part }: { part: ToolPart }) {
-  const { tool, title, state } = part
+  const { tool, state } = part
+  const title = state.title
   const hasBody = Boolean(state.output) || Boolean(state.error)
   // Error output is important — surface it expanded by default.
   const [open, setOpen] = useState(state.status === "error")

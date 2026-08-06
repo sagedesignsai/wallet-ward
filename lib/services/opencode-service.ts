@@ -7,6 +7,10 @@ import {
   requireClient,
 } from "@/lib/daytona";
 import { prisma as db } from "@/lib/db";
+import {
+  agentActorCtx,
+  bestEffortAuditWrite,
+} from "@/lib/ai/telemetry";
 import type { AgentSession } from "@prisma/client";
 
 // ---------------------------------------------------------------------------
@@ -114,6 +118,21 @@ export class OpencodeService {
     const sandboxName = `opencode-${project.slug}-${Date.now().toString(36)}`;
     const sandboxInfo = await createSandbox(sandboxName, "typescript", envVars);
 
+    // Best-effort audit log — never fail provisioning, and never swallow
+    // failures silently (audit evidence must not vanish without trace).
+    bestEffortAuditWrite({
+      ctx: agentActorCtx,
+      organizationId: input.organizationId,
+      action: "sandbox_create",
+      resourceType: "sandbox",
+      resourceId: sandboxInfo.id,
+      metadata: {
+        sandboxName: sandboxInfo.name,
+        language: "typescript",
+        source: "opencode-service",
+      },
+    });
+
     try {
       const client = requireClient();
       const sandbox = await client.get(sandboxInfo.id);
@@ -190,7 +209,21 @@ export class OpencodeService {
     } catch (error) {
       // Never leak a paid sandbox from partial provisioning.
       try {
-        await deleteSandbox(sandboxInfo.id);
+        if (sandboxInfo) {
+          await deleteSandbox(sandboxInfo.id);
+          // Best-effort audit log for the cleanup deletion.
+          bestEffortAuditWrite({
+            ctx: agentActorCtx,
+            organizationId: input.organizationId,
+            action: "sandbox_delete",
+            resourceType: "sandbox",
+            resourceId: sandboxInfo.id,
+            metadata: {
+              reason: "cleanup",
+              source: "opencode-service",
+            },
+          });
+        }
       } catch {
         // ignore cleanup failure; the original error is more useful
       }
@@ -205,10 +238,26 @@ export class OpencodeService {
   static async stop(sandboxId: string): Promise<AgentSession | null> {
     const session = await db.agentSession.findFirst({
       where: { daytonaSandboxId: sandboxId },
+      include: { project: { select: { organizationId: true } } },
     });
 
     try {
       await deleteSandbox(sandboxId);
+      // Best-effort audit log — only when the delete succeeded; the org comes
+      // from the owning session's project (never swallow failures silently).
+      if (session) {
+        bestEffortAuditWrite({
+          ctx: agentActorCtx,
+          organizationId: session.project.organizationId,
+          action: "sandbox_delete",
+          resourceType: "sandbox",
+          resourceId: sandboxId,
+          metadata: {
+            reason: "stop",
+            source: "opencode-service",
+          },
+        });
+      }
     } catch (error) {
       console.error("[OpencodeService] Failed to delete sandbox:", error);
     }

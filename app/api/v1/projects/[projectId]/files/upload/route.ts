@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
-import { db } from "@/lib/db"
 import { FileService } from "@/lib/services/file-service"
+import { writeAuditLog } from "@/lib/services/audit"
 import {
   uploadBuffer,
   buildObjectKey,
@@ -135,21 +135,19 @@ export async function POST(
     }
 
     // Audit log
-    await db.auditLog.create({
-      data: {
-        organizationId: project.organizationId,
-        actorUserId: ctx.userId,
-        action: "project_update",
-        resourceType: "file",
-        resourceId: file.id,
-        metadata: {
-          action: parentId ? "upload_version" : "upload",
-          projectId,
-          fileName: file.name,
-          fileType: file.type,
-          size: file.size,
-          storageKey,
-        },
+    await writeAuditLog({
+      ctx,
+      organizationId: project.organizationId,
+      action: "project_update",
+      resourceType: "file",
+      resourceId: file.id,
+      metadata: {
+        action: parentId ? "upload_version" : "upload",
+        projectId,
+        fileName: file.name,
+        fileType: file.type,
+        size: file.size,
+        storageKey,
       },
     })
 

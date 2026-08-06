@@ -1,4 +1,13 @@
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto"
+import {
+  createCipheriv,
+  createDecipheriv,
+  createPrivateKey,
+  createPublicKey,
+  generateKeyPairSync,
+  randomBytes,
+  sign,
+  verify,
+} from "node:crypto"
 
 const ALGO = "aes-256-gcm"
 const IV_LENGTH = 12
@@ -49,7 +58,10 @@ export function unwrapDataKey(payload: EncryptedPayload): Buffer {
   return decryptBuffer(payload, getMasterKey())
 }
 
-export function encryptString(plaintext: string, dek: Buffer): EncryptedPayload {
+export function encryptString(
+  plaintext: string,
+  dek: Buffer
+): EncryptedPayload {
   return encryptBuffer(Buffer.from(plaintext, "utf8"), dek)
 }
 
@@ -82,4 +94,52 @@ export function decryptBuffer(payload: EncryptedPayload, key: Buffer): Buffer {
     decipher.update(Buffer.from(payload.ciphertext, "base64")),
     decipher.final(),
   ])
+}
+
+// ─── Ed25519 audit signing helpers ───────────────────────────────────────────
+//
+// Contract (pinned): privateKey is exported as PKCS8 DER base64; publicKey as
+// SPKI DER base64. Signatures are Ed25519 over the RAW 32-byte digest (the
+// hex-decoded SHA-256), never over hex/ASCII text. DER signatures are base64.
+
+export type AuditSigningKeyPair = {
+  publicKey: string
+  privateKey: string
+}
+
+export function generateAuditSigningKeyPair(): AuditSigningKeyPair {
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519", {
+    publicKeyEncoding: { type: "spki", format: "der" },
+    privateKeyEncoding: { type: "pkcs8", format: "der" },
+  })
+
+  return {
+    publicKey: publicKey.toString("base64"),
+    privateKey: privateKey.toString("base64"),
+  }
+}
+
+export function signAuditDigest(
+  privateKeyPkcs8DerB64: string,
+  digest: Buffer
+): string {
+  const key = createPrivateKey({
+    key: Buffer.from(privateKeyPkcs8DerB64, "base64"),
+    type: "pkcs8",
+    format: "der",
+  })
+  return sign(null, digest, key).toString("base64")
+}
+
+export function verifyAuditDigest(
+  publicKeySpkiDerB64: string,
+  digest: Buffer,
+  signatureB64: string
+): boolean {
+  const key = createPublicKey({
+    key: Buffer.from(publicKeySpkiDerB64, "base64"),
+    type: "spki",
+    format: "der",
+  })
+  return verify(null, digest, key, Buffer.from(signatureB64, "base64"))
 }

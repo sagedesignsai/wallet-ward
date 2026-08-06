@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db"
 import { deleteSandbox } from "@/lib/daytona"
 import { z } from "zod"
 import { notFound, forbidden } from "@/lib/api/errors"
+import { bestEffortAuditWrite } from "@/lib/ai/telemetry"
 
 // ---------------------------------------------------------------------------
 // GET /api/agents/sessions/:sessionId — Get a single session
@@ -127,6 +128,19 @@ export async function DELETE(
     if (existing.daytonaSandboxId) {
       try {
         await deleteSandbox(existing.daytonaSandboxId)
+        // Best-effort audit log — only when the delete succeeded; never
+        // swallow failures silently (audit evidence must not vanish).
+        bestEffortAuditWrite({
+          ctx: auth,
+          organizationId: auth.organizationId,
+          action: "sandbox_delete",
+          resourceType: "sandbox",
+          resourceId: existing.daytonaSandboxId,
+          metadata: {
+            reason: "user",
+            source: "sessions-api",
+          },
+        })
       } catch (err) {
         console.error("[DELETE session] Failed to destroy sandbox:", err)
       }

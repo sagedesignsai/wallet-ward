@@ -5,6 +5,10 @@ import {
   getWebTerminalUrl,
   deleteSandbox,
 } from "@/lib/daytona";
+import {
+  agentActorCtx,
+  bestEffortAuditWrite,
+} from "@/lib/ai/telemetry";
 import type { AgentSession, ProposalRiskLevel } from "@prisma/client";
 
 export interface InitiateCodingTaskInput {
@@ -49,6 +53,21 @@ export class CodingAgentService {
     const sandboxName = `coding-${project.slug}-${Date.now().toString(36)}`;
     const sandbox = await createSandbox(sandboxName, "typescript");
 
+    // Best-effort audit log — never fail provisioning, and never swallow
+    // failures silently (audit evidence must not vanish without trace).
+    bestEffortAuditWrite({
+      ctx: agentActorCtx,
+      organizationId: input.organizationId,
+      action: "sandbox_create",
+      resourceType: "sandbox",
+      resourceId: sandbox.id,
+      metadata: {
+        sandboxName: sandbox.name,
+        language: "typescript",
+        source: "coding-agent-service",
+      },
+    });
+
     let previewUrl: string | undefined;
     let terminalUrl: string | undefined;
     try {
@@ -84,6 +103,18 @@ export class CodingAgentService {
     } catch (err) {
       try {
         await deleteSandbox(sandbox.id);
+        // Best-effort audit log for the cleanup deletion.
+        bestEffortAuditWrite({
+          ctx: agentActorCtx,
+          organizationId: input.organizationId,
+          action: "sandbox_delete",
+          resourceType: "sandbox",
+          resourceId: sandbox.id,
+          metadata: {
+            reason: "cleanup",
+            source: "coding-agent-service",
+          },
+        });
       } catch {
         // ignore cleanup failure; the original error is more useful
       }

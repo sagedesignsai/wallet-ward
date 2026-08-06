@@ -4,6 +4,7 @@ import type {
   OpsAgentContext,
   AgentRuntimeContext,
 } from "@/lib/ai/context-builders"
+import { telemetryFromRuntimeContext, wrapAgentTools } from "@/lib/ai/telemetry"
 
 // Ops tools
 import { getTasksTool } from "@/lib/ai/tools/ops/get-tasks"
@@ -60,10 +61,11 @@ export interface OpsAgentOptions {
  * notifications. Cannot execute arbitrary code or manage sandboxes.
  */
 export function createOpsAgent(options: OpsAgentOptions) {
+  const telemetry = telemetryFromRuntimeContext(options.runtimeContext)
   return new ToolLoopAgent({
     model: getModel("openrouter", "openrouter/free"),
     instructions: SYSTEM_PROMPTS.ops,
-    tools: opsAgentTools,
+    tools: telemetry ? wrapAgentTools(opsAgentTools, telemetry) : opsAgentTools,
     toolsContext: options.toolsContext,
     runtimeContext: options.runtimeContext,
     stopWhen: isStepCount(20),

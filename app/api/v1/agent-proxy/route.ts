@@ -109,7 +109,8 @@ export async function POST(request: Request) {
     const res = await fetch(url.toString(), fetchOptions)
     const responseData = await res.json().catch(() => ({}))
 
-    // Best-effort audit log — never fail the proxy call
+    // Best-effort audit log — never fail the proxy call, but never swallow
+    // failures silently either (audit evidence must not vanish without trace)
     writeAuditLog({
       ctx: authCtx,
       organizationId: orgCtx.organizationId,
@@ -122,7 +123,17 @@ export async function POST(request: Request) {
         path: input.path,
         statusCode: res.status,
       },
-    }).catch(() => {})
+    }).catch((error) => {
+      console.error(
+        "[audit] agent_proxy_call write failed (org=%s, integration=%s, service=%s, method=%s, path=%s):",
+        orgCtx.organizationId,
+        integration.id,
+        input.service,
+        input.method,
+        input.path,
+        error
+      )
+    })
 
     // Return the upstream response
     return json({

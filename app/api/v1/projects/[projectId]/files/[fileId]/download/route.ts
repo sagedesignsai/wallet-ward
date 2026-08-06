@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
 import { FileService } from "@/lib/services/file-service"
+import { writeAuditLog } from "@/lib/services/audit"
 import { getPresignedDownloadUrl } from "@/lib/storage"
 import { requireProjectAccess } from "@/lib/api/project-access"
 import { handleRouteError } from "@/lib/api/http"
@@ -33,18 +33,16 @@ export async function GET(
       const { downloadUrl } = await getPresignedDownloadUrl(file.storageId)
 
       // Audit log the download
-      await db.auditLog.create({
-        data: {
-          organizationId: project.organizationId,
-          actorUserId: ctx.userId,
-          action: "project_update",
-          resourceType: "file",
-          resourceId: fileId,
-          metadata: {
-            action: "download",
-            projectId,
-            fileName: file.name,
-          },
+      await writeAuditLog({
+        ctx,
+        organizationId: project.organizationId,
+        action: "project_update",
+        resourceType: "file",
+        resourceId: fileId,
+        metadata: {
+          action: "download",
+          projectId,
+          fileName: file.name,
         },
       })
 
@@ -54,18 +52,16 @@ export async function GET(
     // Legacy/externally-hosted files redirect to their stored URL
     if (file.url) {
       // Audit log the download
-      await db.auditLog.create({
-        data: {
-          organizationId: project.organizationId,
-          actorUserId: ctx.userId,
-          action: "project_update",
-          resourceType: "file",
-          resourceId: fileId,
-          metadata: {
-            action: "download",
-            projectId,
-            fileName: file.name,
-          },
+      await writeAuditLog({
+        ctx,
+        organizationId: project.organizationId,
+        action: "project_update",
+        resourceType: "file",
+        resourceId: fileId,
+        metadata: {
+          action: "download",
+          projectId,
+          fileName: file.name,
         },
       })
 

@@ -19,6 +19,7 @@ import {
 import { getProjectsTool } from "@/lib/ai/tools/shared/get-projects"
 import { proposeActionTool } from "@/lib/ai/tools/shared/propose-action"
 import { getPendingProposalsTool } from "@/lib/ai/tools/shared/get-pending-proposals"
+import { telemetryFromRuntimeContext, wrapAgentTools } from "@/lib/ai/telemetry"
 import { createCodingAgent } from "./coding-agent"
 import { createOpsAgent } from "./ops-agent"
 import { createContentAgent } from "./content-agent"
@@ -192,16 +193,21 @@ export interface OrchestratorOptions {
   runtimeContext?: AgentRuntimeContext
 }
 
+const orchestratorTools = {
+  delegateToAgent: delegateToAgentTool,
+  getProjects: getProjectsTool,
+  proposeAction: proposeActionTool,
+  getPendingProposals: getPendingProposalsTool,
+} as const
+
 export function createOrchestrator(options: OrchestratorOptions) {
+  const telemetry = telemetryFromRuntimeContext(options.runtimeContext)
   return new ToolLoopAgent({
     model: getModel("openrouter", "openrouter/free"),
     instructions: ORCHESTRATOR_INSTRUCTIONS,
-    tools: {
-      delegateToAgent: delegateToAgentTool,
-      getProjects: getProjectsTool,
-      proposeAction: proposeActionTool,
-      getPendingProposals: getPendingProposalsTool,
-    },
+    tools: telemetry
+      ? wrapAgentTools(orchestratorTools, telemetry)
+      : orchestratorTools,
     toolsContext: options.toolsContext,
     runtimeContext: options.runtimeContext,
     stopWhen: isStepCount(10),

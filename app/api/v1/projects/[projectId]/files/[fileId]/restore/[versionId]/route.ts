@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
-import { db } from "@/lib/db"
 import { FileService } from "@/lib/services/file-service"
+import { writeAuditLog } from "@/lib/services/audit"
 import { copyObject, buildVersionKey } from "@/lib/storage"
 import { requireProjectAccess } from "@/lib/api/project-access"
 import { handleRouteError, json } from "@/lib/api/http"
@@ -75,21 +75,19 @@ export async function POST(
       undefined
     )
 
-    await db.auditLog.create({
-      data: {
-        organizationId: project.organizationId,
-        actorUserId: ctx.userId,
-        action: "project_update",
-        resourceType: "file",
-        resourceId: fileId,
-        metadata: {
-          action: "restore_version",
-          projectId,
-          fileName: currentFile.name,
-          restoredFromVersionId: versionId,
-          newVersion: restored.version,
-          newStorageKey,
-        },
+    await writeAuditLog({
+      ctx,
+      organizationId: project.organizationId,
+      action: "project_update",
+      resourceType: "file",
+      resourceId: fileId,
+      metadata: {
+        action: "restore_version",
+        projectId,
+        fileName: currentFile.name,
+        restoredFromVersionId: versionId,
+        newVersion: restored.version,
+        newStorageKey,
       },
     })
 

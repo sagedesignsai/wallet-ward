@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { RepositoryService } from "@/lib/services/repository-service"
+import { writeAuditLog } from "@/lib/services/audit"
 import { getDecryptedToken } from "@/lib/services/integrations"
 import { getOrganizationDek } from "@/lib/services/encryption-keys"
 import {
@@ -338,21 +339,19 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     }
 
     // Log audit event (only for hooks that were actually registered)
-    await db.auditLog.create({
-      data: {
-        organizationId: orgCtx.organizationId,
-        actorUserId: authCtx.userId,
-        action: "project_update",
-        resourceType: "repository_webhook",
-        resourceId: webhook.id,
-        metadata: {
-          action: "create",
-          projectId,
-          repositoryId,
-          repositoryName: repository.name,
-          event: webhook.event,
-          url: webhook.url,
-        },
+    await writeAuditLog({
+      ctx: authCtx,
+      organizationId: orgCtx.organizationId,
+      action: "project_update",
+      resourceType: "repository_webhook",
+      resourceId: webhook.id,
+      metadata: {
+        action: "create",
+        projectId,
+        repositoryId,
+        repositoryName: repository.name,
+        event: webhook.event,
+        url: webhook.url,
       },
     })
 

@@ -40,6 +40,7 @@ export { airtableCreateRecordTool } from "./content/airtable-create-record"
 export { jiraCreateIssueTool } from "./content/jira-create-issue"
 export { notionCreatePageTool } from "./content/notion-create-page"
 export { trelloCreateCardTool } from "./content/trello-create-card"
+export { generatePdfTool } from "./content/generate-pdf"
 
 // ─── Shared tools ─────────────────────────────────────────────────────────────
 export { getProjectsTool } from "./shared/get-projects"

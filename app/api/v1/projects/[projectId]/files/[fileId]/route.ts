@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
-import { db } from "@/lib/db"
 import { FileService } from "@/lib/services/file-service"
+import { writeAuditLog } from "@/lib/services/audit"
 import { deleteObject } from "@/lib/storage"
 import { requireProjectAccess } from "@/lib/api/project-access"
 import { handleRouteError, json } from "@/lib/api/http"
@@ -60,19 +60,17 @@ export async function PATCH(
       visibility: body.visibility as FileVisibility,
     })
 
-    await db.auditLog.create({
-      data: {
-        organizationId: project.organizationId,
-        actorUserId: ctx.userId,
-        action: "project_update",
-        resourceType: "file",
-        resourceId: file.id,
-        metadata: {
-          action: "update",
-          projectId,
-          fileName: file.name,
-          changes: body,
-        },
+    await writeAuditLog({
+      ctx,
+      organizationId: project.organizationId,
+      action: "project_update",
+      resourceType: "file",
+      resourceId: file.id,
+      metadata: {
+        action: "update",
+        projectId,
+        fileName: file.name,
+        changes: body,
       },
     })
 
@@ -113,19 +111,17 @@ export async function DELETE(
     // Step 2: Delete DB record (cascades to FileShare)
     await FileService.delete(fileId)
 
-    await db.auditLog.create({
-      data: {
-        organizationId: project.organizationId,
-        actorUserId: ctx.userId,
-        action: "project_update",
-        resourceType: "file",
-        resourceId: fileId,
-        metadata: {
-          action: "delete",
-          projectId,
-          fileName: existingFile.name,
-          storageKey: existingFile.storageId,
-        },
+    await writeAuditLog({
+      ctx,
+      organizationId: project.organizationId,
+      action: "project_update",
+      resourceType: "file",
+      resourceId: fileId,
+      metadata: {
+        action: "delete",
+        projectId,
+        fileName: existingFile.name,
+        storageKey: existingFile.storageId,
       },
     })
 

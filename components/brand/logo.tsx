@@ -1,7 +1,7 @@
 "use client"
 
-import { useId, type SVGProps } from "react"
-import { motion } from "motion/react"
+import { useId } from "react"
+import { motion, type SVGMotionProps } from "motion/react"
 import { cn } from "@/lib/utils"
 
 const SIZE_MAP = { sm: 24, md: 32, lg: 48 }
@@ -55,7 +55,7 @@ export interface LogomarkProps {
   /** Optional explicit gradient id (advanced reuse). */
   gradientId?: string
   /** Per-path SVG props (motion `animate`/`initial`, className, stroke, …). */
-  pathProps?: SVGProps<SVGPathElement>[]
+  pathProps?: SVGMotionProps<SVGPathElement>[]
 }
 
 function resolveSize(size: LogomarkProps["size"]): number {

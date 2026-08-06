@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { RepositoryService } from "@/lib/services/repository-service"
+import { writeAuditLog } from "@/lib/services/audit"
 import { getDecryptedToken } from "@/lib/services/integrations"
 import { getOrganizationDek } from "@/lib/services/encryption-keys"
 import { decryptString, type EncryptedPayload } from "@/lib/crypto"
@@ -258,42 +259,38 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
     // tell which hook was ours, record it so the orphaned GitHub hook is
     // discoverable. Same audit conventions as the POST route.
     if (skippedAmbiguous) {
-      await db.auditLog.create({
-        data: {
-          organizationId: orgCtx.organizationId,
-          actorUserId: authCtx.userId,
-          action: "project_update",
-          resourceType: "repository_webhook",
-          resourceId: webhookId,
-          metadata: {
-            action: "delete_skipped_ambiguous",
-            projectId,
-            repositoryId,
-            repositoryName: repository.name,
-            event: webhook.event,
-            url: webhook.url,
-            webhookId,
-          },
-        },
-      })
-    }
-
-    // Log audit event
-    await db.auditLog.create({
-      data: {
+      await writeAuditLog({
+        ctx: authCtx,
         organizationId: orgCtx.organizationId,
-        actorUserId: authCtx.userId,
         action: "project_update",
         resourceType: "repository_webhook",
         resourceId: webhookId,
         metadata: {
-          action: "delete",
+          action: "delete_skipped_ambiguous",
           projectId,
           repositoryId,
           repositoryName: repository.name,
           event: webhook.event,
           url: webhook.url,
+          webhookId,
         },
+      })
+    }
+
+    // Log audit event
+    await writeAuditLog({
+      ctx: authCtx,
+      organizationId: orgCtx.organizationId,
+      action: "project_update",
+      resourceType: "repository_webhook",
+      resourceId: webhookId,
+      metadata: {
+        action: "delete",
+        projectId,
+        repositoryId,
+        repositoryName: repository.name,
+        event: webhook.event,
+        url: webhook.url,
       },
     })
 

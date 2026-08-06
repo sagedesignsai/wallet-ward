@@ -1,5 +1,9 @@
 import { tool } from "ai"
 import { z } from "zod"
+import {
+  agentActorCtx,
+  bestEffortAuditWrite,
+} from "@/lib/ai/telemetry"
 
 const SERVICE_BASE_URLS: Record<string, string> = {
   github: "https://api.github.com",
@@ -162,6 +166,23 @@ export const agentProxyTool = tool({
 
       const res = await fetch(url.toString(), fetchOptions)
       const responseData = await res.json().catch(() => ({}))
+
+      // This domain row layers on top of the generic `tool_call` row written
+      // by withToolTelemetry — both are emitted per invocation BY DESIGN
+      // (§4 of GOVERNED_OUTPUT_PIPELINE.md); do not collapse into one row.
+      bestEffortAuditWrite({
+        ctx: agentActorCtx,
+        organizationId: context.organizationId,
+        action: "agent_proxy_call",
+        resourceType: "integration",
+        resourceId: integration.id,
+        metadata: {
+          service: input.service,
+          method: input.method,
+          path: input.path,
+          statusCode: res.status,
+        },
+      })
 
       return {
         data: responseData,

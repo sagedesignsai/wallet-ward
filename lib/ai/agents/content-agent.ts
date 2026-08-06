@@ -4,6 +4,7 @@ import type {
   ContentAgentContext,
   AgentRuntimeContext,
 } from "@/lib/ai/context-builders"
+import { telemetryFromRuntimeContext, wrapAgentTools } from "@/lib/ai/telemetry"
 
 // Content tools (including the 4 previously orphaned tools)
 import { getDocumentsTool } from "@/lib/ai/tools/content/get-documents"
@@ -13,6 +14,7 @@ import { airtableCreateRecordTool } from "@/lib/ai/tools/content/airtable-create
 import { jiraCreateIssueTool } from "@/lib/ai/tools/content/jira-create-issue"
 import { notionCreatePageTool } from "@/lib/ai/tools/content/notion-create-page"
 import { trelloCreateCardTool } from "@/lib/ai/tools/content/trello-create-card"
+import { generatePdfTool } from "@/lib/ai/tools/content/generate-pdf"
 
 // Ops tools content also uses
 import { sendSlackNotificationTool } from "@/lib/ai/tools/ops/send-slack-notification"
@@ -35,6 +37,7 @@ export const contentAgentTools = {
   jiraCreateIssue: jiraCreateIssueTool,
   notionCreatePage: notionCreatePageTool,
   trelloCreateCard: trelloCreateCardTool,
+  generatePdf: generatePdfTool,
   sendSlackNotification: sendSlackNotificationTool,
   searchAuditLogs: searchAuditLogsTool,
   getProjects: getProjectsTool,
@@ -63,10 +66,13 @@ export interface ContentAgentOptions {
  * execute code — content-only tool surface.
  */
 export function createContentAgent(options: ContentAgentOptions) {
+  const telemetry = telemetryFromRuntimeContext(options.runtimeContext)
   return new ToolLoopAgent({
     model: getModel("openrouter", "openrouter/free"),
     instructions: SYSTEM_PROMPTS.content,
-    tools: contentAgentTools,
+    tools: telemetry
+      ? wrapAgentTools(contentAgentTools, telemetry)
+      : contentAgentTools,
     toolsContext: options.toolsContext,
     runtimeContext: options.runtimeContext,
     stopWhen: isStepCount(20),

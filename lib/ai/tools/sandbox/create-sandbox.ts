@@ -1,5 +1,9 @@
 import { tool } from "ai";
 import { z } from "zod";
+import {
+  agentActorCtx,
+  bestEffortAuditWrite,
+} from "@/lib/ai/telemetry";
 
 /**
  * Create Sandbox Tool
@@ -25,6 +29,22 @@ export const createSandboxTool = tool({
       const { createSandbox } = await import("@/lib/daytona");
 
       const sandbox = await createSandbox(name, language);
+
+      // This domain row layers on top of the generic `tool_call` row written
+      // by withToolTelemetry — both are emitted per invocation BY DESIGN
+      // (§4 of GOVERNED_OUTPUT_PIPELINE.md); do not collapse into one row.
+      bestEffortAuditWrite({
+        ctx: agentActorCtx,
+        organizationId: context.organizationId,
+        action: "sandbox_create",
+        resourceType: "sandbox",
+        resourceId: sandbox.id,
+        metadata: {
+          sandboxName: sandbox.name,
+          language: language ?? "javascript",
+          source: "create-sandbox-tool",
+        },
+      });
 
       return {
         id: sandbox.id,

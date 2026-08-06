@@ -7,6 +7,7 @@ import {
   opencodeMessages,
   opencodePrompt,
   streamOpencodeEvents,
+  type MessagePartUpdatedEvent,
   type OpencodeEvent,
   type OpencodePart,
 } from "@/lib/opencode/client"
@@ -81,7 +82,8 @@ export function useOpencodeSession({
           break
 
         case "message.part.updated": {
-          const { part, delta } = (event as { properties: { part: OpencodePart; delta?: string } }).properties
+          const { part, delta } = (event as unknown as MessagePartUpdatedEvent)
+            .properties
           upsertPart(part, delta)
           syncMessages()
 

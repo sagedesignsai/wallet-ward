@@ -4,6 +4,7 @@ import type {
   CodingAgentContext,
   AgentRuntimeContext,
 } from "@/lib/ai/context-builders"
+import { telemetryFromRuntimeContext, wrapAgentTools } from "@/lib/ai/telemetry"
 
 // Sandbox tools
 import { createSandboxTool } from "@/lib/ai/tools/sandbox/create-sandbox"
@@ -80,10 +81,13 @@ export interface CodingAgentOptions {
  * Preferred delegation pattern: use opencodeSubagent for multi-file tasks.
  */
 export function createCodingAgent(options: CodingAgentOptions) {
+  const telemetry = telemetryFromRuntimeContext(options.runtimeContext)
   return new ToolLoopAgent({
     model: getModel("openrouter", "openrouter/free"),
     instructions: SYSTEM_PROMPTS.coding,
-    tools: codingAgentTools,
+    tools: telemetry
+      ? wrapAgentTools(codingAgentTools, telemetry)
+      : codingAgentTools,
     toolsContext: options.toolsContext,
     runtimeContext: options.runtimeContext,
     stopWhen: isStepCount(30),

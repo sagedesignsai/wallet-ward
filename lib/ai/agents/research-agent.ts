@@ -4,6 +4,7 @@ import type {
   ResearchAgentContext,
   AgentRuntimeContext,
 } from "@/lib/ai/context-builders"
+import { telemetryFromRuntimeContext, wrapAgentTools } from "@/lib/ai/telemetry"
 
 // Read-only content tools
 import { getDocumentsTool } from "@/lib/ai/tools/content/get-documents"
@@ -47,12 +48,19 @@ export interface ResearchAgentOptions {
  * Read-only analyst. Gathers intelligence and synthesizes information from
  * documents, tasks, and audit logs. Cannot execute code, deploy, access
  * secrets, or make external API calls — purely analytical.
+ *
+ * The one mutation it may perform is `createArtifact`, used to persist a
+ * research report / executive summary to project storage (org-scoped, gated
+ * by `proposeAction` for anything risky). All other capabilities are read-only.
  */
 export function createResearchAgent(options: ResearchAgentOptions) {
+  const telemetry = telemetryFromRuntimeContext(options.runtimeContext)
   return new ToolLoopAgent({
     model: getModel("openrouter", "openrouter/free"),
     instructions: SYSTEM_PROMPTS.research,
-    tools: researchAgentTools,
+    tools: telemetry
+      ? wrapAgentTools(researchAgentTools, telemetry)
+      : researchAgentTools,
     toolsContext: options.toolsContext,
     runtimeContext: options.runtimeContext,
     stopWhen: isStepCount(20),

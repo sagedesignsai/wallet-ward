@@ -2,6 +2,7 @@ import { handleRouteError, json } from "@/lib/api/http"
 import { requireAuth, requireOrganization } from "@/lib/api/auth"
 import { notFound } from "@/lib/api/errors"
 import { db } from "@/lib/db"
+import { bestEffortAuditWrite } from "@/lib/ai/telemetry"
 import {
   getSandbox,
   stopSandbox,
@@ -122,6 +123,19 @@ export async function POST(
 
       case "delete":
         await deleteSandbox(sandboxId)
+        // Best-effort audit log — never fail the delete, never swallow
+        // failures silently (audit evidence must not vanish without trace).
+        bestEffortAuditWrite({
+          ctx: authCtx,
+          organizationId: orgCtx.organizationId,
+          action: "sandbox_delete",
+          resourceType: "sandbox",
+          resourceId: sandboxId,
+          metadata: {
+            reason: "user",
+            source: "sandboxes-api",
+          },
+        })
         return json({ data: { success: true, action: "delete" } })
 
       case "preview": {
